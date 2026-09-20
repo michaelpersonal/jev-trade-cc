@@ -239,14 +239,15 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
   <section>
     <h2>Full-period results</h2>
     <div class="note" style="border-left-color:var(--neg)"><b>Revised 2026-09-20.</b>
-      An external review found three measurement defects: the position limit gating
-      fills at the open was read from that same day's close, the chandelier stop used
-      the current bar's ATR, and relative strength was ranked against every name that
-      was <em>ever</em> an index member rather than the population that existed on the
-      day. All three are fixed and a regression test now guards the timing boundary.
-      Repairing them cost <b>6.6 percentage points</b> &mdash; the previous figure of
-      $130,828 was inflated. Pre-repair outputs are kept in <code>data/pre_repair/</code>.
-    </div>
+      Two changes. An external review found three measurement defects &mdash; the
+      position limit gating fills at the open was read from that same day's close,
+      the chandelier stop used the current bar's ATR, and relative strength was
+      ranked against every name that was <em>ever</em> an index member. All three are
+      fixed and a regression test now guards the timing boundary; repairing them cost
+      6.6 points. Separately, the entry screen was relaxed to admit near-misses,
+      because the strict version produced only 22 buys a year against the 39 needed
+      to keep five slots full. Read the caveat on that below before trusting it.
+      Pre-repair outputs are kept in <code>data/pre_repair/</code>.</div>
     <p class="lede">Jan 3, 2022 &rarr; Sep 18, 2026. $100,000 starting capital, long only, no
       margin, no leverage. The benchmark is the same $100,000 put into the S&amp;P 500 on day
       one and left alone. <b id="verdict"></b></p>
@@ -255,10 +256,13 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
 
   <section>
     <h2>Every exit rule, scored twice</h2>
-    <p class="lede">Twelve ways out of a position. The two right-hand columns split the run in
-      half, because a rule with real edge should win in both &mdash; and none of them does.
-      The winner in the first half is beaten by six rules in the second, which is what noise
-      looks like when you sweep a parameter on one sample.</p>
+    <p class="lede">Twelve ways out of a position, each scored on the whole run and on both
+      halves. With the entry screen relaxed, <b>nine of the twelve now beat the index</b>
+      &mdash; which is the point, not a triumph: if almost any exit rule clears the bar once
+      participation is fixed, then the exit rule was never the lever. The spread between
+      neighbours stays absurd (a 10% trailing stop returns +44%, a 12% one +126%, a 15% one
+      +70%), so no particular value here is a finding. Only O'Neil's fixed 20&ndash;25%
+      target is consistently bad, and it is the one rule that caps winners.</p>
     <div class="scrollx"><table class="cmp" id="grid"></table></div>
     <p class="lede" id="slotsnote" style="margin-top:14px"></p>
   </section>
@@ -281,6 +285,11 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
       <div class="facts" id="tstats"></div>
       <div class="facts" id="reasons"></div>
     </div>
+  </section>
+
+  <section>
+    <h2>The caveat on that result</h2>
+    <div class="note" style="border-left-color:var(--neg)" id="caveat"></div>
   </section>
 
   <section id="rejected">
@@ -670,10 +679,11 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
     Object.entries(t.exit_reasons).sort((a,c)=>c[1]-a[1])
       .map(([k,v])=>fact(k, v+' &middot; '+(v/tot*100).toFixed(0)+'%')).join('');
 
+  const edge = s.total_return - b.total_return;
   $('verdict').innerHTML = `Jev finished at <b>${fmt0(s.final)}</b> against the index's `+
-    `<b>${fmt0(b.final)}</b> &mdash; it lost to buying and holding by `+
-    `<b>${(b.total_return-s.total_return).toFixed(0)} percentage points</b>, while running `+
-    `at lower volatility and a shallower drawdown.`;
+    `<b>${fmt0(b.final)}</b> &mdash; ${edge >= 0 ? 'ahead of' : 'behind'} buying and `+
+    `holding by <b>${Math.abs(edge).toFixed(0)} percentage points</b>, at lower `+
+    `volatility and a shallower drawdown. Read the caveat below before weighing that.`;
 
   const ROW = D.grid.find(r=>/Trailing stop -15/.test(r.rule)) || D.grid[0];
   $('split-note').innerHTML =
@@ -685,6 +695,18 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
     `earned after April 2024, in a tape where a handful of megacaps carried the index while `+
     `breakouts across the rest of the S&amp;P kept failing. Changing the exit rule does not `+
     `touch that, which is where the next round of work belongs.`;
+
+  $('caveat').innerHTML =
+    `Relaxing the screen is what takes this past the index, and it should be read `+
+    `with care. Of the <b>54 names the relaxed screen uniquely traded, aggregate `+
+    `profit is $1,807</b> &mdash; while a single position, MRVL at +125.9%, `+
+    `contributed <b>$25,468</b>. The other 53 lost roughly $23,700 between them. `+
+    `Both the strict and relaxed versions are carried by a handful of trades: strip `+
+    `the best five from either and both lose about $27,000&ndash;30,000, and the `+
+    `median trade is around &minus;4%. That is O'Neil's own design working as `+
+    `intended &mdash; cut losses, let a few winners pay for everything &mdash; but `+
+    `it means the margin over the index rests on one name, and the honest test is `+
+    `whether it survives on data that does not contain it.`;
 
   const X = D.experiments;
   if(X){
@@ -710,7 +732,7 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
       `the baseline's <b>${pct(base.h1)}</b> falls to as low as ${pct(Math.min(...X.ablation.slice(1).map(r=>r.h1)))}. `+
       `On a strategy already sitting half in cash, buying protection with exposure is the wrong `+
       `trade. The sector filter had a second problem: breakouts <em>already</em> cluster in strong `+
-      `groups (189 of 353 signals sit in the top quartile, 24 in the bottom), so the filter mostly `+
+      `groups (189 of 353 strict signals sit in the top quartile, 24 in the bottom), so the filter mostly `+
       `removes signals it was never going to catch.`;
 
     const W = X.walkforward;
@@ -739,16 +761,19 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
   }
 
   $('method-note').innerHTML =
-    `Jev holds an average of <b>43% cash</b>, and it is worth being exact about why, because `+
-    `the obvious explanation is the smaller half. Broken down by day: the market filter sitting `+
-    `in <b>RED</b> accounts for 23 of those 43 points, <b>YELLOW</b> halving the book for 10, `+
-    `and a genuine shortage of qualifying stocks for only 10. <b>Three quarters of the cash is `+
-    `the market filter standing down on purpose</b>, not an empty screen &mdash; on GREEN days `+
-    `Jev holds 4.1 of 5 positions at 18% cash. The screen is thin too (${D.meta.signals} buy `+
-    `signals in 4.7 years across ${D.meta.universe.have} names, on one day in four), which is `+
-    `what confining O'Neil to the S&amp;P 500 and Nasdaq-100 does to a method built for every `+
-    `listed US stock. But the exposure setting is a dial, not an edge: raising it lifts the `+
-    `full-period return and fails to hold out of sample.`;
+    `Jev now holds an average of <b>31% cash</b>, down from 43% before the entry `+
+    `screen was relaxed. What remains is almost entirely the market filter standing `+
+    `down on purpose: <b>RED</b> accounts for 21 of those 31 points, <b>YELLOW</b> `+
+    `for 8, and only 2 points come from GREEN days, where the book now holds <b>4.8 `+
+    `of 5</b> positions at 4% cash. The strict screen produced 22 buys a year against `+
+    `the <b>39</b> needed to keep five slots occupied, and that shortfall &mdash; not `+
+    `the filter &mdash; was the cash. One caution on the market filter itself: its `+
+    `<em>timing</em> has no demonstrated skill. Holding the same average exposure `+
+    `constantly would have beaten its actual path by 15 points over the full run, and `+
+    `by 6 points even in 2022. What helped in 2022 was the low <em>level</em> of `+
+    `exposure, not when it was raised. The RED block is kept because signals taken in `+
+    `RED tape are genuinely bad &mdash; removing it costs 19 points of selection &mdash; `+
+    `not because it times the market.`;
 
   $('coverage-note').textContent = D.meta.coverage || '';
 

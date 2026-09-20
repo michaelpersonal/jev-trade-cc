@@ -31,7 +31,9 @@ def config(slots: int, target: float | None):
 
 
 def main() -> None:
-    sig = pd.read_parquet(ROOT / "data" / "raw" / "signals.parquet")
+    # signals_grouped carries the group ranks AND the near-miss column; it is
+    # the single source of truth for every runner.
+    sig = pd.read_parquet(ROOT / "data" / "raw" / "signals_grouped.parquet")
     idx = D.index_prices()
     memb = U.membership()
 

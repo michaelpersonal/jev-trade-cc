@@ -26,13 +26,19 @@ trailing stop's only real contribution is that it stops capping winners.
 
 ## Results
 
-| | Jev (trailing 15%) | Jev (20–25% target) | S&P 500 |
+| | Jev (shipped) | Jev (20–25% target) | S&P 500 |
 |---|---|---|---|
-| Final value | $124,242 | $86,897 | **$159,500** |
-| Total return | +24.2% | −13.1% | **+59.5%** |
-| CAGR | +4.7% | −2.9% | **+10.4%** |
-| Max drawdown | **−21.2%** | −23.2% | −25.4% |
-| Return ÷ volatility | 0.31 | −0.20 | **0.61** |
+| Final value | **$170,234** | $115,640 | $159,500 |
+| Total return | **+70.2%** | +15.6% | +59.5% |
+| CAGR | **+12.0%** | +3.1% | +10.4% |
+| Max drawdown | **−20.8%** | −25.1% | −25.4% |
+| Return ÷ volatility | **0.74** | 0.22 | 0.61 |
+
+**Read `NEARMISS_RESULT.md` before citing the margin over the index.** It rests
+heavily on one position (MRVL +125.9%, $25,468); the 54 names the relaxed screen
+uniquely traded netted $1,807 in total. Strip the best five trades from either
+configuration and both lose $27–30k. That is O'Neil's design working as intended,
+but it means the edge is one name wide.
 
 101 closed trades, 33.7% win rate, profit factor 1.31. NVDA +54% (70 days),
 best trade INTC +88%. With O'Neil's fixed target the strategy loses money.
@@ -49,7 +55,33 @@ Still 29 points behind the index. Split in half, the reason is not uniform:
 
 It beat buy-and-hold over the first two years and broke afterwards.
 
-## Why it holds 45% cash
+## The participation fix (shipped default)
+
+`S.NEARMISS_MODE = 3`. The strict screen — a *first* close above the 13-week
+pivot — admits 0.09% of stock-days and produces **22 buys a year against the 39
+needed to keep five slots full**. That shortfall, not the market filter, was the
+cash. Admitting near-misses (one relaxed quality bar, any close above the pivot)
+takes exposure from 57% to 68% and the run from $124,242 to $170,234.
+
+Jev was tested against a count-matched mechanical control on exactly this and
+**lost** (+74.0% vs +83.3%). The fix is mechanical; no model is involved.
+
+## The market filter has no timing skill
+
+Holding the same *average* exposure constantly beats the filter's actual path:
+
+| Window | Avg exposure | Actual path | Constant | Timing |
+|---|---|---|---|---|
+| Full run | 57% | +17.5% | +32.9% | **−15.4pp** |
+| H1 | 46% | +9.2% | +5.3% | +3.8pp |
+| H2 | 64% | +12.0% | +28.4% | **−16.4pp** |
+| 2022 (bear) | 10% | −8.0% | −1.9% | **−6.1pp** |
+
+2022 was saved by the *level* of exposure, not by when it was raised. Keep the
+RED block only because signals taken in RED tape are bad — removing it costs
+19 points of selection — not because it times anything.
+
+## Why it used to hold 45% cash
 
 Measured per day, not assumed:
 

@@ -47,7 +47,12 @@ JEV_ENTRY = False
 JEV_EXIT = False
 # Near-miss adjudication; see prereg_nearmiss.md. 0 off, 1 Jev, 2 mechanical
 # count-matched to Jev, 3 mechanical unlimited.
-NEARMISS_MODE = 0
+# SHIPPED DEFAULT. 3 = admit near-misses mechanically, ranked by RS. This is
+# the participation fix: the strict "first close above the pivot" screen
+# produces only 22 buys a year against the 39 needed to keep 5 slots full, so
+# the book sits ~43% in cash for want of candidates rather than by choice.
+# Jev adjudication (mode 1) was tested against this and did not beat it.
+NEARMISS_MODE = 3
 NEARMISS_QUOTA: dict = {}     # date -> n, used only by mode 2
 NM_VOL_LO, NM_RS_LO = 1.15, 65
 NM_DEPTH_LO, NM_DEPTH_HI = 0.05, 0.45
