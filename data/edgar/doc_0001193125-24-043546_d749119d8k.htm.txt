@@ -1,0 +1,64 @@
+8-K
+false 0001340122 0001340122 2024-02-22 2024-02-22 &#160; &#160; UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549 &#160; &#160; FORM 8-K &#160; &#160; CURRENT REPORT Pursuant to Section 13 OR 15(d) of The Securities Exchange Act of 1934 Date of Report (Date of earliest event reported): February 22, 2024 &#160; &#160; CALUMET SPECIALTY PRODUCTS PARTNERS, L.P. (Exact name of registrant as specified in its charter) &#160; &#160; &#160;
+Delaware
+&#160;
+000-51734
+&#160;
+35-1811116
+(State or other jurisdiction of incorporation)
+&#160;
+(Commission File Number)
+&#160;
+(IRS Employer Identification No.) 2780 Waterfront Pkwy E. Drive Suite 200 Indianapolis , Indiana 46214 (Address of principal executive offices) (Zip Code) Registrant's telephone number, including area code (317) 328-5660 &#160; &#160; Check the appropriate box below if the Form 8-K filing is intended to simultaneously satisfy the filing obligation of the registrant under any of the following provisions: &#160;
+&#9744;
+Written communications pursuant to Rule 425 under the Securities Act (17 CFR 230.425) &#160;
+&#9744;
+Soliciting material pursuant to Rule 14a-12 under the Exchange Act (17 CFR 240.14a-12) &#160;
+&#9744;
+Pre-commencement communications pursuant to Rule 14d-2(b) under the Exchange Act (17 CFR 240.14d-2(b)) &#160;
+&#9744;
+Pre-commencement communications pursuant to Rule 13e-4(c) under the Exchange Act (17 CFR 240.13e-4(c)) Securities Registered Pursuant to Section 12(b) of the Act: &#160;
+Title of each class
+&#160;
+Trading symbol(s)
+&#160;
+Name of each exchange on which registered
+Common units representing limited partner interests
+&#160;
+CLMT
+&#160;
+The Nasdaq Stock Market LLC Indicate by check mark whether the registrant is an emerging growth company as defined in Rule 405 of the Securities Act of 1933 (&#167;230.405 of this chapter) or Rule 12b-2 of the Securities Exchange Act of 1934 (&#167;240.12b-2 of this chapter). Emerging growth company &#9744; If an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. &#9744; &#160; &#160; &#160;
+Item&#8201;2.02
+Results of Operations and Financial Condition. The information set forth under Item 4.02 is incorporated into this Item 2.02 by reference. &#160;
+Item&#8201;4.02
+Non-Reliance on Previously Issued Financial Statements or a Related Audit Report or Completed Interim Review. On February&#160;22, 2024, management of Calumet Specialty Products Partners, L.P. (the "Partnership") and the Audit and Finance Committee of the Board of Directors of Calumet GP, LLC, the general partner of the Partnership (the "Audit and Finance Committee"), concluded that the Partnership's consolidated audited financial statements for the fiscal year ended December&#160;31, 2022 (the "Annual Non-Reliance Period") included in the Partnership's Annual Report on Form 10-K for the Annual Non-Reliance Period and the unaudited interim consolidated financial statements for the periods ended March&#160;31, 2023, June&#160;30, 2023, and September&#160;30, 2023 (collectively, the "Interim Non-Reliance Periods" and, together with the Annual Non-Reliance Period, the "Non-Reliance Periods") included in the Partnership's Quarterly Reports on Form 10-Q for each of the Interim Non-Reliance Periods, in each case, require restatements and should no longer be relied upon. During the preparation of the Partnership's consolidated financial statements as of and for the year ended December&#160;31, 2023, the Partnership identified an error in the presentation of net income (loss) to partners arising from the misallocation of net loss from Montana Renewables Holdings LLC, a subsidiary of the Partnership ("MRHL"), to noncontrolling interest. The Partnership previously reported its net loss attributable to noncontrolling interest based on the relative ownership interest of the equity holders in MRHL, which was approximately 14% for the noncontrolling interest. The Partnership has subsequently determined that, under applicable accounting standards, no portion of the net loss from MRHL should have been allocated to noncontrolling interest. As a result of the misallocation of net loss from MRHL to noncontrolling interest, the Partnership's management has determined that a material weakness in internal control over financial reporting existed as of December&#160;31, 2022, and the Partnership's disclosure controls and procedures were not effective as of December&#160;31, 2022. Accordingly, the report of the Partnership's independent registered public accounting firm, Ernst&#160;& Young LLP, covering both their opinion on the consolidated financial statements as of and for the year ended December&#160;31, 2022 and their opinion on internal control over financial reporting as of December&#160;31, 2022, both dated March&#160;15, 2023 and included in the Partnership's Annual Report on Form 10-K for the year ended December&#160;31, 2022, should no longer be relied upon. Similarly, any previously issued or filed reports, press releases, earnings releases, and investor presentations or other communications describing the Partnership's consolidated financial statements for any of the Non-Reliance Periods that report net loss attributable to noncontrolling interest or net income (loss) attributable to partners should no longer be relied upon. The Partnership previously reported net income (loss) attributable to partners of $(165.1) million for the year ended December&#160;31, 2022, $113.2&#160;million for the nine months ended September&#160;30, 2023, $10.2&#160;million for the six months ended June&#160;30, 2023 and $28.7&#160;million, $(18.5) million and $103.0&#160;million for the three months ended March, 31, 2023, June&#160;30, 2023, and September&#160;30, 2023, respectively. After correcting the error discussed above, the Partnership expects to report net income (loss) attributable to partners of $(173.3) million for the year ended December&#160;31, 2022, $96.1&#160;million for the nine months ended September&#160;30, 2023, $(3.7) million for the six months ended June&#160;30, 2023 and $18.6&#160;million, $(22.3) million and $99.9&#160;million for the three months ended March, 31, 2023, June&#160;30, 2023, and September&#160;30, 2023, respectively. The Partnership expects that no portion of net income (loss) will be allocated to noncontrolling interest for the Non-Reliance Periods after this error is corrected. The estimated impact on the financial statements of this error could change based on further review and analysis of the Non-Reliance Periods, including the identification of additional errors. However, the misallocation of net loss from MRHL to noncontrolling interest is not expected to impact the Partnership's primary financial metrics, including non-GAAP financial information previously issued by the Partnership, nor is it expected to affect any forward-looking financial metrics. The Partnership intends to restate its financial statements for the Non-Reliance Periods to correct the error discussed above and make other previously identified immaterial error corrections as soon as practicable. Investors and others should rely on financial information and other disclosures regarding the Non-Reliance Periods only once the Partnership restates its consolidated audited and unaudited financial statements for the Non-Reliance Periods. The Partnership's management and the Audit and Finance Committee have discussed the matters described in this Form 8-K with the Partnership's independent registered public accounting firm, Ernst&#160;& Young LLP.
+&#160; 1
+SIGNATURES Pursuant to the requirements of the Securities Exchange Act of 1934, the registrant has duly caused this report to be signed on its behalf by the undersigned hereunto duly authorized. &#160;
+&#160;
+&#160;
+CALUMET SPECIALTY PRODUCTS PARTNERS, L.P.
+&#160;
+&#160;
+By:
+&#160;
+CALUMET GP, LLC,
+&#160;
+&#160;
+&#160;
+its General Partner
+Date: February&#160;23, 2024
+&#160;
+&#160;
+By:
+&#160;
+/s/ Todd Borgmann
+&#160;
+&#160;
+Name:
+&#160;
+Todd Borgmann
+&#160;
+&#160;
+Title:
+&#160;
+Chief Executive Officer

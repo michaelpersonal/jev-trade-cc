@@ -1,0 +1,359 @@
+false
+0001331421
+0001331421
+2026-09-09
+2026-09-09
+iso4217:USD
+xbrli:shares
+iso4217:USD
+xbrli:shares
+&#160;
+&#160;
+&#160;
+UNITED
+STATES
+SECURITIES
+AND EXCHANGE COMMISSION
+Washington,
+D.C.
+&#160;
+&#160;
+&#160;
+FORM
+8-K
+&#160;
+&#160;
+&#160;
+CURRENT
+REPORT
+PURSUANT
+TO SECTION 13 OR 15(d) OF THE
+SECURITIES
+EXCHANGE ACT OF 1934
+&#160;
+Date
+of Report (Date of earliest event reported): September 9, 2026 (April 27, 2026)
+&#160;
+SDR
+Drone, Inc.
+&#160;
+&#160; (Exact
+name of registrant as specified in its charter)
+&#160;
+Florida
+&#160;
+000-56477
+&#160;
+34-2001531
+(State
+or other jurisdiction
+&#160;
+(Commission
+&#160;
+(IRS
+Employer
+of
+incorporation)
+&#160;
+File
+Number)
+&#160;
+Identification
+No.)
+&#160;
+801
+US Highway 1 , North Palm Beach , Florida 33408
+(Address
+of principal executive offices)
+&#160;
+(877)
+646-4833
+(Registrant's
+telephone number, including area code)
+&#160;
+N/A
+(Former
+name or former address, if changed since last report)
+&#160;
+Check
+the appropriate box below if the Form 8-K filing is intended to simultaneously satisfy the filing obligation of the registrant under
+any of the following provisions:
+&#160;
+&#9744;
+Written
+communications pursuant to Rule 425 under the Securities Act (17 CFR 230.425)
+&#160;
+&#160;
+&#9744;
+Soliciting
+material pursuant to Rule 14a-12 under the Exchange Act (17 CFR 240.14a-12)
+&#160;
+&#160;
+&#9744;
+Pre-commencement
+communications pursuant to Rule 14d-2(b) under the Exchange Act (17 CFR 240.14d-2(b))
+&#160;
+&#160;
+&#9744;
+Pre-commencement
+communications pursuant to Rule 13e-4(c) under the Exchange Act (17 CFR 240.13e-4(c)
+&#160;
+Securities
+registered pursuant to Section 12(b) of the Act:
+&#160;
+Title
+of each class
+&#160;
+Trading
+Symbol(s)
+&#160;
+Name
+of each exchange on which registered
+None
+&#160;
+N/A
+&#160;
+N/A
+&#160;
+Indicate
+by check mark whether the registrant is an emerging growth company as defined in Rule 405 of the Securities Act of 1933 (17 CFR &#167;230.405)
+or Rule 12b-2 of the Securities Exchange Act of 1934 (17 CFR &#167;240.12b-2).
+&#160;
+Emerging
+growth company &#9746;
+&#160;
+If
+an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transition period for complying
+with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. &#9744;
+&#160;
+&#160;
+&#160;
+&#160;
+&#160;
+&#160;
+Item
+4.02. Non-Reliance on Previously Issued Financial Statements or a Related Audit Report or Completed Interim Review.
+&#160;
+On
+April 28, 2026, SDR Drone, Inc., a Florida corporation
+(the "Company" ), filed its Annual Report on Form 10-K for the fiscal year ended December 31, 2025, which
+included restated financial statements for the fiscal year ended December 31, 2024. The accompanying independent auditor's report,
+issued by the Company's current auditor, Integritat CPA, was dated April 27, 2026, and disclosed that the 2024 financial statements
+had been restated to correct certain misstatements. As a result, Management determined that the affected previously issued financial
+statements for the year ended December 31, 2024, should no longer be relied upon. The Company's originally filed Annual Report
+on Form 10-K for the fiscal year ended December 31, 2024, included the report of the Company's predecessor auditor.
+&#160;
+During
+May 2026, additional information relating to certain matters affecting the Company's previously issued financial statements came
+to the attention of Management and Integritat CPA subsequent to the date of Integritat CPA's April 27, 2026, audit report. The
+resulting misstatements were determined to be material and principally related to an understatement of convertible notes payable
+and reassessed accrued interest and derivative liabilities, with the conversion-related fair value adjustment treated
+as a capital transaction and a subsequent adjustment to the derivative liabilities. As a result, Management determined that the affected previously issued financial statements
+for the years ended December 31, 2025 and 2024, and the related audit report, should no longer be relied upon. Integritat CPA separately
+evaluated the effect of the additional information on its previously issued audit report and performed additional procedures in connection
+with the restatement.
+&#160;
+The
+Company subsequently restated its financial statements as of and for the years ended December 31, 2025 and 2024. On May 28, 2026, the
+Company filed Amendment No. 1 to its Annual Report on Form 10-K/A containing the restated financial statements and the dual-dated report
+of Integritat CPA. More specifically, the report is dated April 27, 2026, except for the matters described in Notes 2, 5, 7, 10, 16,
+17, 18 and 19, as to which the date is May 27, 2026.
+&#160;
+Financial
+Statements That Should No Longer Be Relied Upon .
+&#160;
+Fiscal
+Year 2025: The audited consolidated financial statements of the Company as of and for the year ended December 31, 2025, as originally
+issued and included in the Company's Annual Report on Form 10-K filed with the Securities and Exchange Commission (the "Commission" )
+on April 28, 2026, together with the report of Integritat CPA (PCAOB ID 6624) dated April 27, 2026, relating to such financial statements.
+&#160;
+Fiscal
+Year 2024: The audited consolidated financial statements of the Company as of and for the year ended December 31, 2024, as originally
+issued and included in the Company's Annual Report on Form 10-K filed with the Commission on March 27, 2025, together with the
+report of Olayinka Oyebola & Co. dated March 25, 2025 , relating to such financial statements.
+&#160;
+Interim
+Periods: The unaudited condensed consolidated financial statements included in the Company's Quarterly Reports on Form 10-Q
+for the quarterly periods ended March 31, 2025, June 30, 2025, and September 30, 2025, filed with the Commission on July 14, 2025, September
+24, 2025, and November 20, 2025, respectively, in each case to the extent those reports present the consolidated balance sheet as of
+December 31, 2024, or comparative amounts for the corresponding periods of fiscal year 2024, and the completed interim reviews of those
+periods.
+&#160;
+Restated
+Financial Statements . The restated consolidated financial statements for the year ended December 31, 2024, are included, as comparative
+amounts, in the Company's Annual Report on Form 10-K for the year ended December 31, 2025, filed on April 28, 2026. The restated
+consolidated financial statements for the years ended December 31, 2025, and December 31, 2024, are included in Amendment No. 1 to that
+Annual Report on Form 10-K/A filed with the Commission on May 28, 2026, which contains the report of Integritat CPA dual dated April
+27, 2026, except for the matters described in Notes 2, 5, 7, 10, 16, 17, 18 and 19, as to which the date is May 27, 2026. Investors should
+refer to the restated financial statements included in the Form 10-K/A filed May 28, 2026, and should no longer rely on the previously
+issued financial statements and interim quarter review identified above. Investor should also refer to the subsequently filed Forms 10-Q
+for the Company's updated interim financial information.
+&#160;
+&#160;
+&#160;
+&#160;
+Facts
+Underlying The Conclusion &#8211; Fiscal Year 2025, Audit Report Originally Dated April 27,
+2026, Issued By Integritat CPA. The
+errors in the previously issued financial statements for the year ended December 31, 2025, related to the accounting for convertible
+notes payable, accrued interest, the change in fair value of derivative liabilities, loss on issuance of debt, debt discount,
+amortization of debt discount and stockholders' equity, and the related effects on the consolidated statement of operations.
+Specifically:
+&#160;
+&#9679; a
+convertible note payable issued July 8, 2025, was understated by $25,000 of principal and
+$1,138 of accrued interest, the correction of which increased convertible notes payable by
+$25,000, increased accrued interest by $1,138, decreased the change in fair value of derivative
+liabilities by $25,000, and increased interest expense and net loss by $1,138; and
+&#160;
+&#9679; upon
+conversion of convertible debt, the fair value adjustment of the related derivative liability
+was recorded to the change in fair value of derivative liabilities rather than to additional
+paid-in capital, the correction of which decreased the change in fair value of derivative
+liabilities by $1,433,682 and increased additional paid-in capital by $1,519,614, as the
+derivative's fair value change at the settlement date is characterized as a part of
+a capital transaction rather than as an income statement event; and a redetermination
+of derivative liabilities increased derivative liabilities by $31,762, increased debt discount
+by $8,291, increased loss on issuance of convertible debt by $51,471 and increased amortization
+of debt discount by $57,933.
+&#160;
+The
+aggregate effect of these corrections was to increase net loss for the year ended December 31, 2025, by $1,569,224 due to reclassification of derivatives to additional paid-in capital and to increase
+accumulated deficit at December 31, 2025, by the same amount, from $3,745,941 as previously reported to $5,315,165 as restated.
+&#160;
+Facts
+Underlying The Conclusion &#8211; Fiscal Year 2024, Audit Report Originally Dated March 25, 2025, Issued By Olayinka Oyebola &
+Co. The errors in the previously issued financial statements for the year ended December 31, 2024, consisted of the following
+seven error corrections:
+&#160;
+&#9679;
+Revenue recognition and accounts receivable . Revenue was recognized for which the performance obligation criteria of ASC
+Topic 606 had not been satisfied. The correction decreased revenue by $555,195 and decreased accounts receivable by $555,195.
+&#160;
+&#9679;
+Allowance for credit loss on note receivable . The carrying value of a note receivable, including accrued interest, of $105,326
+was written to zero and bad debt expense was increased by the same amount.
+&#160;
+&#9679;
+Misclassification of cash and related party amounts . Cash attributable to a related party and not an asset of the Company
+was recorded as an asset. The correction decreased cash by $52,355, decreased revenue by $52,355 and increased related party liabilities
+by $30,002.
+&#160;
+&#9679;
+Unaccrued interest expense . A period-end cutoff error resulted in unaccrued interest. The correction increased accrued
+interest payable and interest expense by $18,205.
+&#160;
+&#9679;
+Unaccrued vendor obligations &#8211; continuing operations . A period-end cutoff error resulted in unaccrued vendor obligations.
+The correction increased accounts payable and accrued liabilities by $139,543.
+&#160;
+&#9679;
+Unaccrued vendor obligations &#8211; discontinued operations . The correction increased liabilities of discontinued operations
+by $4,388.
+&#160;
+&#9679;
+Accrued compensation . Payroll payments were not applied against the related accrual, resulting in duplicate expense. The
+correction decreased accrued liabilities and payroll expense by $56,666.
+&#160;
+The
+aggregate effect of these corrections was to increase net loss for the year ended December 31, 2024, by $826,206 and to increase accumulated
+deficit at December 31, 2024, from $3,096,015 as previously reported to $3,922,221 as restated. Restated basic and diluted net loss per
+share for the year ended December 31, 2024, was $(0.56). The corrections had no effect on periods prior to the year ended December 31,
+2024.
+&#160;
+The
+restated financial statements for the year ended December 31, 2024, also reflect the presentation of the Company's former Jubilee
+Intel, LLC operations as a discontinued operation under ASC Topic 205-20 and the retroactive adjustment of all share and per-share data
+for the Company's 1-for-500 reverse stock split under ASC Topic 260-10. Neither of those items constitutes a correction of
+an error, nor does either form a basis for the non-reliance conclusion described in this Item 4.02.
+&#160;
+&#160;
+&#160;
+&#160;
+Discussion
+With the Independent Registered Public Accounting Firm. The underlying matters were discussed with Integritat CPA and additional
+procedures were performed. Management determined that the misstatements were material and that the affected previously issued financial
+statements and related audit reports should no longer be relied upon. Integritat CPA separately evaluated the effect of the matters on
+its previously issued audit reports. The matters were subsequently addressed through the restatement of the affected financial statements
+and the issuance or reissuance, as applicable, of Integritat CPA's audit reports, including its dual-dated report dated April 27
+and May 27, 2026.
+&#160;
+Internal
+Control Over Financial Reporting. As disclosed in Item 9A of the Company's Annual Report on Form 10-K for the year ended December
+31, 2025, and in Amendment No. 1 thereto, management concluded that the Company's disclosure controls and procedures were not effective
+as of December 31, 2025, and that the Company's internal control over financial reporting was not effective as of that date, in
+each case as a result of the following material weaknesses: (i) the Company does not have appropriate accounting personnel to maintain
+segregation of duties, to ensure the timely and accurate entry of transactions, or to properly account for complex or unusual transactions;
+(ii) the Company does not have an independent audit committee in place; and (iii) the Company has not completed a documented assessment
+of the design and operating effectiveness of its internal control over financial reporting. The errors described in this Item 4.02 are
+attributable to those material weaknesses.
+&#160;
+In
+June 2026, the Company's Board of Directors established an Audit Committee. The Audit Committee has begun to analyze the circumstances
+surrounding the financial statements issued during Non-Reliance Periods and intends to recommend remediation measures to the full Board
+of Directors during the fourth quarter of 2026.
+&#160;
+Timing
+of This Report. The Company did not file a Current Report on Form 8-K under Item 4.02 within four business days after each applicable
+non-reliance determination was made on April 27, and May 27, 2026. The Company is filing this Current Report to report such determination.
+&#160;
+Item
+9.01 Financial Statements and Exhibits.
+&#160;
+Exhibit
+No.:
+&#160;
+Description
+of Exhibit
+104
+&#160;
+Cover
+Page Interactive Data File (embedded within the Inline XBRL document).
+&#160;
+&#160;
+&#160;
+&#160;
+SIGNATURES
+&#160;
+Pursuant
+to the requirements of the Securities Exchange Act of 1934, the registrant has duly caused this report to be signed on its behalf by
+the undersigned hereunto duly authorized.
+&#160;
+Dated:
+September 9, 2026.
+SDR
+DRONE, INC.
+&#160;
+&#160;
+&#160;
+&#160;
+By:
+/s/
+Cho Sun Sik
+&#160;
+&#160;
+Cho
+Sun Sik
+&#160;
+&#160;
+Co-Chief
+Executive Officer
+&#160;
+&#160;
+&#160;
+&#160;
+By:
+/s/
+Dong Wook Chung
+&#160;
+&#160;
+Dong
+Wook Chung
+&#160;
+&#160;
+Co-Chief
+Executive Officer
+&#160;
+&#160;
+&#160;
+&#160;

@@ -1,0 +1,56 @@
+8-K
+false 0001568651 0001568651 2023-05-26 2023-05-26 &#160; &#160; UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549 &#160; &#160; FORM 8-K &#160; &#160; CURRENT REPORT Pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934 Date of report (Date of earliest event reported): May 26, 2023 &#160; &#160; Oscar Health, Inc. (Exact Name of Registrant as Specified in its Charter) &#160; &#160; &#160;
+Delaware
+&#160;
+001-40154
+&#160;
+46-1315570
+(State or Other Jurisdiction of Incorporation)
+&#160;
+(Commission File Number)
+&#160;
+(IRS Employer Identification No.) &#160;
+75 Varick Street , 5 th Floor
+New York , New York 10013
+(Address of Principal Executive Offices) (Zip Code) (646) 403-3677 (Registrant's telephone number, including area code) Not Applicable (Former Name or Former Address, if Changed Since Last Report) &#160; &#160; Check the appropriate box below if the Form 8-K filing is intended to simultaneously satisfy the filing obligation of the registrant under any of the following provisions: &#160;
+&#160;
+&#9744;
+Written communications pursuant to Rule 425 under the Securities Act (17 CFR 230.425) &#160;
+&#160;
+&#9744;
+Soliciting material pursuant to Rule 14a-12 under the Exchange Act (17 CFR 240.14a-12) &#160;
+&#160;
+&#9744;
+Pre-commencement communications pursuant to Rule 14d-2(b) under the Exchange Act (17 CFR 240.14d-2(b)) &#160;
+&#160;
+&#9744;
+Pre-commencement communications pursuant to Rule 13e-4(c) under the Exchange Act (17 CFR 240.13e-4(c)) Securities registered pursuant to Section 12(b) of the Act: &#160;
+Title of each class
+&#160;
+Trading Symbol(s)
+&#160;
+Name of each exchange on which registered
+Class A Common Stock, $0.00001 par value per share
+&#160;
+OSCR
+&#160;
+New York Stock Exchange Indicate by check mark whether the registrant is an emerging growth company as defined in Rule 405 of the Securities Act of 1933 (&#167;230.405 of this chapter) or Rule 12b-2 of the Securities Exchange Act of 1934 (&#167;240.12b-2 of this chapter). Emerging growth company &#9744; If an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. &#9744; &#160; &#160; &#160;
+Item&#160;5.02 Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers; Compensatory Arrangements of Certain Officers. On May&#160;26, 2023, Oscar Health, Inc. (the "Company") and Siddhartha Sankaran agreed that Mr.&#160;Sankaran will conclude his role as the Company's Interim Chief Financial Officer as of August&#160;31, 2023, following the Company's filing of its Quarterly Report on Form 10-Q for the quarter ending June&#160;30, 2023. Mr.&#160;Sankaran, who serves on the Company's board of directors and who previously served as the Company's Chief Financial Officer from March 2019 to March 2021, returned to the role on an interim basis in December 2022. Mr.&#160;Sankaran and the Company agreed at this time to a transition because Mr.&#160;Sankaran will be taking an internationally based executive role later this year that requires advance regulatory approval. He will remain on the Company's board of directors following the transition. The Company has a number of strong candidates for a permanent Chief Financial Officer and intends to announce Mr.&#160;Sankaran's successor prior to his transition date. Item&#160;7.01 Regulation FD Disclosure. The Company is reaffirming its full year 2023 outlook across all metrics, as well as its profitability targets, as provided in its financial results press release for the fourth quarter and full year 2022 dated February&#160;9, 2023. The information in this Item 7.01 shall not be deemed "filed" for purposes of Section&#160;18 of the Securities Exchange Act of 1934, as amended (the "Exchange Act"), or incorporated by reference in any filing under the Securities Act of 1933, as amended, or the Exchange Act, except as expressly set forth by specific reference in any such filing. Cautionary Note Regarding Forward-Looking Statements This Current Report on Form 8-K contains forward-looking statements within the meaning of the Private Securities Litigation Reform Act of 1995. All statements other than statements of historical fact contained herein are forward-looking statements. These statements include, but are not limited to, statements about the transition of our Chief Financial Officer and our expected financial performance. Accordingly, we caution you that any such forward-looking statements are not guarantees of future performance and are subject to risks, assumptions, and uncertainties that are difficult to predict and generally beyond our control. Although management believes that the expectations reflected in these forward-looking statements are reasonable as of the date made, there are or will be important factors that could cause our actual results to differ materially from those indicated in these forward-looking statements, including, but not limited to, the factors set forth under the caption "Risk Factors" in our Quarterly Report on Form 10-Q for the quarterly period ended March&#160;31, 2023, filed with the Securities and Exchange Commission ("SEC"), and our other filings with the SEC. You are cautioned not to place undue reliance on any forward-looking statements made herein. Any forward-looking statement speaks only as of the date as of which it is made, and, except as otherwise required by law, we do not undertake any obligation to publicly update or review any forward-looking statement, whether as a result of new information, future developments or otherwise. New factors emerge from time to time, and it is not possible for us to predict which will arise.
+SIGNATURES Pursuant to the requirements of the Securities Exchange Act of 1934, the registrant has duly caused this report to be signed on its behalf by the undersigned hereunto duly authorized. &#160;
+&#160;
+&#160;
+Oscar Health, Inc.
+Date: May&#160;30, 2023
+&#160;
+&#160;
+By:
+&#160;
+/s/ Ranmali Bopitiya
+&#160;
+&#160;
+&#160;
+Ranmali Bopitiya
+&#160;
+&#160;
+&#160;
+Chief Legal Officer

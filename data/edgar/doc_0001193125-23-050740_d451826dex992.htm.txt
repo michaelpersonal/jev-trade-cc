@@ -1,0 +1,106 @@
+EX-99.2
+3
+d451826dex992.htm
+EX-99.2
+EX-99.2
+Exhibit 99.2 Investor Presentation February 2023 1
+Disclaimer This presentation contains forward-looking statements. All
+statements other than statements of historical facts contained in this presentation, including statements regarding possible or assumed future results of operations, business strategies, development plans, regulatory activities, competitive
+position, potential growth opportunities, & the effects of competition are forward-looking statements. These statements involve known & unknown risks, uncertainties & other important factors that may cause actual results, performance or
+achievements of EverQuote, Inc. ("the Company") to be materially different from any future results, performance or achievements expressed or implied by the forward-looking statements. In some cases, you can identify forward- looking
+statements by terms such as "may," "should," "expect," "plan," "project," "estimate," "guidance," or "potential" or the negative of these terms or other
+similar expressions. The forward-looking statements in this presentation are only predictions. The Company has based these forward-looking statements largely on its current expectations & projections about future events & financial trends
+that it believes may affect the Company's business, financial condition & results of operations. These forward-looking statements speak only as of the date of this presentation & are subject to a number of risks, uncertainties &
+assumptions, some of which cannot be predicted or quantified & some of which are beyond the Company's control. The events & circumstances reflected in the Company's forward-looking statements may not be achieved or occur, &
+actual results could differ materially from those projected in the forward-looking statements, including as a result of: (1) the Company's ability to attract and retain consumers and insurance providers using the Company's marketplace;
+(2) the Company's ability to maintain or increase the amount providers spend per quote request; (3) the impact on the Company and the insurance industry of the COVID-19 pandemic; (4) the effectiveness of the Company's growth strategies
+and its ability to effectively manage growth; (5) the Company's ability to maintain and build its brand; (6) the Company's reliance on its third-party service providers; (7) the Company's ability to develop new and enhanced
+products and services to attract and retain consumers and insurance providers, and the Company's ability to successfully monetize them; (8) the impact of competition in the Company's industry and innovation by the Company's
+competitors; (9) the expected recovery of the auto insurance industry; (10) developments regarding the insurance industry and the transition to online marketing; (11) the possible impacts of inflation; and (12) the risks described in the "Risk
+Factors" section of the Company's most recent Annual Report on Form 10-K, Quarterly Report on Form 10-Q & the other filings that the Company makes with the Securities & Exchange Commission from time to time. Moreover, new risk
+factors & uncertainties may emerge from time to time, & it is not possible for management to predict all risk factors & uncertainties that the Company may face. Except as required by applicable law, the Company does not plan to publicly
+update or revise any forward- looking statements contained herein, whether as a result of any new information, future events, changed circumstances or otherwise. The Company's presentation also contains estimates, projections, & other
+information concerning the Company's industry, the Company's business & the markets for certain of the Company's products & services, including data regarding the estimated size of those markets. Information that is based
+on estimates, forecasts, projections, market research, or similar methodologies is inherently subject to uncertainties & actual events or circumstances may differ materially from events & circumstances reflected in this information. Unless
+otherwise expressly stated, the Company obtained this industry, business, market & other data from reports, research surveys, studies & similar data prepared by market research firms & other third parties, from industry, general
+publications, & from government data & similar sources. The Company presents Adjusted EBITDA as a non-GAAP measure, which is not a substitute for or superior to, other measures of financial performance prepared in accordance with U.S. GAAP.
+A reconciliation of Adjusted EBITDA to the most directly comparable GAAP measure is included in the Appendix to these slides. 2
+Our vision Become the largest online source of insurance policies by
+using data, technology and knowledgeable advisors to make insurance simpler, more affordable and personalized, ultimately reducing cost and risk. 3
+Key Investment Highlights Leading multi-vertical online insurance
+marketplace providing compelling Insurance Marketplace Leader benefits for consumers and insurance providers $171b in annual insurance distribution spend in the early phases of shifting Massive Market Opportunity 1 online provides multi-year
+tailwind Proprietary platforms built on highly integrated machine learning assets Proprietary Tech and Data support rapid growth and drive network effects rd Extensive distribution channels with Enterprise Marketplace (carriers), 3 Extensive
+Distribution 2 st Party Agency (local agents) and DTC Agency (1 Party) offerings Multi-vertical insurance market with diversified distribution channels Diversified Business Model creates resilience in business model Targeting 20+% average annual
+revenue growth over the long-term with Compelling Financial Model 3 expanding Adjusted EBITDA margin 1. Source: S&P Global Market Intelligence, Insider Intelligence and Company estimates as of 2021. 2. "DTC Agency" refers to
+Direct-to-Consumer Agency. 4 3. Based on the compound annual growth rate (CAGR) from 2017 &#8211; 2022 of Revenue of 26% and Adjusted EBITDA percentage point growth of 2.7%,
+Company Snapshot &#9642; One of the insurance industry's largest
+online customer 26% acquisition and distribution platforms 26% 29% 2 Revenue CAGR VMM &#9642; Hybrid Marketplace" with extensive distribution: 1 1 (5yr) CAGR (5yr) rd Enterprise Marketplace (100+ carriers), 3 Party Agency st (~8,000 local
+agents), and DTC Agency (~200 1 party agents) 63 26% % 26% 63% 20% &#9642; Diversified business serving consumers and providers 3 Non-Auto CAGR Of Revenue was across multiple insurance markets 1 3 (5yr) Non-Auto in 2022 &#9642; Highly scalable,
+proprietary platform leveraging 2.5b+ 4 consumer data points amassed over a decade Insurance Verticals Served &#9642; Founded by MIT alumni in 2011 with headquarters in Home & Renters Auto Cambridge, MA; IPO in summer 2018 Health Life 1. Based
+on the compound annual growth rate (CAGR) from 2017 &#8211; 2022. 2. "VMM" refers to Variable Marketing Margin. 5 3. "Non-Auto" refers to non-auto insurance verticals which consist of home & renters, life and health. 4.
+Source: estimated using Company data through 2022.
+Large & Expanding TAM U.S. Insurance Market: Highlights Growth
+Drivers 1 Distribution Spend $171b &lt;1% Continued shift of Total Market Estimated share of Total consumer time spent online Distribution Spend Market ~4% Continued shift of Estimated share of Digital acquisition spend online Advertising Spend
+Market $10.5b Total Digital Continued shift to Advertising ~13% digitization of insurance Spend Estimated Digital Advertising products and workflows 3 spend growth $428m 2 EverQuote's projected 2023 revenue 1. Distribution Spend includes
+commissions and advertising spend as of 2021.. 2. EverQuote is not reaffirming this guidance as of the date of this presentation & makes no statement with respect to this guidance other than that such guidance was provided by EverQuote as 6 of
+February 27, 2023. 3. Estimated compound annual growth rate for 2021 to 2024. Source: Insider Intelligence.
+EverQuote Benefits Both Consumers & Providers Our platforms address
+challenges inherent in the highly-fragmented insurance market Consumers save time and money Providers efficiently acquire consumers &#9642; Single destination for insurance needs &#9642; Large volume of high intent consumers &#9642; Personalized
+shopping experience &#9642; Higher ROI from target-based consumer attributes &#9642; Provide multiple quotes, fitting the consumer's needs &#9642; Opportunity to acquire consumer referrals (within Marketplace) and bound policies (within DTC
+Agency) 7
+The Customer Journey Marketplace Distribution Customer Acquisition
+Consumer Routing Provider Traffic Consumer Provider EverQuote Engagement Channels Arrival Matching Monetization Enterprise Marketplace SEM Per Referral Bidding Alignment Performance Media Carriers rd 3 Party Agency Calls Per Referral Clicks Local
+agents Performance Partnerships DTC Agency Per Policy 1 Other Sold st 1 party agents 1. Other includes organic search, direct-to-site, partner exchange & other traffic sources. 8
+Proprietary Platforms Strengthen Competitive Moat Highly integrated
+machine learning and data assets to support growth of all verticals Marketing Consumer Distribution B2B Omni-channel Personalized User Consumer Alignment Enterprise & Agency Automated Bidding Experiences Algorithms Campaign Management Minimize
+Cost per Maximize Maximize Bind Maximize Value per Acquisition Conversion Rates Performance Acquisition 1 Over 2.5b Consumer Submitted Data Points Since Inception 9
+Distribution Strength of our Platform Representative Partners 100+
+carriers available in the marketplace ~8,000 rd 3 party local agents ~200 st 1 party EverQuote agents Based on Company data & representative of the insurance provider partners on the platform as of December 31, 2022. 10
+Diversification by Distribution Channel We are continuing to build more
+diversified revenue streams Revenue ($m) 2017 2022 $404m $51 $28 DTC Agency $118 Enterprise Non-Auto 3P Agency $126m Enterprise Auto $6 $207 $37 $84 2017 2022 Non-Auto 5% 20% 1 Revenue 1. Non-Auto revenues as a percentage of overall revenue.
+Non-auto revenue includes home & renters, health, and life verticals. 11 26% Revenue CAGR
+The Current State of the Auto Insurance Market Late Summer 2021;
+Current Outlook Auto Insurance Downturn Begins Cost of claims rises rapidly due to Auto carriers continue raising rates to unexpected supply chain challenges, restore adequate profitability; higher used car prices and rising progress varies
+considerably by state accident severity Carriers are unable to adjust rates Cost of claims showing some signs of quickly due to lengthy regulatory stabilization, however, inflationary process loss pressures persist Carriers face elevated combined
+Anticipated improvements through ratios; pull back significantly on 2023 and into 2024; exact timing of consumer acquisition spend the auto recovery remains uncertain 12
+Multiple Levers Driving Future Growth Potential Acquisition
+Opportunities Grow Existing Verticals Deepen Consumer & Provider Engagement Increase Attract Provider Coverage More & Budget Consumers 13
+Financial Overview 14
+Financial Guidance Highlights Focused on restoring Revenue growth,
+increasing Adjusted EBITDA and generating positive cash flow in 2023 Full Year 2023 Guidance Levers $428m Gradual auto insurance market recovery; Revenue 2023 Revenue re-accelerate growth in Non-Auto verticals YoY Growth of 6% 31.8% Increasing
+efficiency in traffic operations VMM% 2023 VMM YoY point expansion of 0.1% 2.3% Adjusted Creating operating leverage through disciplined 2023 Adjusted EBITDA margin expense management EBITDA% YoY point expansion of 0.9% Note: Adjusted EBITDA is a
+non-GAAP metric, refer to financial reconciliation for additional detail. EverQuote is not reaffirming this guidance as of the date of this presentation & makes no statement with respect to this guidance other than that such guidance was
+provided by EverQuote as of February 27, 2023. With respect to the Company's expectations under "Full Year 2023 Guidance" above, the Company has not reconciled the non-GAAP measure Adjusted EBITDA to the GAAP measure net income
+(loss) because the Company does not provide guidance for stock-based compensation expense, depreciation and amortization expense, acquisition-related costs, one-time severance charges, interest income, and income taxes on a 15 consistent basis as
+the Company is unable to quantify these amounts without unreasonable efforts, which would be required to include a reconciliation of Adjusted EBITDA to GAAP net income (loss). In addition, the Company believes such a reconciliation would imply a
+degree of precision that could be confusing or misleading to investors.
+Focused on Driving Revenue Growth Track Record of Strong Growth Revenue
+($m) Auto insurance downturn (begins late summer 2021) 26% &#9642; Total revenue grew 26% compounded annually CAGR 2017-2022 $419 $404 2017 &#8211; 2022 $347 &#9642; Non-Auto verticals grew 63% compounded annually 2017 &#8211; 2022 $249 &#9642;
+Building revenue diversification by growing non- auto insurance verticals $163 $126 Home & Renters Life Health 2017 2018 2019 2020 2021 2022 Non-Auto Auto Note: Based on the compound annual growth rate (CAGR) from 2017 &#8211; 2022 of Revenue.
+16
+Delivering Incremental Variable Marketing Margin Variable Marketing
+Margin ($m) Auto Insurance downturn (begins late summer 2021) 29% $140 33% $130 $128 CAGR 2017-2022 &#9642; Variable Marketing Margin (VMM) grew 29% $12 0 compounded annually 2017 &#8211; 2022 $109 32% 31.7% $100 31.3% &#9642; Proprietary traffic
+platforms have driven 31.0% 31% $80 increasing VMM as a percentage of revenue $73 (VMM %) since 2017 $60 30% 29.5% $46 &#9642; Potential for incremental improvement in VMM % $40 $36 from traffic optimization and product expansion 29% $20 28.3% 28.2%
+$0 28% 2017 2018 2019 2020 2021 2022 Variable Marketing Margin% Note: Beginning in the first quarter of 2019, we revised our definition of variable marketing margin, or VMM. The VMM displayed above reflects our revised definition of VMM for all
+years presented. Refer to Key Metrics Definitions in the Appendix for a definition of VMM. 17
+Focused on Delivering Long-term Profitability Adjusted EBITDA ($m) Auto
+Insurance downturn (begins late summer 2021) 20 20% $18 &#9642; Steadily grew Adjusted EBITDA margin until auto downturn occurred in late summer 2021 $15 15 15 % &#9642; Adjusted EBITDA margin expected to "snapback" to 10 10 % $8
+pre-downturn levels once auto insurance market $6 5.3% substantially recovers 5 5% 3.5% 3.4% 1.5% &#9642; Post auto insurance market recovery, expect continued 0 0% -1.2% -3.3% margin expansion by improving the efficiency of -$1 marketing costs and
+leveraging operating expenses -5 -5 % -$5 -1 0 -1 % 0 &#9642; Strategic investments in proprietary technology and 2017 2018 2019 2020 2021 2022 data platforms provide key driver for long-term growth Adjusted EBITDA Margin % Note: Adjusted EBITDA is
+a non-GAAP metric, refer to financial reconciliation for additional detail. 18
+NASDAQ: EVER 19
+Appendix 20
+Key Metrics Definitions We define variable marketing margin, or VMM, as
+revenue, as reported in our consolidated statements of operations and Variable comprehensive income (loss), less advertising costs (a component of sales and marketing expense, as reported in our statements of operations and comprehensive income
+(loss)). We use VMM to measure the efficiency of individual advertising and consumer Marketing acquisition sources and to make trade-off decisions to manage our return on advertising. We do not use VMM as a measure of Margin profitability. We define
+Adjusted EBITDA as net income (loss), adjusted to exclude: stock-based compensation expense, depreciation and amortization expense, acquisition-related costs, legal settlement expense, one-time severance charges, interest income and the Adjusted
+provision for (benefit from) income taxes. We monitor & present Adjusted EBITDA because it is a key measure used by our management & board of directors to understand & evaluate our operating performance, to establish budgets & to
+develop EBITDA operational goals for managing our business. 21
+Reconciliation of Adjusted EBITDA - 12 Months Ended 12 Months Ended
+December 31, December 31, December 31, December 31, December 31, December 31, ($ in Thousands) 2022 2021 2020 2019 2018 2017 Net loss ($24,416) ($19,434) ($11,202) ($7,117) ($13,791) ($5,070) Stock-based $28,986 $30,020 $12,721 $7,121 $1,860
+compensation $24,179 Depreciation & $5,848 $5,072 $3,350 $2,186 $1,341 $1,360 amortization Legal settlement - - - $1,227 - - Acquisition-related ($4,135) $1,065 $2,258 - - - costs/ earnout - 440 - - - - Severance under a plan Interest (income)
+($349) ($37) (189) ($669) (121) 381 expense, net Provision for (benefit - ($2,510) - - - - from) income taxes Adjusted EBITDA $5,934 $14,616 $18,396 $8,348 ($5,450) ($1,469) 22
+Reconciliation of Adjusted EBITDA - 3 Months Ended 3 Months Ended
+December 31, September 30, June 30, March 31, December 31, ($ in Thousands) 2022 2022 2022 2022 2021 Net loss ($8,494) ($6,451) ($3,756) ($5,715) ($8,480) Stock-based $6,623 $7,233 $7,600 $7,530 $7,063 compensation Depreciation & $1,522 $1,410
+$1,405 $1,511 $1,464 amortization Legal settlement - - - - - Acquisition-related $632 ($96) ($3,779) ($892) $60 costs/ earnout Severance under a plan - - - - 440 Interest (income) ($191) ($113) ($37) ($8) ($4) expense, net Provision for (benefit - -
+- - - from) income taxes Adjusted EBITDA $92 $1,983 $1,433 $2,426 $543 23

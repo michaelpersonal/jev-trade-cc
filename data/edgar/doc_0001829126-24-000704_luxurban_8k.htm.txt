@@ -1,0 +1,184 @@
+false
+0001893311
+0001893311
+2024-01-30
+2024-01-30
+0001893311
+luxh:CommonStockParValue0.00001PerShareMember
+2024-01-30
+2024-01-30
+0001893311
+luxh:SeriesACumulativeRedeemablePreferredMember
+2024-01-30
+2024-01-30
+iso4217:USD
+xbrli:shares
+iso4217:USD
+xbrli:shares
+&#160;
+&#160;
+&#160;
+UNITED STATES
+SECURITIES AND EXCHANGE COMMISSION
+WASHINGTON, D.C. 20549
+&#160;
+FORM 8-K
+&#160;
+CURRENT REPORT
+PURSUANT TO SECTION 13 OR 15(d) OF THE
+SECURITIES EXCHANGE ACT OF 1934
+&#160;
+Date of Report (Date of earliest event reported): January 30, 2024
+&#160;
+LuxUrban Hotels Inc.
+(Exact Name of Registrant as Specified in Charter)
+&#160;
+Delaware
+&#160;
+001-41473
+&#160;
+82-3334945
+(State or Other Jurisdiction
+of Incorporation)
+(Commission
+File Number)
+(IRS Employer
+Identification No.)
+&#160;
+2125 Biscayne Blvd , Suite 253 , Miami , Florida
+&#160;
+33137
+(Address of Principal Executive Offices)
+&#160;
+(Zip Code)
+&#160;
+Registrant's telephone number, including area code: (844) - 220-9973
+&#160;
+N/A
+(Former Name or Former Address, if Changed Since Last Report)
+&#160;
+&#160;
+&#160;
+Check the appropriate box below if the Form 8-K filing is intended to simultaneously satisfy the filing obligation of the Registrant
+under any of the following provisions (see General Instruction A.2. below):
+&#160;
+&#9744;
+Written communications pursuant to Rule&#160;425 under the Securities Act (17 CFR 230.425)
+&#160;
+&#9744;
+Soliciting material pursuant to Rule&#160;14a-12 under the Exchange Act (17 CFR 240.14a-12)
+&#160;
+&#9744;
+Pre-commencement communications pursuant to Rule&#160;14d-2(b) under the Exchange Act (17 CFR 240.14d-2(b))
+&#160;
+&#9744;
+Pre-commencement communications pursuant to Rule&#160;13e-4&#169; under the Exchange Act (17 CFR 240.13e 4(c))
+&#160;
+Indicate by check mark whether the registrant is an emerging growth company as defined
+in Rule&#160;405 of the Securities Act of 1933 (&#167;230.405 of this chapter) or Rule&#160;12b-2 of the Securities Exchange Act of 1934 (&#167;240.12b-2 of this chapter).
+&#160;
+Emerging growth company&#160; &#9746;
+&#160;
+If an emerging growth company, indicate by check mark if the registrant has elected
+not to use the extended transition period for complying with any new or revised financial
+accounting standards provided pursuant to Section&#160;13(a) of the Exchange Act.&#160; &#9744;
+&#160;
+Securities registered pursuant to Section&#160;12(b) of the Act:
+&#160;
+Title of each class
+&#160;
+Ticker symbol(s)
+&#160;
+Name of each exchange on which registered
+Common Stock, par value $0.00001 per share
+&#160;
+LUXH
+&#160;
+The Nasdaq Stock Market LLC
+13.00% Series A Cumulative Redeemable Preferred Stock, $0.00001 par value per share
+&#160;
+LUXHP
+&#160;
+The Nasdaq Stock Market LLC
+&#160;
+&#160;
+&#160;
+&#160;
+&#160;
+&#160;
+Item 7.01
+Regulation FD Disclosure.
+&#160;
+On January 30, 2024, LuxUrban Hotels Inc. (the " Company ")
+issued a press release announcing that it has signed and funded a 15-year Master Lease Agreement, plus two, five-year options, to operate
+The James NoMad Hotel in New York City. The James Nomad is a 353-room historic hotel and is LuxUrban's largest operating rights
+acquisition to date. A copy of the press release is attached hereto as Exhibit 99.1.
+&#160;
+Item 8.01
+Other Events.
+&#160;
+In addition to the foregoing, today the Company is announcing the termination
+of discussions to add the Royalton Hotel to its roster of properties. The removal of the Royalton Hotel (the "Royalton") as
+a prospect for the Company is not expected to have a material impact on the company's ability to achieve its previously stated financial
+goals for the full year 2024.
+&#160;
+The Company filed its Quarterly Report on Form 10-Q for the three and
+nine months ended September 30, 2023 (the "10-Q"). Under "Item 2-Management's Discussion and Analysis of
+Financial Condition and Results of Operations-Property Summary-Properties under lease, not operating," the Company included
+a reference to the Royalton. The Company made similar references to the Royalton expressing its belief that the Company had entered into
+a Master Lease agreement and was expecting the Royalton to begin operating as part of the Company's portfolio in subsequent press
+releases.
+&#160;
+Today the Company is withdrawing its prior statements regarding the
+Royalton. The parties began working toward a transaction in early fall 2023. The Company believed based on correspondence received that
+the material terms of the transaction was agreed to. In addition, there was a commitment by a qualified banking institution to fund the
+letter of credit required under the proposed lease in a form agreeable by the landlord; however, a complete set of definitive agreements
+relating to the lease were not, and will not be, entered into by the Company.
+&#160;
+In addition, based on the complexity and multi-step process of closing
+an MLA from lease execution, which was the previous policy for announcing acquisitions, on a go-forward basis the Company will only announce
+acquisitions when they are opened for hosting guests and have completed the entire MLA process.
+&#160;
+Item 9.01
+Financial Statements and Exhibits.
+&#160;
+(d)
+Exhibits:
+&#160;
+Exhibit
+Number
+&#160;
+Description
+99.1
+&#160;
+Press Release.
+104
+&#160;
+Cover Page Interactive Data File (Embedded within the Inline XBRL document and included in Exhibit).
+&#160;
+1
+&#160;
+&#160;
+SIGNATURE
+&#160;
+Pursuant to the requirements of the Securities Exchange Act of 1934, the registrant
+has duly caused this report to be signed on its behalf by the undersigned hereunto
+duly authorized.
+&#160;
+Dated: February 2, 2024
+LUXURBAN HOTELS INC.
+&#160;
+&#160;
+&#160;
+By:
+/s/ Brian Ferdinand
+&#160;
+&#160;
+Name:
+Brian Ferdinand
+&#160;
+&#160;
+Title:
+Chairman and Co-Chief Executive Officer
+&#160;
+2

@@ -1,0 +1,103 @@
+8-K
+0001042893 false 0001042893 2024-07-08 2024-07-08
+&#160;
+UNITED STATES
+SECURITIES AND EXCHANGE COMMISSION
+Washington, D.C. 20549
+&#160;
+FORM 8-K
+&#160;
+CURRENT REPORT
+Pursuant to Section 13 or 15(d)
+of the Securities Exchange Act of 1934
+Date of Report (date of earliest event reported): July 8, 2024
+&#160;
+DRIL-QUIP, INC.
+(Exact name of registrant as specified in its charter)
+&#160;
+&#160;
+&#160;
+&#160;
+&#160;
+&#160;
+&#160;
+Delaware
+001-13439
+74-2162088
+(State or other jurisdiction of incorporation)
+(Commission File Number)
+(I.R.S. Employer Identification No.)
+&#160;
+&#160;
+&#160;
+&#160;
+2050 West Sam Houston Parkway S ., Suite 1100 Houston , Texas
+77042
+(Address of principal executive offices)
+(Zip Code)
+Registrant's telephone number, including area code: ( 713 ) 939-7711
+&#160;
+Check the appropriate box below if the Form 8-K filing is intended to simultaneously satisfy the filing obligation of the registrant under any of the following provisions ( see General Instruction A.2):
+&#160;
+&#9744; Written communications pursuant to Rule 425 under the Securities Act (17 CFR 230.425)
+&#160;
+&#9744; Soliciting material pursuant to Rule 14a-12 under the Exchange Act (17 CFR 240.14a-12)
+&#160;
+&#9744; Pre-commencement communications pursuant to Rule 14d-2(b) under the Exchange Act (17 CFR 240.14d-2(b))
+&#160;
+&#9744; Pre-commencement communications pursuant to Rule 13e-4(c) under the Exchange Act (17 CFR 240.13e-4(c))
+Securities registered pursuant to Section 12(b) of the Act:
+&#160;
+&#160;
+&#160;
+&#160;
+&#160;
+&#160;
+Title of each class
+Trading symbol(s)
+Name of each exchange on which registered
+Common Stock, $.01 par value per share
+DRQ
+New York Stock Exchange
+Indicate by check mark whether the registrant is an emerging growth company as defined in Rule 405 of the Securities Act of 1933 (&#167;230.405 of this chapter) or Rule 12b-2 of the Securities Exchange Act of 1934 (&#167;240.12b-2 of this chapter).
+Emerging growth company &#9744;
+If an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. &#9744;
+&#160;
+&#160;
+&#160;
+Item&#8201;2.02 Results of Operations and Financial Condition.
+The information set forth under Item 4.02 is incorporated into this Item 2.02 by reference.
+&#160;
+Item 4.02. Non-Reliance on Previously Issued Financial Statements or a Related Audit Report or Completed Interim Review.
+Dril-Quip, Inc. (the "Company" or "we") received comment letters from the Division of Corporation Finance of the Securities and Exchange Commission ("SEC") on June 3, 2024 related to their review of both the Company's Registration Statement on Form S-4 filed with the SEC on May 1, 2024 and the Company's Annual Report on Form 10-K for the fiscal year ended December 31, 2023 (the "2023 Form 10-K"). As a result of one of the SEC's comments to the 2023 Form 10-K, we became aware of an error in the classification of certain inventory write-downs from 2021. We misclassified inventory write-downs from 2021 totaling approximately $67 million, including $19.3 million related to the 2018 global strategic plan and approximately $47.7 million due to the discontinuation of certain product categories under the 2021 global strategic plan. The Company classified these charges as "Restructuring and other charges"; however, these charges should have been classified in "Cost of sales" in the Consolidated Statement of Income (Loss) for the fiscal year ended December 31, 2021, in accordance with ASC 420-10-S99-3. As a result, "Cost of sales" was understated and "Restructuring and other charges" was overstated by $67 million for the fiscal year ended December 31, 2021 (the "Affected Period"). Since the error is related to misclassification on the Consolidated Statement of Income (loss), there was no impact on "Income (loss) before income taxes", "Net income (loss)", or "Adjusted EBITDA" (earnings before interest, taxes, depreciation and amortization, as well as other significant non-cash items and other adjustments for certain charges and credits.)
+On July 8, 2024, after considering the recommendations of management and discussion with the Company's independent registered public accounting firm, PricewaterhouseCoopers LLP ("PwC"), the Audit Committee of our board of directors ("Audit Committee") concluded that the consolidated financial statements for the Affected Period should no longer be relied upon due to the error described above. Any previously issued or filed reports, press releases, earnings releases and investor presentations or other communications describing the Company's consolidated financial statements and other related financial information covering the Affected Period also should no longer be relied upon.
+Additionally, the Audit Committee concluded that management's report on internal control over financial reporting as of December 31, 2023 should no longer be relied upon, and the PwC opinion on the consolidated financial statements for the fiscal year ended December 31, 2021, as well as PWC's opinion on the effectiveness of the Company's internal control over financial reporting as of December 31, 2023, should no longer be relied upon. Management has also concluded that, in light of the findings described above, the Company's disclosure controls and procedures as of December 31, 2023 were not effective.
+The Company intends to complete and file restated consolidated financial statements for the Affected Period and to update that its disclosure controls and procedures were not effective for the material weakness described below by amending its 2023 Form 10-K and its form 10-Q for the quarter ended March 31, 2024 (the "Amended Reports"), on July 8, 2024 following the filing of this Form 8-K. The SEC comment letters also included other immaterial disclosure errors that will be addressed in the Amended Reports.
+The Company will disclose a material weakness in its internal control over financial reporting in such reports relating to the findings described above as it did not design and maintain effective controls over the financial statement classification of inventory write-downs related to restructurings. Specifically, the Company did not design controls to accurately address the income statement classification as an attribute for consideration during the review and analysis process specific to inventory write-downs for accurate accounting and disclosure. The Company's management and the Audit Committee have discussed the matters disclosed in this Item 4.02 with PwC.
+&#160;
+Exhibit No.
+&#160;
+Description
+&#160;
+&#160;
+&#160;
+104
+Cover Page Interactive Data File - the cover page XBRL tags are embedded within the Inline XBRL document.
+&#160;
+SIGNATURE
+Pursuant to the requirements of the Securities Exchange Act of 1934, the Registrant has duly caused this report to be signed on its behalf by the undersigned hereunto duly authorized.
+&#160;
+&#160;
+&#160;
+&#160;
+DRIL-QUIP, INC.
+&#160;
+&#160;
+By:
+/s/ Kyle F. McClure
+&#160;
+Kyle F. McClure
+&#160;
+Vice President and Chief Financial Officer
+Date: July 8, 2024
+&#160;

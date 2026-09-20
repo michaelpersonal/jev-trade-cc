@@ -1,0 +1,102 @@
+8-K
+false 0001531177 0001531177 2023-11-07 2023-11-07
+&#160;
+UNITED STATES SECURITIES AND EXCHANGE COMMISSION WASHINGTON, D.C. 20549
+&#160;
+FORM 8-K
+&#160;
+CURRENT REPORT
+Pursuant to Section 13 or 15(d) of the Securities Exchange Act of 1934
+Date of Report (Date of earliest event reported): November 07, 2023
+&#160;
+&#160;
+Sight Sciences, Inc.
+(Exact name of Registrant as Specified in Its Charter)
+&#160;
+&#160;
+Delaware
+001-40587
+80-0625749
+(State or Other Jurisdiction of Incorporation)
+(Commission File Number)
+(IRS Employer Identification No.)
+&#160;
+&#160;
+&#160;
+&#160;
+&#160;
+4040 Campbell Avenue Suite 100
+&#160;
+Menlo Park , California
+&#160;
+94025
+(Address of Principal Executive Offices)
+&#160;
+(Zip Code)
+&#160;
+Registrant&#x2019;s Telephone Number, Including Area Code: 877 266-1144
+&#160;
+N/A
+(Former Name or Former Address, if Changed Since Last Report)
+&#160;
+Check the appropriate box below if the Form 8-K filing is intended to simultaneously satisfy the filing obligation of the registrant under any of the following provisions:
+&#9744; Written communications pursuant to Rule 425 under the Securities Act (17 CFR 230.425)
+&#9744; Soliciting material pursuant to Rule 14a-12 under the Exchange Act (17 CFR 240.14a-12)
+&#9744; Pre-commencement communications pursuant to Rule 14d-2(b) under the Exchange Act (17 CFR 240.14d-2(b))
+&#9744; Pre-commencement communications pursuant to Rule 13e-4(c) under the Exchange Act (17 CFR 240.13e-4(c))
+Securities registered pursuant to Section 12(b) of the Act:
+Title of each class
+&#160;
+Trading Symbol(s)
+&#160;
+Name of each exchange on which registered
+Common Stock, $0.001 par value per share
+&#160;
+SGHT
+&#160;
+The Nasdaq Global Select Market
+Indicate by check mark whether the registrant is an emerging growth company as defined in Rule 405 of the Securities Act of 1933 (&#167;&#x202f;230.405 of this chapter) or Rule 12b-2 of the Securities Exchange Act of 1934 (&#167;&#x202f;240.12b-2 of this chapter).
+Emerging growth company &#9746;
+If an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. &#9744;
+&#160;
+&#160;
+Item 2.02 Results of Operations and Financial Condition
+On November 7, 2023, Sight Sciences, Inc. (the &#34;Company&#34;) issued a press release announcing its financial results for the quarter ended September 30, 2023 and withdrawing its guidance for the fiscal year ending December 31, 2023. A copy of the press release is furnished as Exhibit 99.1 to this Current Report on Form 8-K.*
+Item 7.01 Regulation FD Disclosure
+On November 7, 2023, the Company posted an investor presentation to its website at https://investors.sightsciences.com/. The Company expects to use the investor presentation, in whole or in part, and possibly with modifications, in connection with presentations to investors, analysts, and others. A copy of the investor presentation is furnished as Exhibit 99.2 to this Current Report on Form 8-K.*
+Item 9.01 Financial Statements and Exhibits
+(d) Exhibits
+&#160;
+Exhibit No.
+Description
+99.1
+Press Release dated November 7, 2023
+99.2
+Sight Sciences Presentation dated November 7, 2023
+104
+Cover Page Interactive Data File, formatted in Inline XBRL.
+&#160;
+*
+The information in Item 2.02, Item 7.01, Exhibit 99.1, and Exhibit 99.2 of this Current Report on Form 8-K shall not be deemed &#x201c;filed&#x201d; for purposes of Section 18 of the Securities Exchange Act of 1934, as amended (the &#x201c;Exchange Act&#x201d;), or otherwise subject to the liabilities of that Section, nor shall it be deemed to be incorporated by reference into any filing of the Company under the Securities Act of 1933, as amended, or the Exchange Act, except as expressly set forth by specific reference in such filing.
+&#160;
+&#160;
+&#160;
+SIGNATURES
+Pursuant to the requirements of the Securities Exchange Act of 1934, the registrant has duly caused this report to be signed on its behalf by the undersigned thereunto duly authorized.
+&#160;
+&#160;
+&#160;
+Sight Sciences, Inc.
+&#160;
+&#160;
+&#160;
+&#160;
+Date:
+November 7, 2023
+By:
+/s/ Alison Bauerlein
+&#160;
+&#160;
+&#160;
+Chief Financial Officer
+&#160;

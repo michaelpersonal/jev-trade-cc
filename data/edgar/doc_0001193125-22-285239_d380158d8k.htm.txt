@@ -1,0 +1,64 @@
+8-K
+CONMED Corp false 0000816956 0000816956 2022-11-15 2022-11-15 &#160; &#160; UNITED STATES SECURITIES AND EXCHANGE COMMISSION Washington, D.C. 20549 &#160; &#160; FORM 8-K &#160; &#160; CURRENT REPORT Pursuant to Section&#160;13 or 15(d) of The Securities Exchange Act of 1934 Date of Report (Date of earliest event reported): November 15, 2022 &#160; &#160; CONMED CORPORATION (Exact name of registrant as specified in its charter) &#160; &#160; &#160;
+Delaware
+&#160;
+001-39218
+&#160;
+16-0977505
+(State or other jurisdiction of incorporation)
+&#160;
+(Commission File Number)
+&#160;
+(IRS. Employer Identification No.) 11311 Concept Blvd Largo , Florida 33773 (Address of principal executive offices, including zip code) (727) 392-6464 (Registrant's telephone number, including area code) &#160; &#160; Check the appropriate box below if the Form 8-K filing is intended to simultaneously satisfy the filing obligations of the registrant under any of the following provisions ( see General Instruction A.2 below): &#160;
+&#9744;
+Written communications pursuant to Rule 425 under the Securities Act (17 CFR 230.425) &#160;
+&#9744;
+Soliciting material pursuant to Rule 14a-12 under the Exchange Act (17 CFR 240.14a-12) &#160;
+&#9744;
+Pre-commencement communications pursuant to Rule 14d-2(b) under the Exchange Act (17 CFR 240.14d-2(b)) &#160;
+&#9744;
+Pre-commencement communications pursuant to Rule 13e-4(c) under the Exchange Act (17 CFR 240.13e-4(c)) Securities registered pursuant to Section 12(b) of the Act: &#160;
+Title of each class
+&#160;
+Trading Symbol
+&#160;
+Name of each exchange on which registered
+Common Stock, $0.01 par value
+&#160;
+CNMD
+&#160;
+NYSE Indicate by check mark whether the registrant is an emerging growth company as defined in Rule 405 of the Securities Act of 1933 (&#167;230.405 of this chapter) or Rule 12b-2 of the Securities Exchange Act of 1934 (&#167;240.12b-2 of this chapter). Emerging growth company &#9744; If an emerging growth company, indicate by check mark if the registrant has elected not to use the extended transition period for complying with any new or revised financial accounting standards provided pursuant to Section 13(a) of the Exchange Act. &#9744; &#160; &#160; &#160;
+Item&#160;7.01
+Financial Regulation FD Disclosure. On November&#160;15, 2022, CONMED Corporation (the "Company") issued a press release withdrawing its full year 2022 financial outlook as a result of the temporary disruption from a software implementation. The Company also provided its 2023 financial outlook. A copy of this press release is attached hereto as Exhibit 99.1. On November&#160;15, 2022, Curt R. Hartman, the Company's Chief Executive Officer, and Todd W. Garner, the Company's Chief Financial Officer, plan to appear at the Stifel 2022 Healthcare Conference to discuss the Company's objectives, strategy and recent events, including the issues discussed in the press release. A copy of the Company's updated investor presentation is attached hereto as Exhibit 99.2. &#160;
+Item&#160;8.01
+Other Events. In October 2022, the Company implemented new warehouse software, which caused service level disruptions that impacted the Company's ability to ship certain quantities of finished goods to customers. Although the Company believes that the impact to sales, if any, will be limited to the fourth quarter of 2022, the Company cannot provide assurances that the resolution of service level and shipping disruptions will fully recover these sales in the fourth quarter of 2022 and/or that the warehouse management software implementation will not disrupt the Company's operations and its ability to fulfill customer orders. Also, these disruptions have caused the Company to incur other costs and expenses in connection with the resolution of the service level and shipping disruptions. To the extent that these disruptions recur and/or persist over time, this could negatively impact the Company's competitive position and its relationships with its customers and thus could have a material adverse effect on the Company's business, prospects, results of operations, financial condition and/or cash flows. The information in this Current Report on Form 8-K that is furnished under "Item 7.01. Financial Regulation FD Disclosure" and Exhibit 99.1 and Exhibit 99.2 attached hereto shall not be deemed "filed" for purposes of Section&#160;18 of the Securities Act of 1934, nor shall they be deemed incorporated by reference in any filing under the Securities Act of 1933, except as shall be expressly set forth by specific reference in such filing. &#160;
+Item&#160;9.01
+Financial Statements and Exhibits. &#160;
+&#160;
+(d)
+Exhibits The following exhibits are included herewith: &#160;
+Exhibit&#160;No.
+&#160;&#160;
+Description of Exhibit
+99.1
+&#160;&#160;
+Press Release dated November&#160;15, 2022, issued by CONMED Corporation.
+99.2
+&#160;&#160;
+Investor Presentation dated November&#160;15, 2022, issued by CONMED Corporation.
+104
+&#160;&#160;
+Cover Page Interactive Data File (embedded within the Inline XBRL document).
+Signature Pursuant to the requirements of the Securities Exchange Act of 1934, the Registrant has duly caused this report to be signed on its behalf by the undersigned thereunto duly authorized. &#160;
+CONMED CORPORATION
+(Registrant)
+By:
+&#160;
+/s/ Todd W. Garner
+Name:
+&#160;
+Todd W. Garner
+Title:
+&#160;
+Executive Vice President - Finance, Chief Financial Officer
+Date: November&#160;15, 2022

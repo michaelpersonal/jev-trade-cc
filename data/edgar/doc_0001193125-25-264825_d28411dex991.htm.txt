@@ -1,0 +1,1171 @@
+EX-99.1
+2
+d28411dex991.htm
+EX-99.1
+EX-99.1
+Exhibit 99.1
+Premier, Inc. Reports Fiscal-Year 2026 First-Quarter Financial Results
+&#149;
+First-quarter total net revenue of $240.0 million (total net revenue excluding Contigo Health* of $234.7
+million)
+&#149;
+First-quarter GAAP net income from continuing operations of $15.3 million, or $0.21 per fully diluted
+share
+&#149;
+First-quarter adjusted earnings per share of $0.32, excluding Contigo Health*
+CHARLOTTE, N.C., November 4, 2025 - Premier, Inc. (NASDAQ: PINC), a leading technology-driven healthcare improvement company, today reported financial
+results for the fiscal-year 2026 first quarter ended September 30, 2025. Fiscal-year 2026 first quarter total net revenue of $240.0 million
+decreased 3% from the prior-year period. Net income from continuing operations of $15.3 million, or $0.21 per share, in the fiscal-year 2026 first quarter compared to $72.9 million, or $0.72 per share, in the prior-year period, which
+included a non-operating gain from a derivative lawsuit settlement of $57.0 million. Adjusted EBITDA* of $55.0 million in the fiscal-year 2026 first quarter decreased 12% from the prior-year period.
+Adjusted EPS* of $0.30 in the fiscal-year 2026 first quarter decreased 12% from the prior-year period. On October 1, 2024, the company announced
+that it had divested the S2S Global direct sourcing business. As such, and unless stated otherwise, all results presented in the following release reflect those of continuing operations. In addition, as the company's efforts to wind down the
+remaining components of the Contigo Health business remain ongoing, results presented in this release continue to include contributions from that business. However, because of the expected wind-down, the company is providing certain financial
+measures that exclude contributions from this business, and tables are included at the end of this release that reconcile the impact of the Contigo Health business on certain financial measures in the periods presented.
+Consolidated Financial Highlights of Continuing Operations
+Three Months Ended September 30,
+(in thousands, except per share data)
+2025
+2024
+% Change
+Net revenue:
+Supply Chain Services:
+Net administrative fees
+$
+132,402
+$
+132,625
+-&#8194;
+%
+Software licenses, other services and support
+19,684
+18,763
+5
+%
+Total Supply Chain Services
+152,086
+151,388
+-&#8194;
+%
+Performance Services
+87,918
+96,754
+(9
+%)
+Performance Services excluding Contigo Health
+82,628
+89,108
+(7
+%)
+Net revenue
+$
+240,004
+$
+248,142
+(3
+%)
+Net revenue excluding Contigo Health*
+$
+234,714
+$
+240,496
+(2
+%)
+Net income from continuing operations
+$
+15,287
+$
+72,940
+(79
+%)
+Net income from continuing operations attributable to stockholders
+$
+17,579
+$
+72,388
+(76
+%)
+Diluted earnings per share from continuing operations attributable to stockholders
+$
+0.21
+$
+0.72
+(71
+%)
+Consolidated Non-GAAP Financial Highlights of Continuing
+Operations *
+Three Months Ended September 30,
+(in thousands, except per share data)
+2025
+2024
+% Change
+Adjusted EBITDA:
+Supply Chain Services
+$
+76,174
+$
+77,511
+(2
+%)
+Performance Services
+10,622
+14,949
+(29
+%)
+Total segment adjusted EBITDA
+86,796
+92,460
+(6
+%)
+Corporate
+(31,846
+)
+(30,032
+)
+(6
+%)
+Adjusted EBITDA
+$
+54,950
+$
+62,428
+(12
+%)
+Adjusted EBITDA excluding Contigo Health
+$
+56,100
+$
+64,655
+(13
+%)
+Adjusted net income
+$
+25,057
+$
+34,739
+(28
+%)
+Adjusted EPS
+$
+0.30
+$
+0.34
+(12
+%)
+Adjusted EPS excluding Contigo Health
+$
+0.32
+$
+0.36
+(11
+%)
+*
+These are non-GAAP financial measures. Refer to "Premier's
+Use and Definitions of Non-GAAP Measures" below and the supplemental financial information at the end of this release for information on the company's use of
+non-GAAP measures and a reconciliation of reported GAAP results to non-GAAP results.
+Fiscal-Year 2026 Guidance The company previously
+announced the signing of a definitive agreement to be acquired by an affiliate of Patient Square Capital, LP ("Patient Square Capital"). As a result of the pending acquisition, Premier is withdrawing previously issued, and is no longer
+providing, fiscal-year 2026 guidance. Results of Operations for the Three Months Ended September 30, 2025
+(As compared with the three months ended September 30, 2024)
+GAAP net revenue of $240.0 million decreased 3% from $248.1 million in the prior-year period. Refer to the "Supply Chain Services" and
+"Performance Services" sections below for discussion on the factors that impacted the net revenue during the quarter. GAAP net income from
+continuing operations of $15.3 million decreased by $57.7 million from $72.9 million in the prior-year period primarily due to the prior-year non-operating gain from a derivative lawsuit
+settlement of $57.0 million. GAAP diluted EPS from continuing operations of $0.21 decreased by $0.51 from $0.72 in the prior-year period due to the
+aforementioned drivers affecting GAAP net income from continuing operations, partially offset by a decrease in the diluted weighted average shares outstanding as a result of share repurchases under the company's $1 billion share
+repurchase authorization announced in February 2024 ("Share Repurchase Authorization"), further discussed below under "Return of Capital to Stockholders".
+Adjusted EBITDA of $55.0 million decreased 12% from $62.4 million in the prior-year period. Refer to the "Supply Chain Services" and
+"Performance Services" sections below for discussion on the factors that impacted the Adjusted EBITDA during the quarter. Adjusted net income
+of $25.1 million decreased 28% from $34.7 million in the prior-year period primarily as a result of the same factors that impacted adjusted EBITDA and an increase in interest expense due to higher borrowings on the company's
+five-year, $1.0 billion revolving credit facility ("Credit Facility"). Adjusted EPS of $0.30 decreased 12% from $0.34 in the prior-year period.
+2
+Segment Results
+(For the fiscal first quarter of 2026 as compared with the fiscal first quarter of 2025)
+Supply Chain Services Supply Chain Services
+segment net revenue of $152.1 million was roughly flat compared to $151.4 million in the prior-year period. Net administrative fees revenue of
+$132.4 million was roughly flat compared to $132.6 million in the prior-year period as the expected increase in the aggregate blended member fee share was offset by continued growth in member purchasing as a result of increased utilization
+of contracts with existing members and from the recruitment and onboarding of new members. Software licenses, other services and support revenue of
+$19.7 million increased 5% from $18.8 million in the prior-year period mainly driven by continued growth from new engagements in the supply chain co-management business and further expansion of the
+company's digital supply chain solutions to providers and suppliers. Segment adjusted EBITDA of $76.2 million decreased 2% from
+$77.5 million in the prior-year period largely due investments in the supply chain co-management business to support ongoing growth.
+Performance Services Performance Services segment
+net revenue of $87.9 million decreased 9% from $96.8 million in the prior-year period primarily due to lower license revenue partially offset by growth in the consulting business and contributions from the IllumiCare acquisition.
+Segment adjusted EBITDA of $10.6 million decreased 29% from $14.9 million in the prior-year period mainly due to the decrease in revenue partially
+offset by lower cost of revenue and operating expenses. Liquidity and Cash Flows
+As of September 30, 2025, cash and cash equivalents were $43.4 million compared with $83.7 million as of June 30, 2025, and the
+company's Credit Facility had an outstanding balance of $280.0 million. Net cash provided by operating activities from continuing operations
+("operating cash flow") for the three months ended September 30, 2025 of $15.9 million decreased from $80.0 million in the prior-year period mainly due to a decrease in cash receipts due to lower collections during the
+current-year period as well as cash received in the prior-year period from a derivative lawsuit settlement. These decreases to cash were partially offset by lower performance-related compensation in the current-year period.
+Net cash used in investing activities for the three months ended September 30, 2025 of $19.5 million increased from $17.7 million in the
+prior-year period due to an increase in purchases of property and equipment. Net cash used in financing activities for the three months ended
+September 30, 2025 of $36.7 million decreased from $88.1 million in the prior-year period due to share repurchases under the Share Repurchase Authorization in the prior-year period, completion of the early termination payments to
+certain former limited partners in connection with the August 2020 restructuring, and a decrease in payments on the liability related to the sale of future revenues. These changes were offset by the final cash payment received in the prior-year
+period from the sale of the non-healthcare GPO operations. Non-GAAP free
+cash flow for the three months ended September 30, 2025 was $(14.0) million compared with $16.2 million in the prior-year period. In addition to some of the factors that affected operating cash flow, the decrease was partially offset by
+the completion of the early termination payments to certain former limited partners and a decrease in cash payments to OMNIA related to the company's non-healthcare channel partnership agreement. Non-GAAP free cash flow is typically lowest in the first quarter as the company's fiscal year ends in June and payment of certain expenses, including annual performance-related compensation, occurs in the
+first quarter. Refer to "Premier's Use and Definitions of Non-GAAP Measures" below and the supplemental financial information at the end of this release for information on the company's
+use of this and other non-GAAP financial measures and a reconciliation of reported GAAP results to non-GAAP results.
+3
+Return of Capital to Stockholders
+In February 2024, the company announced that its Board of Directors approved the Share Repurchase Authorization. Pursuant to the Share Repurchase
+Authorization, which expired on June 30, 2025, the company has repurchased an aggregate of $800.0 million of its common stock, which includes the August 2025 completion of the $200.0 million accelerated share repurchase program
+announced in February 2025. During the fiscal-year 2026 first quarter, the company paid aggregate dividends of $18.6 million to holders of its
+Class A common stock. As a result of the company's pending acquisition by Patient Square Capital, Premier has suspended the declaration and distribution of common stock dividends in future quarters.
+Conference Call and Webcast As a result of the
+company's pending acquisition by Patient Square Capital, Premier will not host a conference call and webcast to discuss its financial results.
+About Premier, Inc. Premier, Inc. (NASDAQ: PINC) is a
+leading technology-driven healthcare improvement company. Playing a critical role in the rapidly evolving healthcare industry, Premier unites providers, suppliers and payers to make healthcare better with national scale, smarter with actionable
+intelligence and faster with novel technologies. Headquartered in Charlotte, N.C., Premier offers integrated data and analytics, collaboratives, supply chain solutions, consulting and other services in service of our mission to improve the health of
+communities. Please visit Premier's news and investor sites on www.premierinc.com, as well as X, Facebook, LinkedIn, YouTube, Instagram and Premier's blog for more information about the company.
+Premier's Use and Definitions of Non-GAAP Measures
+Premier uses EBITDA, adjusted EBITDA, segment adjusted EBITDA, adjusted net income, adjusted earnings per share, and free cash flow. These are non-GAAP financial measures that are not in accordance with, or an alternative to, GAAP, and may be different from non-GAAP financial measures used by other companies. We
+include these non-GAAP financial measures to facilitate a comparison of the company's operating performance on a consistent basis from period to period and to provide measures that, when viewed in
+combination with its results prepared in accordance with GAAP, we believe allow for a more complete understanding of factors and trends affecting the company's business than GAAP measures alone.
+Management believes EBITDA, adjusted EBITDA and segment adjusted EBITDA assist the company's board of directors, management and investors in comparing
+the company's operating performance on a consistent basis from period to period by removing the impact of the company's earnings elements attributable to the company's asset base (primarily depreciation and amortization), certain
+items outside the control of management, e.g., taxes, other non-cash items (such as impairment of intangible assets, purchase accounting adjustments and stock-based compensation), non-recurring items (such as strategic initiative and restructuring-related expenses) and income and expense that have been classified as discontinued operations from operating results.
+Management believes adjusted net income and adjusted earnings per share assist the company's board of directors, management and investors in comparing
+our net income and earnings per share on a consistent basis from period to period because these measures remove non-cash items (such as impairment of intangible assets, purchase accounting adjustments and
+stock-based compensation) and non-recurring items (such as strategic initiative and restructuring-related expenses) and eliminate the variability of non-controlling
+interest and equity in net income of unconsolidated affiliates. Management believes free cash flow is an important measure because it represents the cash
+that the company generates after payments to certain former limited partners that elected to execute a Unit Exchange and Tax Receivable Agreement ("Unit Exchange Agreement") in connection with our August 2020 restructuring, capital
+investment to maintain existing products and services and ongoing business operations, as well as development of new and upgraded products and services to support future growth and cash payments to OMNIA for the sale of future revenues and tax
+payments on proceeds received from the sale of future revenues. Free cash flow is important because it enables the company to seek enhancement of stockholder value through acquisitions, partnerships, joint ventures, investments in related or
+complementary businesses and/or debt reduction.
+4
+Also, adjusted EBITDA and free cash flow are supplemental financial measures used by the company and by
+external users of our financial statements and are considered to be indicators of the operational strength and performance of our business. Adjusted EBITDA and free cash flow measures allow us to assess our performance without regard to financing
+methods and capital structure and without the impact of other matters that we do not consider indicative of the operating performance of our business. More specifically, segment adjusted EBITDA is the primary earnings measure we use to evaluate the
+performance of our business segments. Non-recurring items are income or expenses and other items that have
+not been earned or incurred within the prior two years and are not expected to recur within the next two years. Such items include acquisition- and disposition-related expenses, strategic initiative- and restructuring-related expenses, loss on
+disposal of long-lived assets, income and expense that has been classified as discontinued operations and other reconciling items. Non-cash items include stock-based compensation expense and asset impairments.
+Non-operating items include gains or losses on the disposal of assets, interest and investment income or
+expense, equity in net income of unconsolidated affiliates and operating income from revenues sold to OMNIA in connection with the sale of non-healthcare GPO member contracts, less royalty payments retained.
+EBITDA is defined as net income before income or loss from discontinued operations, net of tax, interest and investment income or expense, net,
+income tax expense, depreciation and amortization and amortization of purchased intangible assets. Adjusted EBITDA is defined as EBITDA before
+merger and acquisition-related expenses and non-recurring, non-cash or non-operating items.
+Segment adjusted EBITDA is defined as the segment's net revenue less cost of revenue and operating expenses directly attributable to the segment
+excluding depreciation and amortization, amortization of purchased intangible assets, merger and acquisition-related expenses and non-recurring or non-cash items.
+Operating expenses directly attributable to the segment include expenses associated with sales and marketing, general and administrative, and product development activities specific to the operation of each segment. General and administrative
+corporate expenses that are not specific to a particular segment are not included in the calculation of segment adjusted EBITDA. Segment adjusted EBITDA also excludes any income and expense that has been classified as discontinued operations and
+operating income from revenues sold to OMNIA in connection with the sale of non-healthcare GPO member contracts, less royalty payments retained.
+Adjusted net income is defined as net income attributable to Premier (i) excluding income or loss from discontinued operations, net,
+(ii) excluding income tax expense, (iii) excluding the effect of non-recurring or non-cash items, including certain strategic initiative- and
+restructuring-related expenses, (iv) reflecting an adjustment for income tax expense on Non-GAAP net income before income taxes at our estimated annual effective income tax rate, adjusted for unusual or
+infrequent items, (v) excluding the equity in net income of unconsolidated affiliates and (vi) excluding operating income from revenues sold to OMNIA in connection with the sale of non-healthcare GPO
+member contracts, less royalty fees retained, imputed interest expense and associated income tax expense. Adjusted earnings per share is adjusted
+net income divided by diluted weighted average shares. Free cash flow is defined as net cash provided by operating activities from continuing
+operations less (i) early termination payments to certain former limited partners that elected to execute a Unit Exchange Agreement in connection with our August 2020 restructuring, (ii) purchases of property and equipment and
+(iii) cash payments to OMNIA for the sale of future revenues and tax payments on proceeds received from the sale of future revenues. Free cash flow does not represent discretionary cash available for spending as it excludes certain contractual
+obligations such as debt repayments.
+5
+To properly and prudently evaluate our business, readers are urged to review the reconciliation of these non-GAAP financial measures, as well as the other financial tables, included at the end of this release. Readers should not rely on any single financial measure to evaluate the company's business. In addition,
+the non-GAAP financial measures used in this release are susceptible to varying calculations and may differ from, and may therefore not be comparable to, similarly titled measures used by other companies.
+In addition to the foregoing, this release and the reconciliations of our non-GAAP financial measures included at the
+end of this release include the presentation of additional fiscal-year 2025 non-GAAP financial measures including net revenue excluding Contigo Health, adjusted EBITDA excluding Contigo Health and adjusted
+earnings per share excluding Contigo Health. As the company continues to own and operate certain components of the Contigo Health business, GAAP financial results presented in this release include contributions from these remaining components. The
+company expects that the remainder of Contigo Health will be substantially wound down by December 31, 2025. Accordingly, we believe that providing supplemental non-GAAP financial measures excluding
+Contigo Health allows for a better understanding of our operating performance. Further information on Premier's use of non-GAAP financial measures is available in the "Our Use of Non-GAAP Financial Measures" section of Premier's Form
+10-Q for the quarter ended September 30, 2025, expected to be filed with the SEC shortly after this release, and which will also be made available on Premier's website at investors.premierinc.com.
+Cautionary Note Regarding Forward-Looking Statements
+Statements made in this release that are not statements of historical or current facts, including, but not limited to, those related to the pending acquisition
+of Premier by Patient Square Capital (the "Merger"), our ability to advance our business strategies and improve healthcare, our ability to wind down the remaining components of the Contigo Health business and the potential costs and
+expenses associated therewith, and our expected effective income tax rate, are "forward-looking statements" within the meaning of the Private Securities Litigation Reform Act of 1995. Forward-looking statements may involve known and
+unknown risks, uncertainties and other factors that may cause the actual results, performance or achievements of Premier to be materially different from historical results or from any future results or projections expressed or implied by such
+forward-looking statements. Accordingly, readers should not place undue reliance on any forward-looking statements, the achievement of which cannot be guaranteed. In addition to statements that explicitly describe such risks and uncertainties,
+readers are urged to consider statements in the conditional or future tenses or that include terms such as "believes," "belief," "expects," "estimates," "intends," "anticipates"
+or "plans" to be uncertain and forward-looking. Forward-looking statements may include comments as to Premier's beliefs and expectations regarding future events and trends affecting its business and are necessarily subject to risks
+and uncertainties, many of which are outside Premier's control. The risks and uncertainties that could affect the Merger and/or Premier's business, achievements, performance, financial condition and financial results include, but are not
+limited to, those discussed under "Cautionary Note Regarding Forward-Looking Statements," "Risk Factors" and "Management's Discussion and Analysis of Financial Condition and Results of Operations" sections
+of Premier's periodic and current filings with the SEC, including the information in those sections of Premier's Form 10-K for the year ended June 30, 2025, and subsequent Quarterly Reports on
+Form 10-Q, including the Form 10-Q for the quarter ended September 30, 2025, expected to be filed with the SEC shortly after the date of this release; and also
+include, without limitation, the following risks related the pending Merger: (1) the inability to consummate the Merger within the anticipated time period, or at all, due to any reason, including the failure to obtain required regulatory
+approvals, satisfy the other conditions to the consummation of the Merger (including the failure to obtain the approval of our stockholders) or complete contemplated financing arrangements, (2) the risk that any announcements relating to the
+Merger could have adverse effects on the market price of our common stock, (3) disruption from the Merger making it more difficult to maintain business and operational relationships, including retaining and hiring key personnel and maintaining
+relationships with our members, customers, vendors and others with whom we do business, (4) the occurrence of any event, change or other circumstances that could give rise to the termination of the Merger agreement pursuant to which the Merger
+would be consummated, (5) risks related to disruption of our current plans and operations or the diversion of management's attention from our ongoing business operations due to the Merger, (6) significant transaction costs and
+(7) the risk of litigation and/or regulatory actions related to the Merger or unfavorable results from currently pending litigation and proceedings or litigation and proceedings that could arise in the future. Premier's periodic and
+current filings with the SEC are made available on Premier's website at investors.premierinc.com. Forward-looking statements speak only as of the date
+6
+they are made, and Premier undertakes no obligation to publicly update or revise any forward-looking statements, whether as a result of new information, future events that occur after that date,
+or otherwise.
+Investor contact:
+Media contact:
+Ben Krasinski
+Amanda Forster
+Senior Director, Investor Relations
+Vice President, Integrated Communications
+704.816.5644
+202.879.8004
+ben_krasinski@premierinc.com
+amanda_forster@premierinc.com
+7
+Condensed Consolidated Statements of Income
+(Unaudited) (In
+thousands, except per share data)
+Three Months Ended September 30,
+2025
+2024
+Net revenue:
+Net administrative fees
+$
+132,402
+$
+132,625
+Software licenses, other services and support
+107,602
+115,517
+Net revenue
+240,004
+248,142
+Cost of revenue:
+Services and software licenses
+69,407
+67,724
+Cost of revenue
+69,407
+67,724
+Gross profit
+170,597
+180,418
+Operating expenses:
+Selling, general, and administrative
+134,851
+134,880
+Research and development
+483
+586
+Amortization of purchased intangible assets
+10,379
+9,637
+Operating expenses
+145,713
+145,103
+Operating income
+24,884
+35,315
+Equity in net (loss) income of unconsolidated affiliates
+(3,358
+)
+1,833
+Interest expense, net
+(5,622
+)
+(1,756
+)
+Other income, net
+1,080
+60,259
+Other (expense) income, net
+(7,900
+)
+60,336
+Income before income taxes
+16,984
+95,651
+Income tax expense
+1,697
+22,711
+Net income from continuing operations
+15,287
+72,940
+Net income from discontinued operations, net of tax
+-&#8194;
+(1,604
+)
+Net income
+15,287
+71,336
+Net loss (income) from continuing operations attributable to
+non-controlling interest
+2,292
+(552
+)
+Net income attributable to stockholders
+$
+17,579
+$
+70,784
+Calculation of GAAP Earnings per Share
+Numerator for basic and diluted earnings per share:
+Net income from continuing operations attributable to stockholders
+$
+17,579
+$
+72,388
+Net income from discontinued operations attributable to stockholders
+-&#8194;
+(1,604
+)
+Net income attributable to stockholders
+$
+17,579
+$
+70,784
+Denominator for earnings per share:
+Basic weighted average shares outstanding
+82,548
+100,380
+Effect of dilutive securities:
+Restricted stock units
+750
+611
+Performance share awards
+308
+-&#8194;
+Diluted weighted average shares
+83,606
+100,991
+Earnings per share attributable to stockholders:
+Basic earnings per share from continuing operations
+$
+0.21
+$
+0.72
+Basic earnings per share from discontinued operations
+-&#8194;
+(0.01
+)
+Basic earnings per share attributable to stockholders
+$
+0.21
+$
+0.71
+Diluted earnings per share from continuing operations
+$
+0.21
+$
+0.72
+Diluted earnings per share from discontinued operations
+-&#8194;
+(0.02
+)
+Diluted earnings per share attributable to stockholders
+$
+0.21
+$
+0.70
+8
+Condensed Consolidated Balance Sheets
+(Unaudited) (In
+thousands, except share data)
+September 30, 2025
+June 30, 2025
+Assets
+Cash and cash equivalents
+$
+43,380
+$
+83,725
+Accounts receivable (net of $5,767 and $6,339 allowance for credit losses, respectively)
+87,460
+99,092
+Contract assets (net of $1,189 and $1,207 allowance for credit losses, respectively)
+330,699
+318,337
+Prepaid expenses and other current assets
+70,473
+84,649
+Total current assets
+532,012
+585,803
+Property and equipment (net of $819,366 and $820,043 accumulated depreciation,
+respectively)
+200,211
+201,481
+Intangible assets (net of $342,898 and $332,522 accumulated amortization, respectively)
+237,694
+250,770
+Goodwill
+899,071
+897,894
+Deferred income tax assets
+758,170
+762,859
+Deferred compensation plan assets
+31,198
+35,069
+Investments in unconsolidated affiliates
+259,261
+262,621
+Operating lease
+right-of-use assets
+41,807
+5,072
+Other assets
+91,947
+95,505
+Total assets
+$
+3,051,371
+$
+3,097,074
+Liabilities and stockholders' equity
+Accounts payable
+$
+24,078
+$
+19,619
+Accrued expenses
+51,844
+59,151
+Revenue share obligations
+349,059
+347,306
+Accrued compensation and benefits
+49,421
+99,019
+Deferred revenue
+19,786
+22,548
+Line of credit and current portion of long-term debt
+280,000
+280,000
+Current portion of liability related to the sale of future revenues
+53,618
+49,712
+Other current liabilities
+26,939
+33,182
+Current liabilities of discontinued operations
+24
+96
+Total current liabilities
+854,769
+910,633
+Liability related to the sale of future revenues, less current portion
+576,373
+590,727
+Deferred compensation plan obligations
+31,198
+35,069
+Operating lease liabilities, less current portion
+42,451
+2,007
+Other liabilities
+18,307
+28,061
+Total liabilities
+1,523,098
+1,566,497
+Commitments and contingencies
+Stockholders' equity:
+Class A common stock, $0.01 par value, 500,000,000 shares authorized; 82,684,147 shares
+issued and outstanding at September 30, 2025 and 91,548,325 shares issued and 82,544,385 shares outstanding at June 30, 2025
+827
+916
+Treasury stock, at cost; 9,003,940 shares at June 30, 2025
+-&#8194;
+(161,561
+)
+Additional paid-in capital
+2,214,520
+2,176,318
+Accumulated deficit
+(686,998
+)
+(485,045
+)
+Accumulated other comprehensive loss
+(76
+)
+(51
+)
+Total stockholders' equity
+1,528,273
+1,530,577
+Total liabilities and stockholders' equity
+$
+3,051,371
+$
+3,097,074
+9
+Condensed Consolidated Statements of Cash Flows
+(Unaudited) (In
+thousands)
+Three Months Ended September 30,
+2025
+2024
+Operating activities
+Net income
+$
+15,287
+$
+71,336
+Adjustments to reconcile net income to net cash provided by operating activities:
+Net loss from discontinued operations, net of tax
+-&#8194;
+1,604
+Depreciation and amortization
+30,477
+29,288
+Equity in net loss (income) of unconsolidated affiliates
+3,358
+(1,833
+)
+Deferred income taxes
+5,407
+24,954
+Stock-based compensation
+8,165
+6,931
+Impairment of assets
+1,758
+-&#8194;
+Other, net
+840
+1,672
+Changes in operating assets and liabilities, net of the effects of acquisitions:
+Accounts receivable
+11,632
+2,216
+Contract assets
+(10,794
+)
+(10,566
+)
+Prepaid expenses and other assets
+(18,229
+)
+8,730
+Accounts payable
+4,265
+397
+Revenue share obligations
+1,753
+26,118
+Accrued expenses, deferred revenue, and other liabilities
+(37,989
+)
+(80,804
+)
+Net cash provided by operating activities from continuing operations
+15,930
+80,043
+Net cash used in operating activities from discontinued operations
+(72
+)
+(12,396
+)
+Net cash provided by operating activities
+$
+15,858
+$
+67,647
+Investing activities
+Purchases of property and equipment
+$
+(19,504
+)
+$
+(17,718
+)
+Net cash used in investing activities
+$
+(19,504
+)
+$
+(17,718
+)
+Financing activities
+Payments on notes payable
+$
+-&#8194;
+$
+(26,214
+)
+Proceeds from credit facility
+120,000
+-&#8194;
+Payments on credit facility
+(120,000
+)
+-&#8194;
+Proceeds from sale of future revenues
+-&#8194;
+42,325
+Payments on liability related to the sale of future revenues
+(10,448
+)
+(20,949
+)
+Cash dividends paid
+(18,561
+)
+(21,323
+)
+Repurchase of Class A common stock
+-&#8194;
+(56,440
+)
+Other, net
+(7,665
+)
+(5,539
+)
+Net cash used in financing activities
+$
+(36,674
+)
+$
+(88,140
+)
+Effect of exchange rate changes on cash flows
+(25
+)
+21
+Net decrease in cash and cash equivalents
+(40,345
+)
+(38,190
+)
+Cash and cash equivalents at beginning of period
+83,725
+125,146
+Cash and cash equivalents at end of period
+$
+43,380
+$
+86,956
+10
+Supplemental Financial Information
+Reconciliation of Net Cash Provided by Operating Activities from Continuing Operations to Free Cash Flow
+(Unaudited) (In
+thousands)
+Three Months Ended September 30,
+2025
+2024
+Net cash provided by operating activities from continuing operations
+$
+15,930
+$
+80,043
+Early termination payments to certain former limited partners that elected to execute a Unit
+Exchange Agreement (a)
+-&#8194;
+(25,206
+)
+Purchases of property and equipment
+(19,504
+)
+(17,718
+)
+Cash payments to OMNIA for the sale of future revenues (b)
+(10,448
+)
+(20,949
+)
+Free cash flow
+$
+(14,022
+)
+$
+16,170
+(a)
+Early termination payments to certain former limited partners that elected to execute a Unit Exchange Agreement
+in connection with our August 2020 Restructuring are presented in our Condensed Consolidated Statements of Cash Flows under "Payments made on notes payable." As of June 30, 2025, we had fully paid the notes payables to former
+limited partners. During the three months ended September 30, 2024, we paid $25.7 million to members including imputed interest of $0.5 million which is included in net cash provided by operating activities from continuing operations.
+(b)
+Cash payments to OMNIA for the sale of future revenues in connection with our sale of non-healthcare contracts to OMNIA are presented in our Condensed Consolidated Statements of Cash Flows under "Payments on liability related to the sale of future revenues." During the three months ended
+September 30, 2025, we paid $14.5 million to OMNIA including imputed interest of $4.1 million which is included in net cash provided by operating activities from continuing operations. During the three months ended September 30,
+2024, we paid $25.3 million to OMNIA including imputed interest of $4.4 million which is included in net cash provided by operating activities from continuing operations.
+11
+Supplemental Financial Information
+Reconciliation of Net Income from Continuing Operations to Adjusted EBITDA
+Reconciliation of Operating Income to Segment Adjusted EBITDA
+Reconciliation of Net Income Attributable to Stockholders to Adjusted Net Income
+(Unaudited) (In
+thousands)
+Three Months Ended September 30,
+2025
+2024
+Net income from continuing operations
+$
+15,287
+$
+72,940
+Interest expense, net
+5,622
+1,756
+Income tax expense
+1,697
+22,711
+Depreciation and amortization
+20,098
+19,651
+Amortization of purchased intangible assets
+10,379
+9,637
+EBITDA
+53,083
+126,695
+Stock-based compensation
+8,363
+7,140
+Acquisition- and disposition-related expenses
+(384
+)
+2,884
+Strategic initiative and restructuring-related expenses
+280
+110
+Operating income from revenues sold to OMNIA
+(13,953
+)
+(15,710
+)
+Equity in net loss (income) of unconsolidated affiliates
+3,358
+(1,833
+)
+Other non-operating gains
+-&#8194;
+(57,244
+)
+Impairment of assets
+1,758
+-&#8194;
+Other reconciling items, net
+2,445
+386
+Adjusted EBITDA
+$
+54,950
+$
+62,428
+Add: Loss from Contigo Health (a)
+1,150
+2,227
+Adjusted EBITDA excluding Contigo Health
+$
+56,100
+$
+64,655
+(a) Contigo Health was in a loss position which results in an increase to adjusted EBITDA and adjusted EPS when excluding Contigo Health.
+Income before income taxes
+$
+16,984
+$
+95,651
+Equity in net loss (income) of unconsolidated affiliates
+3,358
+(1,833
+)
+Interest expense, net
+5,622
+1,756
+Other income, net
+(1,080
+)
+(60,259
+)
+Operating income
+24,884
+35,315
+Depreciation and amortization
+20,098
+19,651
+Amortization of purchased intangible assets
+10,379
+9,637
+Stock-based compensation
+8,363
+7,140
+Acquisition- and disposition-related expenses
+(384
+)
+2,884
+Strategic initiative and restructuring-related expenses
+280
+110
+Operating income from revenues sold to OMNIA
+(13,953
+)
+(15,710
+)
+Deferred compensation plan expense
+1,726
+2,692
+Impairment of assets
+1,758
+-&#8194;
+Other reconciling items, net
+1,799
+709
+Adjusted EBITDA
+$
+54,950
+$
+62,428
+SEGMENT ADJUSTED EBITDA
+Supply Chain Services
+$
+76,174
+$
+77,511
+Performance Services
+10,622
+14,949
+Corporate
+(31,846
+)
+(30,032
+)
+Adjusted EBITDA
+$
+54,950
+$
+62,428
+Net income attributable to stockholders
+$
+17,579
+$
+70,784
+Net loss from discontinued operations, net of tax
+-&#8194;
+1,604
+Income tax expense
+1,697
+22,711
+Amortization of purchased intangible assets
+10,379
+9,637
+Stock-based compensation
+8,363
+7,140
+Acquisition- and disposition-related expenses
+(384
+)
+2,884
+Strategic initiative and restructuring-related expenses
+280
+110
+12
+Supplemental Financial Information
+Reconciliation of Net Income from Continuing Operations to Adjusted EBITDA
+Reconciliation of Operating Income to Segment Adjusted EBITDA
+Reconciliation of Net Income Attributable to Stockholders to Adjusted Net Income
+(Unaudited) (In
+thousands)
+Three Months Ended September 30,
+2025
+2024
+Operating income from revenues sold to OMNIA
+(13,953
+)
+(15,710
+)
+Equity in net loss (income) of unconsolidated affiliates
+3,358
+(1,833
+)
+Other non-operating gains
+-&#8194;
+(57,244
+)
+Impairment of assets
+1,758
+-&#8194;
+Other reconciling items, net
+4,333
+6,236
+Adjusted income before income taxes
+33,410
+46,319
+Income tax expense on adjusted income before income taxes
+8,353
+11,580
+Adjusted net income
+$
+25,057
+$
+34,739
+13
+Supplemental Financial Information
+Reconciliation of GAAP EPS to Adjusted EPS
+(Unaudited) (In
+thousands, except per share data)
+Three Months Ended September 30,
+2025
+2024
+Net income attributable to stockholders
+$
+17,579
+$
+70,784
+Net loss from discontinued operations, net of tax
+-&#8194;
+1,604
+Income tax expense
+1,697
+22,711
+Amortization of purchased intangible assets
+10,379
+9,637
+Stock-based compensation
+8,363
+7,140
+Acquisition- and disposition-related expenses
+(384
+)
+2,884
+Strategic initiative and restructuring-related expenses
+280
+110
+Operating income from revenues sold to OMNIA
+(13,953
+)
+(15,710
+)
+Equity in net loss (income) of unconsolidated affiliates
+3,358
+(1,833
+)
+Other non-operating gains
+-&#8194;
+(57,244
+)
+Impairment of assets
+1,758
+-&#8194;
+Other reconciling items, net
+4,333
+6,236
+Adjusted income before income taxes
+33,410
+46,319
+Income tax expense on adjusted income before income taxes
+8,353
+11,580
+Adjusted net income
+$
+25,057
+$
+34,739
+Weighted average:
+Basic weighted average shares outstanding
+82,548
+100,380
+Dilutive shares
+1,058
+611
+Weighted average shares outstanding - diluted
+83,606
+100,991
+Basic earnings per share attributable to stockholders
+$
+0.21
+$
+0.71
+Net loss from discontinued operations, net of tax
+-&#8194;
+0.02
+Income tax expense
+0.02
+0.23
+Amortization of purchased intangible assets
+0.13
+0.10
+Stock-based compensation
+0.10
+0.07
+Acquisition- and disposition-related expenses
+-&#8194;
+0.03
+Strategic initiative and restructuring-related expenses
+-&#8194;
+-&#8194;
+Operating income from revenues sold to OMNIA
+(0.17
+)
+(0.16
+)
+Equity in net loss (income) of unconsolidated affiliates
+0.04
+(0.02
+)
+Other non-operating gains
+-&#8194;
+(0.57
+)
+Impairment of assets
+0.02
+-&#8194;
+Other reconciling items, net
+0.05
+0.05
+Impact of corporation taxes
+(0.10
+)
+(0.12
+)
+Impact of dilutive shares
+-&#8194;
+-&#8194;
+Adjusted earnings per share
+$
+0.30
+$
+0.34
+Add: Loss from Contigo Health (a)
+0.02
+0.02
+Adjusted earnings per share excluding Contigo Health
+$
+0.32
+$
+0.36
+(a)
+Contigo Health was in a loss position which results in an increase to adjusted EBITDA and adjusted EPS when
+excluding Contigo Health.
+14
+Supplemental Financial Information
+Reconciliation of Certain Financial Measures to Adjust for Contigo Health
+(Unaudited) (In
+thousands)
+Three Months Ended September 30,
+2025
+2024
+Net revenue
+$
+240,004
+$
+248,142
+Less: Contigo Health
+(5,290
+)
+(7,646
+)
+Net revenue excluding Contigo Health
+$
+234,714
+$
+240,496
+Adjusted EBITDA
+$
+54,950
+$
+62,428
+Add: Loss from Contigo Health (a)
+1,150
+2,227
+Adjusted EBITDA excluding Contigo Health
+$
+56,100
+$
+64,655
+Adjusted EPS
+$
+0.30
+$
+0.34
+Add: Loss from Contigo Health (a)
+0.02
+0.02
+Adjusted EPS excluding Contigo Health
+$
+0.32
+$
+0.36
+(a)
+Contigo Health was in a loss position which results in an increase to adjusted EBITDA and adjusted EPS when
+excluding Contigo Health.
+15
