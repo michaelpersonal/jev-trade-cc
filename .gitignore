@@ -11,3 +11,6 @@ web/data.js
 
 # Local review surfaces
 .lavish/
+
+# Codex review artifacts (local)
+.lavish/
