@@ -46,6 +46,18 @@ _client: TypeSafeClient | None = None
 _cache: dict | None = None
 _lock = threading.Lock()
 _stats = {"hits": 0, "calls": 0, "input_tokens": 0}
+_offline = False
+
+
+def set_offline(flag: bool) -> None:
+    """Strict replay: serve only from cache, raise on a miss. Proves a rerun
+    reproduces decisions without touching the network."""
+    global _offline
+    _offline = flag
+
+
+class JevUnavailable(RuntimeError):
+    """Inference failed, or returned something the policy does not allow."""
 
 
 def _load_env() -> None:
@@ -167,6 +179,8 @@ def ask(state: str, questions: dict, kind: str) -> dict:
         _stats["hits"] += 1
         return hit["answers"]
 
+    if _offline:
+        raise JevUnavailable(f"offline replay: no cached answer for {kind}")
     r = client().system_one(state=state, questions=questions, model=MODEL)
     answers = {}
     for name, a in r.answers.items():
@@ -267,3 +281,105 @@ def describe_shape(r, bars) -> str:
 
 def judge_shape(row, bars) -> dict:
     return ask(describe_shape(row, bars), SHAPE_QUESTIONS, "shape")
+
+
+# --------------------------------------------------------------------------
+# Jev in the decision loop.
+#
+# Division of labour, deliberately: Jev decides WHETHER to act. Code keeps the
+# risk -- the 7% hard stop and the trailing stop are standing orders that fire
+# regardless of what Jev thinks, because a calibrated probability is not a risk
+# limit and must never be allowed to override one.
+# --------------------------------------------------------------------------
+ENTRY_DECISION = {
+    "action": Choice(
+        instructions=(
+            "A momentum strategy may open one position today. Given this "
+            "stock's price structure and standing, should it take this one?"),
+        criteria={
+            "buy": "Take the position",
+            "skip": "Pass - the structure or standing does not justify risk",
+        }),
+    # A Noul is the probability of a yes/no proposition, not a degree. Ranking
+    # candidates is a strength rating, so it needs ordered levels.
+    "conviction": Score(
+        instructions=("Rate this candidate's strength relative to a typical "
+                      "stock breaking to new highs."),
+        criteria=["Much weaker than typical", "Weaker than typical",
+                  "About typical", "Stronger than typical",
+                  "Much stronger than typical"]),
+}
+
+EXIT_DECISION = {
+    "action": Choice(
+        instructions=(
+            "An open position has weakened. Is this a normal shakeout within "
+            "an intact advance, or the start of a real breakdown?"),
+        criteria={
+            "hold": "Normal shakeout - the advance is intact, stay in",
+            "sell": "Breakdown - the move is over, exit",
+        }),
+}
+
+
+def describe_position(r, gain_pct, days_held, peak_gain_pct, below_ma_days,
+                      sessions_left, stop_distance_pct) -> str:
+    """Anonymised state of an open position under review.
+
+    States the permitted action and its remaining horizon, so the judgment is
+    made against the authority actually on offer.
+    """
+    return (
+        f"An open position in a momentum portfolio has weakened.\n"
+        f"- Held {days_held} trading days.\n"
+        f"- Currently {gain_pct:+.1f}% from the entry price.\n"
+        f"- At its best it was {peak_gain_pct:+.1f}% from entry; it has given "
+        f"back {peak_gain_pct - gain_pct:.1f} points from that peak.\n"
+        f"- Price is {(r['close']/r['ma50']-1)*100:+.1f}% from its 50-day "
+        f"average and {(r['close']/r['ma200']-1)*100:+.1f}% from its 200-day.\n"
+        f"- It has closed below the 50-day average on "
+        f"{below_ma_days} consecutive day(s).\n"
+        f"- Price is {(1-r['close']/r['hi52'])*100:.0f}% below its 52-week high.\n"
+        f"- Relative strength rank versus all other stocks: "
+        f"{int(r['rs_rating'])} of 99.\n"
+        f"- Today's volume was {r['vol_ratio']:.1f}x its 50-day average.\n"
+        f"- The broad market is in a {r['regime'].lower()} trend.\n"
+        f"- A protective stop sits {stop_distance_pct:.1f}% below the current "
+        f"price and will execute on its own if reached.\n"
+        f"- The only decision available is to keep the position for up to "
+        f"{sessions_left} more trading session(s); after that it is sold "
+        f"regardless of this answer."
+    )
+
+
+def decide_entry(row, bars) -> dict:
+    return ask(describe_shape(row, bars), ENTRY_DECISION, "entry_decision")
+
+
+def decide_exit(row, gain_pct, days_held, peak_gain_pct, below_ma_days,
+                sessions_left, stop_distance_pct) -> dict:
+    state = describe_position(row, gain_pct, days_held, peak_gain_pct,
+                              below_ma_days, sessions_left, stop_distance_pct)
+    return ask(state, EXIT_DECISION, "exit_decision")
+
+
+# --- F3: a malformed or missing answer is not a decision -----------------
+def choice_of(answer: dict, key: str, allowed: set[str]) -> str:
+    """Pull a Choice, rejecting anything outside the declared option set."""
+    try:
+        v = answer[key]["choice"]
+    except (KeyError, TypeError) as exc:
+        raise JevUnavailable(f"{key}: no choice in response") from exc
+    if v not in allowed:
+        raise JevUnavailable(f"{key}: unexpected label {v!r}")
+    return v
+
+
+def score_of(answer: dict, key: str) -> float:
+    try:
+        v = float(answer[key]["score"])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise JevUnavailable(f"{key}: no score in response") from exc
+    if not (v == v) or not (0.0 <= v <= 10.0):
+        raise JevUnavailable(f"{key}: score out of range ({v})")
+    return v

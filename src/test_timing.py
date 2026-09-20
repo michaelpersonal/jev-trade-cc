@@ -99,9 +99,137 @@ def test_atr_stop_excludes_todays_range() -> bool:
     return ok
 
 
+
+
+
+# ---------------------------------------------------------------------------
+# Integration guards for the Jev hooks (codex-integration-review.md)
+# ---------------------------------------------------------------------------
+def test_uninitialised_provider_is_an_error() -> bool:
+    """JEV_ENTRY without loaded history must raise, not silently go to cash."""
+    import backtest
+    backtest._PANEL, backtest._WEEKLY = {}, {}
+    pan = _panel()
+    sig = S.build_signals(pan)
+    sig["buyable"] = sig["breakout"].fillna(False)
+    memb = {pd.Timestamp("2021-01-01"): {"TEST"}}
+    dates = pd.DatetimeIndex(sorted(sig["date"].unique()))
+    S.JEV_ENTRY = True
+    try:
+        B.run(sig, _index(dates, 4200.0), memb, start=str(dates[300].date()),
+              end=str(dates[-1].date()), capital=100_000.0)
+        ok = False
+    except RuntimeError:
+        ok = True
+    finally:
+        S.JEV_ENTRY = False
+    print(f"  uninitialised evidence provider raises  ->  {'PASS' if ok else 'FAIL'}")
+    return ok
+
+
+def test_weekly_cache_invalidates() -> bool:
+    """A reload must not serve bars built from the previous panel, and the
+    lookback must be part of the cache identity."""
+    import backtest
+    pan = _panel()
+    backtest.load_panel(pan)
+    a16 = backtest.weekly_bars("TEST", pan["date"].iloc[-1], weeks=16)
+    a8 = backtest.weekly_bars("TEST", pan["date"].iloc[-1], weeks=8)
+    len_ok = (a16 is not None and a8 is not None
+              and len(a16) == 16 and len(a8) == 8)
+    bumped = pan.copy()
+    bumped[["open", "high", "low", "close"]] *= 2.0
+    backtest.load_panel(bumped)
+    b16 = backtest.weekly_bars("TEST", pan["date"].iloc[-1], weeks=16)
+    fresh_ok = b16 is not None and abs(
+        float(b16["close"].iloc[-1]) / float(a16["close"].iloc[-1]) - 2.0) < 1e-6
+    ok = len_ok and fresh_ok
+    print(f"  weekly cache keys on lookback ({len_ok}) and clears on reload "
+          f"({fresh_ok})  ->  {'PASS' if ok else 'FAIL'}")
+    return ok
+
+
+def _shakeout_panel(n=560):
+    """Breakout, then a long shallow drift that dips under the rising 50-day
+    while staying inside the 7% stop and the 15% trailing stop -- the exact
+    state a deferral episode is meant to cover."""
+    dates = pd.bdate_range("2021-01-04", periods=n)
+    px = np.linspace(20.0, 140.0, n)
+    rim = px[-141]
+    cup = np.concatenate([np.linspace(rim, rim * 0.88, 20),
+                          np.linspace(rim * 0.88, rim * 0.99, 19)])
+    px[-141:-102] = cup
+    px[-102] = rim * 1.05                      # breakout
+    # A long shallow drift. It runs well past DEFER_MAX so the episode can
+    # reach expiry, and stays inside 7% of entry so no stop pre-empts it.
+    px[-101:] = np.linspace(rim * 1.05, rim * 0.99, 101)
+    vol = np.full(n, 3e6)
+    vol[-102] = 9e6
+    return pd.DataFrame(dict(
+        date=dates, ticker="TEST", open=px * 0.995, high=px * 1.005,
+        low=px * 0.99, close=px, volume=vol))
+
+
+def test_deferral_is_bounded() -> bool:
+    """A model that always says hold must not defer an exit indefinitely."""
+    import backtest
+    import jev
+    pan = _shakeout_panel()
+    backtest.load_panel(pan)
+    sig = S.build_signals(pan)
+    sig["buyable"] = sig["breakout"].fillna(False)
+    memb = {pd.Timestamp("2021-01-01"): {"TEST"}}
+    dates = pd.DatetimeIndex(sorted(sig["date"].unique()))
+    real = jev.decide_exit
+    jev.decide_exit = lambda *a, **k: {"action": {"choice": "hold"}}
+    S.JEV_EXIT = True
+    try:
+        r = B.run(sig, _index(dates, 4200.0), memb,
+                  start=str(dates[300].date()), end=str(dates[-1].date()),
+                  capital=100_000.0)
+        holds = r["jev_holds"]
+        expired = [t for t in r["trades"]
+                   if t.get("reason") == "Jev: deferral expired"]
+    finally:
+        jev.decide_exit = real
+        S.JEV_EXIT = False
+    if holds == 0:
+        print("  VACUOUS: no deferral episode opened, the test proves nothing"
+              "  ->  FAIL")
+        return False
+    ok = holds <= S.DEFER_MAX and len(expired) == 1
+    print(f"  always-hold model deferred {holds} times (cap {S.DEFER_MAX}) and "
+          f"the exit was forced at expiry ({len(expired)})  ->  "
+          f"{'PASS' if ok else 'FAIL'}")
+    return ok
+
+
+def test_bad_response_is_not_a_decision() -> bool:
+    """An unexpected label must be rejected, not silently read as hold."""
+    import jev
+    try:
+        jev.choice_of({"action": {"choice": "maybe"}}, "action", {"hold", "sell"})
+        ok = False
+    except jev.JevUnavailable:
+        ok = True
+    try:
+        jev.score_of({"conviction": {}}, "conviction")
+        ok = ok and False
+    except jev.JevUnavailable:
+        pass
+    print(f"  unexpected label and missing score both rejected  ->  "
+          f"{'PASS' if ok else 'FAIL'}")
+    return ok
+
+
 if __name__ == "__main__":
     print("decision-time boundary:")
     results = [test_close_cannot_change_an_open_fill(),
                test_atr_stop_excludes_todays_range()]
+    print("jev integration guards:")
+    results += [test_uninitialised_provider_is_an_error(),
+                test_weekly_cache_invalidates(),
+                test_deferral_is_bounded(),
+                test_bad_response_is_not_a_decision()]
     print("ALL PASS" if all(results) else "FAILURES PRESENT")
     sys.exit(0 if all(results) else 1)

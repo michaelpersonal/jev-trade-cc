@@ -20,6 +20,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import jev as J
 import macro as MAC
 import strategy as S
 import universe as U
@@ -39,7 +40,7 @@ def _why_buy(rows, tkr) -> str:
 class Position:
     __slots__ = ("ticker", "shares", "entry", "entry_date", "entry_idx",
                  "stop", "target", "hold_until", "peak", "peak_high",
-                 "below_ma_days")
+                 "below_ma_days", "defer_start")
 
     def __init__(self, ticker, shares, entry, entry_date, entry_idx):
         self.ticker, self.shares = ticker, shares
@@ -53,6 +54,53 @@ class Position:
         self.peak = entry          # highest close since entry
         self.peak_high = entry     # highest intraday high since entry
         self.below_ma_days = 0
+        self.defer_start = None    # index the current deferral episode opened
+
+
+_PANEL: dict = {}
+_WEEKLY: dict = {}
+
+
+def load_panel(panel: pd.DataFrame) -> None:
+    """Give weekly_bars its price history. Call once before a Jev run.
+
+    Clears the derived weekly cache: entries built from a previous panel --
+    including cached `None` misses from before initialisation -- must not
+    survive a reload.
+    """
+    global _PANEL
+    _WEEKLY.clear()
+    p = panel.sort_values(["ticker", "date"]).copy()
+    p["vol_rel"] = p["volume"] / p.groupby("ticker")["volume"].transform(
+        lambda v: v.rolling(50).mean())
+    _PANEL = {t: g.set_index("date") for t, g in p.groupby("ticker")}
+
+
+def weekly_bars(ticker: str, upto, weeks: int = 16):
+    """Trailing weekly bars ending on `upto` -- the same evidence the entry
+    evaluation used. Nothing after `upto` is visible."""
+    key = (ticker, upto, weeks)   # lookback is part of the identity
+    if key in _WEEKLY:
+        return _WEEKLY[key]
+    g = _PANEL.get(ticker)
+    if g is None:
+        _WEEKLY[key] = None
+        return None
+    g = g[g.index <= upto].tail(260)
+    w = g.resample("W").agg(open=("open", "first"), high=("high", "max"),
+                            low=("low", "min"), close=("close", "last"),
+                            vol_rel=("vol_rel", "mean")).dropna().tail(weeks)
+    _WEEKLY[key] = w
+    return w
+
+
+def _log(ledger, date, ticker, kind, status, baseline, action,
+         value=None, detail=None) -> None:
+    """One immutable row per decision Jev was asked for, so a result can be
+    traced back to what the model was asked and what the rule would have done."""
+    ledger.append(dict(date=str(pd.Timestamp(date).date()), ticker=ticker,
+                       kind=kind, status=status, baseline=baseline,
+                       action=action, value=value, detail=detail))
 
 
 def index_by_date(sig: pd.DataFrame) -> dict:
@@ -77,6 +125,9 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
         by_date = index_by_date(sig)
 
     cash = capital
+    jev_holds = [0]                     # times Jev overrode a mechanical sell
+    errors = [0]                        # inference failures, never a decision
+    ledger: list[dict] = []             # every decision Jev was asked for
     prev_max_pos: int | None = None     # last night's position limit
     positions: dict[str, Position] = {}
     pending_buys: list[str] = []
@@ -211,11 +262,58 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                 np.isfinite(ma50) and c < ma50) else 0
             need = 1 if regime_name == "RED" else 2
             if p.below_ma_days >= need:
-                pending_sells.append((tkr, f"broke 50dma ({regime_name})"))
+                if S.JEV_EXIT:
+                    # Bounded deferral, per src/deferral_contract.md. Jev may
+                    # keep a position for at most DEFER_MAX sessions from the
+                    # day the mechanical exit first qualified; after that it is
+                    # sold regardless. Protective stops are unaffected.
+                    if p.defer_start is None:
+                        p.defer_start = i
+                    left = S.DEFER_MAX - (i - p.defer_start)
+                    if left <= 0:
+                        pending_sells.append((tkr, "Jev: deferral expired"))
+                        _log(ledger, today, tkr, "exit", "expired",
+                             baseline="sell", action="sell")
+                    else:
+                        row = rows.loc[tkr].to_dict()
+                        row["regime"] = regime_name
+                        stop_gap = (1 - max(p.stop, p.peak * (1 - S.TRAIL_PCT)
+                                            if S.TRAIL_PCT else p.stop) / c) * 100
+                        try:
+                            d = J.decide_exit(
+                                row, gain_pct=(c / p.entry - 1) * 100,
+                                days_held=held,
+                                peak_gain_pct=(p.peak / p.entry - 1) * 100,
+                                below_ma_days=p.below_ma_days,
+                                sessions_left=left,
+                                stop_distance_pct=max(0.0, stop_gap))
+                            act = J.choice_of(d, "action", {"hold", "sell"})
+                        except Exception as exc:
+                            # Failure falls back to the mechanical rule and is
+                            # recorded as a failure, never credited to Jev.
+                            errors[0] += 1
+                            _log(ledger, today, tkr, "exit", "error",
+                                 baseline="sell", action="sell",
+                                 detail=str(exc)[:120])
+                            pending_sells.append(
+                                (tkr, f"broke 50dma ({regime_name}) [fallback]"))
+                            act = None
+                        if act == "sell":
+                            pending_sells.append((tkr, "Jev: breakdown"))
+                            _log(ledger, today, tkr, "exit", "ok",
+                                 baseline="sell", action="sell")
+                        elif act == "hold":
+                            jev_holds[0] += 1
+                            _log(ledger, today, tkr, "exit", "ok",
+                                 baseline="sell", action="hold", value=left)
+                else:
+                    pending_sells.append((tkr, f"broke 50dma ({regime_name})"))
+            elif S.JEV_EXIT and p.defer_start is not None:
+                p.defer_start = None      # recovered above the 50-day: reset
 
         sell_set = {t for t, _ in pending_sells}
         open_slots = max_pos - (len(positions) - len(sell_set))
-        n_cands = 0
+        n_cands = n_cands_pre = 0
         if open_slots > 0 and regime_name != "RED":
             live = set(memb_on(today, memb))
             cands = rows[rows["buyable"].fillna(False)]
@@ -227,14 +325,54 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                 # the groups this filter exists to find.
                 gp = cands["group_pct"]
                 cands = cands[gp.isna() | (gp >= S.GROUP_MIN_PCT)]
+            n_cands_pre = len(cands)      # opportunities before any model filter
+            if S.JEV_ENTRY and len(cands):
+                if not _PANEL:
+                    raise RuntimeError(
+                        "JEV_ENTRY is on but no price history is loaded. Call "
+                        "backtest.load_panel(panel) first. Refusing to run: "
+                        "without it every candidate is skipped and the result "
+                        "silently looks like a legitimate all-cash strategy.")
+                keep, conv = [], {}
+                for tkr in cands.index:
+                    row = cands.loc[tkr].to_dict()
+                    row["regime"] = regime_name
+                    bars = weekly_bars(tkr, today)
+                    if bars is None or len(bars) < 8:
+                        _log(ledger, today, tkr, "entry", "no_evidence",
+                             baseline="buy", action="skip")
+                        continue
+                    try:
+                        d = J.decide_entry(row, bars)
+                        act = J.choice_of(d, "action", {"buy", "skip"})
+                        strength = J.score_of(d, "conviction")
+                    except Exception as exc:
+                        # An inference failure is not a decision to skip. It is
+                        # recorded as a failure and the run is marked degraded.
+                        errors[0] += 1
+                        _log(ledger, today, tkr, "entry", "error",
+                             baseline="buy", action="skip", detail=str(exc)[:120])
+                        continue
+                    _log(ledger, today, tkr, "entry", "ok", baseline="buy",
+                         action=act, value=strength)
+                    if act == "buy":
+                        keep.append(tkr)
+                        conv[tkr] = strength
+                cands = cands.loc[keep]
+                if len(cands):
+                    cands = cands.assign(
+                        jev_conviction=[conv[t] for t in cands.index])
             n_cands = len(cands)
-            # rs_rating is rounded to whole numbers, so ties are common. Break
-            # them on ticker rather than on row order, otherwise the result
-            # depends on how the signal file happened to be written.
-            pending_buys = (cands.sort_values("rs_rating", ascending=False,
+            # Rank by Jev's conviction when Jev is choosing, else by RS.
+            # rs_rating is rounded to whole numbers so ties are common; break
+            # them on ticker, otherwise the result depends on row order.
+            rank_key = ("jev_conviction"
+                        if S.JEV_ENTRY and "jev_conviction" in cands.columns
+                        else "rs_rating")
+            pending_buys = (cands.sort_values(rank_key, ascending=False,
                                               kind="mergesort")
                             .sort_index(kind="mergesort")
-                            .sort_values("rs_rating", ascending=False,
+                            .sort_values(rank_key, ascending=False,
                                          kind="mergesort")
                             .index[:open_slots].tolist())
 
@@ -242,7 +380,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
         daily.append(dict(
             date=str(today.date()), equity=round(equity, 2), cash=round(cash, 2),
             regime=regime_name, slots=max_pos, open_slots=max(0, open_slots),
-            n_cands=n_cands,
+            n_cands=n_cands, n_cands_pre_jev=n_cands_pre,
             positions=[dict(t=t, sh=p.shares, entry=round(p.entry, 2),
                             px=round(px(t, "close"), 2),
                             pct=round((px(t, "close") / p.entry - 1) * 100, 1),
@@ -252,6 +390,15 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
             trades=todays_trades))
 
     return dict(daily=daily, trades=trades, equity=equity_curve, dates=dates,
+                jev_holds=jev_holds[0], jev_errors=errors[0], ledger=ledger,
+                config=dict(max_positions=S.MAX_POSITIONS,
+                            profit_target=S.PROFIT_TARGET, trail_pct=S.TRAIL_PCT,
+                            trail_atr=S.TRAIL_ATR, macro_mode=S.MACRO_MODE,
+                            group_min_pct=S.GROUP_MIN_PCT,
+                            regime_mode=S.REGIME_MODE,
+                            yellow_slots=S.YELLOW_SLOTS,
+                            jev_entry=S.JEV_ENTRY, jev_exit=S.JEV_EXIT,
+                            defer_max=S.DEFER_MAX, jev_model=J.MODEL),
                 final=equity_curve[-1] if equity_curve else capital)
 
 
@@ -267,7 +414,9 @@ if __name__ == "__main__":
     idx = D.index_prices()
     print(f"  {pan['ticker'].nunique()} tickers, {len(pan):,} rows")
     print("building signals ...")
-    sig = S.build_signals(pan)
+    # Membership is REQUIRED: without it RS ranks against every name that was
+    # ever a member, which is the contamination repaired earlier.
+    sig = S.build_signals(pan, membership=U.membership())
     sig.to_parquet(ROOT / "data" / "raw" / "signals.parquet")
     memb = U.membership()
     print("running backtest ...")

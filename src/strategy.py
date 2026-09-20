@@ -40,6 +40,13 @@ GROUP_MIN_PCT = None      # require the stock's industry group in this top fract
 #   0 none     ignore the market, always allow a full book
 #   1 binary   RED blocks new buying, otherwise a full book
 #   2 graded   RED blocks, YELLOW halves the book  (O'Neil-ish, the default)
+# Jev in the loop. When on, Jev decides whether to take a candidate and
+# whether a weakening position is a shakeout or a breakdown. The hard stop and
+# the trailing stop stay in code and fire regardless.
+JEV_ENTRY = False
+JEV_EXIT = False
+DEFER_MAX = 10            # sessions Jev may defer an exit; see deferral_contract.md
+
 REGIME_MODE = 2
 YELLOW_SLOTS = None       # slots allowed in YELLOW; None = MAX_POSITIONS // 2
 MACRO_MODE = 0            # 0 off, 1 macro may veto, 2 macro may veto or confirm

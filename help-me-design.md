@@ -240,6 +240,45 @@ on roughly one day in four.
 
 ---
 
+## 6b. Jev is now in the trading loop
+
+`src/run_jev.py` is the **supported entry point** — it initialises the price
+history, persists the answer cache, writes a decision ledger and records the
+full configuration. Do not enable `S.JEV_ENTRY` / `S.JEV_EXIT` by hand: an
+earlier workflow required a manual `load_panel()` that no caller made, and
+flipping the flag produced a silent all-cash run that looked like a result.
+`src/test_timing.py` now raises on that.
+
+| Configuration | Full | 2022–24 | 2024–26 | Max DD | Trades | Holds |
+|---|---|---|---|---|---|---|
+| rules only | +24.2% | **+19.0%** | +8.1% | −21.2% | 205 | — |
+| Jev ranks entries | +20.5% | +16.8% | +11.5% | −24.8% | 199 | — |
+| Jev judges exits | +22.9% | +17.9% | +12.4% | **−20.4%** | 191 | 67 |
+| **Jev does both** | **+24.8%** | +18.1% | **+14.4%** | −21.4% | 181 | 70 |
+| S&P 500 | +59.5% | +9.5% | +45.9% | −25.4% | 1 | — |
+
+Jev-both edges the rules on the full period by 0.6 points — **$600 on $100k
+across 181 trades, which is noise** — and is 0.9 points behind in the first
+half, so it still fails the both-halves bar. The consistent part is the second
+half, where every Jev variant beats the rules.
+
+**The entry hook is a re-ranker, not a picker.** The ledger shows it accepted
+108 of 109 candidates: it vetoes almost nothing, and its effect comes from
+ordering candidates by a conviction Score instead of by RS. Describe it as
+"Jev ranks rule-selected candidates", never as "Jev chooses investments" — it
+sits downstream of the whole O'Neil screen and cannot surface anything the
+rules excluded.
+
+**Delegation is bounded by contract** (`src/deferral_contract.md`): Jev may
+defer a mechanical exit at most 10 sessions, after which the position is sold
+regardless; a close back above the 50-day resets the episode; the 7% stop and
+the 15% trailing stop stay in code and fire inside an episode exactly as
+outside it. A guard test proves an always-hold model defers 10 times and no
+more — with the bound removed it defers 60 and never exits.
+
+**Runs are reproducible.** `run_jev.py --replay` serves only from cache, raises
+on a miss, and reproduces every figure above with 0 network calls.
+
 ## 7. Decisions you need to make
 
 ### D1 — Is the Jev entry null real, and does Jev belong in the loop at all?
