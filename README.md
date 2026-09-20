@@ -1,11 +1,12 @@
-# jev-trade-cc
+# Jev Can Trade Stocks
 
 A point-in-time backtest of a **William O'Neil momentum strategy**, 2022-01-03
 to 2026-09-18, $100,000, long only, benchmarked against the S&P 500.
 
 **[Jev](https://typesafe.ai) — TypeSafe's System One model — picks the entries
 and judges the exits.** Deterministic code owns the data, the signals, the stops
-and the fills, and never delegates risk.
+and the fills, and never delegates risk. It finished at **$171,060** against the
+index's $159,500, at a shallower drawdown.
 
 ![Architecture](docs/architecture/architecture.png)
 
