@@ -45,6 +45,13 @@ GROUP_MIN_PCT = None      # require the stock's industry group in this top fract
 # the trailing stop stay in code and fire regardless.
 JEV_ENTRY = False
 JEV_EXIT = False
+# Near-miss adjudication; see prereg_nearmiss.md. 0 off, 1 Jev, 2 mechanical
+# count-matched to Jev, 3 mechanical unlimited.
+NEARMISS_MODE = 0
+NEARMISS_QUOTA: dict = {}     # date -> n, used only by mode 2
+NM_VOL_LO, NM_RS_LO = 1.15, 65
+NM_DEPTH_LO, NM_DEPTH_HI = 0.05, 0.45
+
 DEFER_MAX = 10            # sessions Jev may defer an exit; see deferral_contract.md
 
 REGIME_MODE = 2
@@ -164,6 +171,23 @@ def build_signals(panel: pd.DataFrame, membership: dict | None = None) -> pd.Dat
         scored.groupby(out["date"]).rank(pct=True) * 98 + 1
     ).round()
     out["buyable"] = out["breakout"] & (out["rs_rating"] >= RS_MIN)
+
+    # Near-miss: every structural requirement holds and exactly one relaxable
+    # test fails, inside its band. Frozen in prereg_nearmiss.md.
+    core = (out["trend_ok"].fillna(False) & (out["close"] >= MIN_PRICE)
+            & (out["dollar_vol"] >= MIN_DOLLAR_VOL))
+    fresh = out["close"] > out["pivot"]
+    t_vol = out["vol_ratio"] >= VOL_SURGE
+    t_rs = out["rs_rating"] >= RS_MIN
+    t_dep = out["base_depth"].between(BASE_DEPTH_MIN, BASE_DEPTH_MAX)
+    b_vol = out["vol_ratio"].between(NM_VOL_LO, VOL_SURGE, inclusive="left")
+    b_rs = out["rs_rating"].between(NM_RS_LO, RS_MIN, inclusive="left")
+    b_dep = (out["base_depth"].between(NM_DEPTH_LO, BASE_DEPTH_MIN, inclusive="left")
+             | out["base_depth"].between(BASE_DEPTH_MAX, NM_DEPTH_HI, inclusive="right"))
+    fails = ((~t_vol).astype(int) + (~t_rs).astype(int) + (~t_dep).astype(int))
+    out["nearmiss"] = (fresh & core & (t_vol | b_vol) & (t_rs | b_rs)
+                       & (t_dep | b_dep) & (fails == 1)
+                       & ~out["buyable"].fillna(False))
     return out
 
 

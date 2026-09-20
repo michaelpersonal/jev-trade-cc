@@ -127,6 +127,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
     cash = capital
     jev_holds = [0]                     # times Jev overrode a mechanical sell
     errors = [0]                        # inference failures, never a decision
+    nm_taken: dict = {}                 # date -> near-misses admitted
     ledger: list[dict] = []             # every decision Jev was asked for
     prev_max_pos: int | None = None     # last night's position limit
     positions: dict[str, Position] = {}
@@ -383,6 +384,57 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                                          kind="mergesort")
                             .index[:open_slots].tolist())
 
+            # --- near-miss adjudication (prereg_nearmiss.md) ---------------
+            # Strict candidates take slots first; near-misses fill what is
+            # left. This is the only path by which a model can INCREASE the
+            # supply of candidates rather than filter one the rules built.
+            spare = open_slots - len(pending_buys)
+            if S.NEARMISS_MODE and spare > 0:
+                nm = rows[rows["nearmiss"].fillna(False)]
+                nm = nm[nm.index.isin(live) & ~nm.index.isin(positions)
+                        & ~nm.index.isin(pending_buys)]
+                taken: list[str] = []
+                if len(nm):
+                    if S.NEARMISS_MODE == 1:            # Jev adjudicates
+                        if not _PANEL:
+                            raise RuntimeError(
+                                "NEARMISS_MODE=1 needs price history; call "
+                                "backtest.load_panel(panel) first.")
+                        keep, sc = [], {}
+                        for tkr in nm.index:
+                            row = nm.loc[tkr].to_dict()
+                            row["regime"] = regime_name
+                            bars = weekly_bars(tkr, today)
+                            if bars is None or len(bars) < 8:
+                                continue
+                            try:
+                                d = J.decide_entry(row, bars)
+                                act = J.choice_of(d, "action", {"buy", "skip"})
+                                sc[tkr] = J.score_of(d, "conviction")
+                            except Exception as exc:
+                                errors[0] += 1
+                                _log(ledger, today, tkr, "nearmiss", "error",
+                                     baseline="skip", action="skip",
+                                     detail=str(exc)[:120])
+                                continue
+                            _log(ledger, today, tkr, "nearmiss", "ok",
+                                 baseline="skip", action=act, value=sc[tkr])
+                            if act == "buy":
+                                keep.append(tkr)
+                        taken = sorted(keep, key=lambda t: (-sc[t], t))[:spare]
+                    else:                                # mechanical control
+                        quota = (S.NEARMISS_QUOTA.get(str(pd.Timestamp(today).date()), 0)
+                                 if S.NEARMISS_MODE == 2 else spare)
+                        n = min(spare, quota)
+                        taken = (nm.sort_values("rs_rating", ascending=False,
+                                                kind="mergesort")
+                                 .sort_index(kind="mergesort")
+                                 .sort_values("rs_rating", ascending=False,
+                                              kind="mergesort")
+                                 .index[:n].tolist())
+                pending_buys += taken
+                nm_taken[str(pd.Timestamp(today).date())] = len(taken)
+
         prev_max_pos = max_pos     # tonight's limit governs tomorrow's opens
         daily.append(dict(
             date=str(today.date()), equity=round(equity, 2), cash=round(cash, 2),
@@ -399,6 +451,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
 
     return dict(daily=daily, trades=trades, equity=equity_curve, dates=dates,
                 jev_holds=jev_holds[0], jev_errors=errors[0], ledger=ledger,
+                nm_taken=nm_taken, nm_total=sum(nm_taken.values()),
                 config=dict(max_positions=S.MAX_POSITIONS,
                             profit_target=S.PROFIT_TARGET, trail_pct=S.TRAIL_PCT,
                             trail_atr=S.TRAIL_ATR, macro_mode=S.MACRO_MODE,
@@ -406,6 +459,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                             regime_mode=S.REGIME_MODE,
                             yellow_slots=S.YELLOW_SLOTS,
                             jev_entry=S.JEV_ENTRY, jev_exit=S.JEV_EXIT,
+                            nearmiss_mode=S.NEARMISS_MODE,
                             defer_max=S.DEFER_MAX, jev_model=J.MODEL),
                 final=equity_curve[-1] if equity_curve else capital)
 
