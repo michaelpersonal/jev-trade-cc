@@ -215,22 +215,23 @@ def judge_entry(row) -> dict:
 # --------------------------------------------------------------------------
 SHAPE_QUESTIONS = {
     "proper_base": Noul(instructions=(
-        "Reading the weekly bars: did this stock build a genuine base -- an "
-        "orderly consolidation with supply drying up -- rather than a wide, "
-        "loose, erratic pattern or a stock already extended from its last base?")),
+        "Reading the weekly bars: has this stock formed an orderly "
+        "consolidation with supply drying up, rather than a wide, loose or "
+        "erratic pattern, or a stock already extended from any such range?")),
     "quality": Score(
         instructions=(
-            "Judge the base structure in the weekly bars: its tightness, the "
-            "behaviour of volume through the consolidation and on the breakout, "
-            "and whether the prior uptrend earns a continuation."),
+            "Judge the price structure in these weekly bars: how tight or loose "
+            "the recent range has been, how volume behaved through it and on the "
+            "most recent bar, and whether the earlier trend looks likely to "
+            "continue."),
         criteria=["Poor - wide and loose, or no real base",
                   "Marginal - visible flaws in the structure",
                   "Acceptable - a workable base",
                   "Strong - tight, orderly, volume confirms",
                   "Textbook - the structure that precedes a large advance"]),
     "follow_through": Noul(instructions=(
-        "Over the next several weeks, is this breakout more likely to follow "
-        "through than to fail back into the base?")),
+        "Over the next several weeks, is this stock more likely to advance "
+        "than to fall back into its earlier range?")),
 }
 
 

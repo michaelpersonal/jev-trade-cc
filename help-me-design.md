@@ -180,14 +180,35 @@ out-of-sample cell (+1.8%). The out-of-sample column zigzags (10.1 → 5.6 → 1
 → 6.7 → 1.4) and is best at the *fewest* slots. Full-period and out-of-sample
 point in opposite directions, so the parameter is unresolved. Left at 2.
 
-**Jev judging entry quality shows no predictive power.** Note these judgments
-were produced **pre-repair**, on contaminated RS values and a leading prompt
-("A stock broke out of a consolidation today…" asserts the conclusion before
-asking whether the base is genuine). Treat as legacy evidence. 1,270 judgments across
-two framings, 32 seconds, $0.052 total. Rank correlation with forward return:
+**Jev judging entry quality shows no predictive power — settled, do not retry.**
+Three framings were tested against the same candidate pool and the third was
+pre-registered (`src/prereg_shape_v3.md`) with a stopping rule. Final run used
+repaired RS, neutral prompts and excess-over-SPX returns:
 
-| Feature | 20d | 60d |
-|---|---|---|
+| Feature | Full 20d | Full 60d | H1 20d | H1 60d | H2 20d | H2 60d |
+|---|---|---|---|---|---|---|
+| `shape_quality` | +0.022 | −0.016 | +0.044 | −0.068 | +0.005 | +0.022 |
+| `shape_proper` | +0.024 | −0.073 | +0.074 | −0.086 | −0.004 | −0.057 |
+| `shape_follow` | +0.040 | +0.037 | +0.017 | −0.059 | +0.052 | +0.104 |
+| `rs_rating` | −0.032 | +0.036 | −0.040 | +0.073 | −0.046 | +0.002 |
+
+Everything flips sign between halves and sits within ~1.5 standard errors of
+zero (n = 212 / 333). Quintiles are non-monotonic.
+
+Two corrections to earlier claims that were circulated before the repair:
+
+- The v2 figure of −0.077 was **not** a contrarian signal. On clean inputs it
+  goes to zero, not negative. Do not repeat the "crowded pretty bases" story.
+- `rs_rating` is **not** a working feature either. Its apparent +0.093 was
+  measured on raw returns with contaminated RS; against excess return with
+  repaired RS it is +0.036, also noise.
+
+On this pool nothing predicts forward excess return. The stopping rule was
+honoured: no fourth framing. Note this is a statement about chart aesthetics in
+liquid large caps, not about Jev — the same model scores F1 0.931 on the
+guidance-withdrawal interpretation task (`GUIDANCE_EVAL.md`).
+
+---|---|---|
 | `jev_quality` (summary features) | +0.003 | +0.009 |
 | `shape_quality` (serialised weekly bars) | −0.044 | **−0.077** |
 | `shape_proper` | −0.056 | −0.052 |
