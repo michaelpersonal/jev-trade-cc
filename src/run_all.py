@@ -76,7 +76,7 @@ def main() -> None:
         h2, bm2, _ = span(kw, *HALVES[1])
         ts = M.trade_stats(r["trades"])
         grid.append(dict(rule=label, total=full["total_return"], cagr=full["cagr"],
-                         max_dd=full["max_dd"], sharpe=full["sharpe"],
+                         max_dd=full["max_dd"], return_vol=full["return_vol"],
                          h1=h1["total_return"], h2=h2["total_return"],
                          trades=ts["n_closed"], win=ts["win_rate"]))
     B.START, B.END = "2022-01-03", "2026-09-18"
@@ -156,7 +156,7 @@ def main() -> None:
     for k in ("strat", "aswritten", "spx"):
         s = stats[k]
         print(f"  {s['label']:18s} {s['total_return']:+7.1f}%  CAGR {s['cagr']:+6.2f}%  "
-              f"maxDD {s['max_dd']:6.1f}%  Sharpe {s['sharpe']}")
+              f"maxDD {s['max_dd']:6.1f}%  ret/vol {s['return_vol']}")
     t = stats["trades"]
     print(f"  {t['n_closed']} closed trades, win rate {t['win_rate']}%, "
           f"profit factor {t['profit_factor']}, {n_sig} buy signals available")

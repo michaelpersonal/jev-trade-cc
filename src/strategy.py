@@ -45,7 +45,12 @@ YELLOW_SLOTS = None       # slots allowed in YELLOW; None = MAX_POSITIONS // 2
 MACRO_MODE = 0            # 0 off, 1 macro may veto, 2 macro may veto or confirm
 RS_MIN = 80               # buy leaders: RS rating 80+
 VOL_SURGE = 1.4           # breakout needs 40%+ above average volume
-BASE_MIN, BASE_MAX = 25, 65      # base length in trading days (5-13 weeks)
+# BASE_MAX is the lookback for the pivot: the breakout must clear the highest
+# high of the prior 13 weeks. BASE_MIN is a de-duplication window -- it
+# suppresses a second signal within 5 weeks of the last one. Neither imposes a
+# minimum age on the consolidation itself, and `base_len_wk` is frequently
+# shorter than 5 weeks. Do not read these as "a 5-13 week base".
+BASE_MIN, BASE_MAX = 25, 65      # de-dup window, pivot lookback (trading days)
 BASE_DEPTH_MIN, BASE_DEPTH_MAX = 0.08, 0.35   # flat base .. deep cup
 NEAR_HIGH = 0.85          # within 15% of the 52-week high
 OFF_LOW = 1.25            # at least 25% above the 52-week low
@@ -68,6 +73,8 @@ def indicators(g: pd.DataFrame) -> pd.DataFrame:
     prev_c = c.shift(1)
     tr = pd.concat([h - l, (h - prev_c).abs(), (l - prev_c).abs()], axis=1).max(axis=1)
     g["atr20"] = tr.rolling(20).mean()
+    # A standing stop placed before the open cannot know today's true range.
+    g["atr20_prev"] = g["atr20"].shift(1)
 
     g["hi52"] = h.rolling(252, min_periods=120).max()
     g["lo52"] = l.rolling(252, min_periods=120).min()
@@ -118,17 +125,36 @@ def indicators(g: pd.DataFrame) -> pd.DataFrame:
     return g
 
 
-def build_signals(panel: pd.DataFrame) -> pd.DataFrame:
-    """Panel -> panel + indicators + cross-sectional RS rating (1-99)."""
+def build_signals(panel: pd.DataFrame, membership: dict | None = None) -> pd.DataFrame:
+    """Panel -> panel + indicators + cross-sectional RS rating (1-99).
+
+    `membership` maps snapshot date -> set of tickers in the index then. When
+    given, RS is ranked only against names that were actually in the index on
+    that date. Without it the reference population is the union of every name
+    that was EVER a member, which leaks future membership into a rank that is
+    supposed to describe the past.
+    """
     # Iterate rather than .apply(): pandas 3 drops the grouping column inside
     # apply, and we need `ticker` to survive.
     parts = [indicators(g) for _, g in
              panel.sort_values(["ticker", "date"]).groupby("ticker", sort=True)]
     out = pd.concat(parts, ignore_index=True)
-    # RS rating is a rank *against every other stock that day*, which is why it
-    # can only be computed once the whole panel is in hand.
+    # RS rating is a rank against every other stock in that day's investable
+    # population, which is why it can only be computed once the whole panel is
+    # in hand -- and why the population has to be the historical one.
+    if membership:
+        snaps = sorted(membership)
+        eligible = pd.Series(False, index=out.index)
+        for i, snap in enumerate(snaps):
+            lo = pd.Timestamp.min if i == 0 else snap
+            hi = snaps[i + 1] if i + 1 < len(snaps) else pd.Timestamp.max
+            m = (out["date"] >= lo) & (out["date"] < hi)
+            eligible |= m & out["ticker"].isin(membership[snap])
+        scored = out["rs_score"].where(eligible)
+    else:
+        scored = out["rs_score"]
     out["rs_rating"] = (
-        out.groupby("date")["rs_score"].rank(pct=True) * 98 + 1
+        scored.groupby(out["date"]).rank(pct=True) * 98 + 1
     ).round()
     out["buyable"] = out["breakout"] & (out["rs_rating"] >= RS_MIN)
     return out

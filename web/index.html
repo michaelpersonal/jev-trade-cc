@@ -238,6 +238,15 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
 
   <section>
     <h2>Full-period results</h2>
+    <div class="note" style="border-left-color:var(--neg)"><b>Revised 2026-09-20.</b>
+      An external review found three measurement defects: the position limit gating
+      fills at the open was read from that same day's close, the chandelier stop used
+      the current bar's ATR, and relative strength was ranked against every name that
+      was <em>ever</em> an index member rather than the population that existed on the
+      day. All three are fixed and a regression test now guards the timing boundary.
+      Repairing them cost <b>6.6 percentage points</b> &mdash; the previous figure of
+      $130,828 was inflated. Pre-repair outputs are kept in <code>data/pre_repair/</code>.
+    </div>
     <p class="lede">Jan 3, 2022 &rarr; Sep 18, 2026. $100,000 starting capital, long only, no
       margin, no leverage. The benchmark is the same $100,000 put into the S&amp;P 500 on day
       one and left alone. <b id="verdict"></b></p>
@@ -575,16 +584,17 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
     ['Total return',       x=>pct(x.total_return),          true],
     ['CAGR',               x=>pct(x.cagr),                  true],
     ['Volatility (ann.)',  x=>x.vol.toFixed(1)+'%',         false],
-    ['Return / volatility',x=>x.sharpe,                     true],
-    ['Sortino',            x=>x.sortino,                    true],
+    ['Return / volatility',x=>x.return_vol,                 true],
+    ['Return / downside vol',x=>x.return_downside_vol,      true],
     ['Max drawdown',       x=>x.max_dd.toFixed(1)+'%',      true],
     ['Worst day',          x=>x.worst_day.toFixed(1)+'%',   true],
   ];
   const KEYS = [s,v,b];
   const RAW = {
     'Final value':x=>x.final, 'Total return':x=>x.total_return, 'CAGR':x=>x.cagr,
-    'Volatility (ann.)':x=>x.vol, 'Return / volatility':x=>x.sharpe,
-    'Sortino':x=>x.sortino, 'Max drawdown':x=>x.max_dd, 'Worst day':x=>x.worst_day};
+    'Volatility (ann.)':x=>x.vol, 'Return / volatility':x=>x.return_vol,
+    'Return / downside vol':x=>x.return_downside_vol,
+    'Max drawdown':x=>x.max_dd, 'Worst day':x=>x.worst_day};
   $('cmp').innerHTML =
     '<thead><tr><th></th><th>Jev<br><span class="mut">trailing stop -15%</span></th>'+
     '<th>Jev<br><span class="mut">20-25% target, as written</span></th>'+
@@ -700,7 +710,7 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
       `the baseline's <b>${pct(base.h1)}</b> falls to as low as ${pct(Math.min(...X.ablation.slice(1).map(r=>r.h1)))}. `+
       `On a strategy already sitting half in cash, buying protection with exposure is the wrong `+
       `trade. The sector filter had a second problem: breakouts <em>already</em> cluster in strong `+
-      `groups (174 of 398 signals sit in the top quartile, 22 in the bottom), so the filter mostly `+
+      `groups (189 of 353 signals sit in the top quartile, 24 in the bottom), so the filter mostly `+
       `removes signals it was never going to catch.`;
 
     const W = X.walkforward;
@@ -729,17 +739,17 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
   }
 
   $('method-note').innerHTML =
-    `Jev holds an average of <b>45% cash</b>, and it is worth being exact about why, because `+
+    `Jev holds an average of <b>43% cash</b>, and it is worth being exact about why, because `+
     `the obvious explanation is the smaller half. Broken down by day: the market filter sitting `+
-    `in <b>RED</b> accounts for 23 of those 45 points, <b>YELLOW</b> halving the book accounts `+
-    `for 11, and a genuine shortage of qualifying stocks accounts for only 12. <b>Three quarters `+
-    `of the cash is the market filter standing down on purpose</b>, not an empty screen &mdash; `+
-    `on GREEN days Jev holds 3.9 of 5 positions at just 21% cash. The screen is thin too `+
-    `(${D.meta.signals} buy signals in 4.7 years across ${D.meta.universe.have} names, on one `+
-    `day in four), which is what confining O'Neil to the S&amp;P 500 and Nasdaq-100 does to a `+
-    `method built for every listed US stock. But the exposure setting is a dial, not an edge: `+
-    `raising it lifts the full-period return sharply and fails to hold out of sample, where `+
-    `moving it a single slot swings the result ten points either way.`;
+    `in <b>RED</b> accounts for 23 of those 43 points, <b>YELLOW</b> halving the book for 10, `+
+    `and a genuine shortage of qualifying stocks for only 10. <b>Three quarters of the cash is `+
+    `the market filter standing down on purpose</b>, not an empty screen &mdash; on GREEN days `+
+    `Jev holds 4.1 of 5 positions at 18% cash. The screen is thin too (${D.meta.signals} buy `+
+    `signals in 4.7 years across ${D.meta.universe.have} names, on one day in four), which is `+
+    `what confining O'Neil to the S&amp;P 500 and Nasdaq-100 does to a method built for every `+
+    `listed US stock. But the exposure setting is a dial, not an edge: raising it lifts the `+
+    `full-period return and fails to hold out of sample.`;
+
   $('coverage-note').textContent = D.meta.coverage || '';
 
   // Opens paused on day one and waits for Play, so a screen recording can be

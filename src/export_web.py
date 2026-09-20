@@ -67,9 +67,9 @@ def main() -> None:
     out.write_text("window.JEV = " + json.dumps(payload, separators=(",", ":")) + ";")
     print(f"wrote {out} ({out.stat().st_size/1024:.0f} KB)")
     print(f"  Jev  {strat_stats['total_return']:+.1f}%  CAGR {strat_stats['cagr']:+.1f}%"
-          f"  maxDD {strat_stats['max_dd']:.1f}%  Sharpe {strat_stats['sharpe']}")
+          f"  maxDD {strat_stats['max_dd']:.1f}%  ret/vol {strat_stats['return_vol']}")
     print(f"  SPX  {spx_stats['total_return']:+.1f}%  CAGR {spx_stats['cagr']:+.1f}%"
-          f"  maxDD {spx_stats['max_dd']:.1f}%  Sharpe {spx_stats['sharpe']}")
+          f"  maxDD {spx_stats['max_dd']:.1f}%  ret/vol {spx_stats['return_vol']}")
     print(f"  trades {tstats.get('n_closed')} closed, win rate {tstats.get('win_rate')}%"
           f", profit factor {tstats.get('profit_factor')}")
 

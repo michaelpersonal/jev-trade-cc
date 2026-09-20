@@ -1,5 +1,13 @@
 # Jev — O'Neil momentum backtest, 2022–2026
 
+> **Revised 2026-09-20.** An external review (`codex-review.md`) found three
+> measurement defects — a lookahead in the position limit gating open fills, a
+> chandelier stop built from the current bar's ATR, and relative strength
+> ranked against every name that was *ever* an index member. All are fixed;
+> `src/test_timing.py` guards the timing boundary and is proven to fail against
+> the original defect. Repairs cost 6.6 points. Pre-repair outputs are in
+> `data/pre_repair/` and must not be cited. Numbers below are post-repair.
+
 $100,000, long only, no margin. Benchmarked against S&P 500 buy-and-hold.
 Replay page: `web/index.html`.
 
@@ -20,14 +28,17 @@ trailing stop's only real contribution is that it stops capping winners.
 
 | | Jev (trailing 15%) | Jev (20–25% target) | S&P 500 |
 |---|---|---|---|
-| Final value | $130,828 | $104,658 | **$159,500** |
-| Total return | +30.8% | +4.7% | **+59.5%** |
-| CAGR | +5.9% | +1.0% | **+10.4%** |
-| Max drawdown | **−21.7%** | −22.4% | −25.4% |
-| Sharpe | 0.38 | 0.07 | **0.61** |
+| Final value | $124,242 | $86,897 | **$159,500** |
+| Total return | +24.2% | −13.1% | **+59.5%** |
+| CAGR | +4.7% | −2.9% | **+10.4%** |
+| Max drawdown | **−21.2%** | −23.2% | −25.4% |
+| Return ÷ volatility | 0.31 | −0.20 | **0.61** |
 
-93 closed trades, 34.4% win rate, profit factor 1.39, average hold 33 days.
-NVDA +54% (70 days), best trade INTC +88%.
+101 closed trades, 33.7% win rate, profit factor 1.31. NVDA +54% (70 days),
+best trade INTC +88%. With O'Neil's fixed target the strategy loses money.
+
+"Return ÷ volatility" is CAGR over annualised volatility. It was previously
+mislabelled "Sharpe"; no risk-free rate is subtracted.
 
 Still 29 points behind the index. Split in half, the reason is not uniform:
 
@@ -110,8 +121,8 @@ Seven out-of-sample folds, 2023-07 → 2026-09:
 
 | | Final | Beat constant |
 |---|---|---|
-| Walk-forward (re-fit each fold) | $102,941 | 2 / 7 folds |
-| Fixed setting, never touched | **$113,031** | — |
+| Walk-forward (re-fit each fold) | $84,783 | 1 / 7 folds |
+| Fixed setting, never touched | **$105,621** | — |
 | S&P 500 | $172,044 | — |
 
 Re-fitting **lost 10 points** to leaving the parameters alone, and picked a

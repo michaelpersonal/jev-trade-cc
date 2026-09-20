@@ -31,8 +31,11 @@ def summarize(equity: list[float], dates: list, label: str) -> dict:
         total_return=round(float(total) * 100, 2),
         cagr=round(float(cagr) * 100, 2),
         vol=round(float(vol) * 100, 2),
-        sharpe=round(float(cagr / vol), 2) if vol else None,
-        sortino=round(float(cagr / downside), 2) if downside else None,
+        # CAGR divided by annualised volatility. NOT a Sharpe ratio: no
+        # risk-free rate is subtracted and the numerator is a geometric
+        # growth rate rather than a mean excess return.
+        return_vol=round(float(cagr / vol), 2) if vol else None,
+        return_downside_vol=round(float(cagr / downside), 2) if downside else None,
         max_dd=round(float(dd.min()) * 100, 2),
         max_dd_date=str(dd.idxmin().date()),
         best_day=round(float(rets.max()) * 100, 2),

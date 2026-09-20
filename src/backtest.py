@@ -77,6 +77,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
         by_date = index_by_date(sig)
 
     cash = capital
+    prev_max_pos: int | None = None     # last night's position limit
     positions: dict[str, Position] = {}
     pending_buys: list[str] = []
     pending_sells: list[tuple[str, str]] = []
@@ -88,7 +89,13 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
             continue
         reg = regime.loc[today] if today in regime.index else None
         regime_name = reg["regime"] if reg is not None else "YELLOW"
+        # `max_pos` is read from TODAY's close and therefore may only inform
+        # orders queued for tomorrow. Orders filling at today's open were
+        # placed last night and are governed by last night's limit -- reading
+        # today's close here would let information from after the fill decide
+        # whether the fill happens.
         max_pos = int(reg["max_positions"]) if reg is not None else S.MAX_POSITIONS
+        max_pos_at_open = prev_max_pos if prev_max_pos is not None else max_pos
         todays_trades = []
 
         def px(t, field):
@@ -116,7 +123,8 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
         equity_now = cash + sum(p.shares * px(t, "open") for t, p in positions.items()
                                 if t in rows.index)
         for tkr in pending_buys:
-            if tkr in positions or len(positions) >= max_pos or tkr not in rows.index:
+            if (tkr in positions or len(positions) >= max_pos_at_open
+                    or tkr not in rows.index):
                 continue
             o = px(tkr, "open")
             if not np.isfinite(o) or o <= 0:
@@ -150,7 +158,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                 if t > level:
                     level, why = t, f"trail -{S.TRAIL_PCT:.0%}"
             elif S.TRAIL_ATR:
-                atr = px(tkr, "atr20")
+                atr = px(tkr, "atr20_prev")   # today's ATR includes today's range
                 if np.isfinite(atr):
                     t = p.peak_high - S.TRAIL_ATR * atr
                     if t > level:
@@ -230,6 +238,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                                          kind="mergesort")
                             .index[:open_slots].tolist())
 
+        prev_max_pos = max_pos     # tonight's limit governs tomorrow's opens
         daily.append(dict(
             date=str(today.date()), equity=round(equity, 2), cash=round(cash, 2),
             regime=regime_name, slots=max_pos, open_slots=max(0, open_slots),

@@ -1,10 +1,14 @@
 # Jev trading system — design brief
 
 You are picking up a working research rig, not a blank page. Read this before
-touching code. Everything below is measured, not assumed; where something is
-uncertain it says so.
+touching code.
 
-The repo is `~/projects/jev-trade-cc` (git initialised, one commit). A sibling
+**Revised 2026-09-20** after an external review (`codex-review.md`) found three
+measurement defects and one false claim in an earlier version of this brief.
+All are fixed or corrected below; every number here is post-repair. Pre-repair
+outputs are preserved in `data/pre_repair/` and must not be cited.
+
+The repo is `~/projects/jev-trade-cc` (git initialised). A sibling
 `~/projects/jev-trade` is an abandoned earlier attempt — ignore it except that
 its `.env` holds the API key.
 
@@ -24,8 +28,11 @@ text.
 - Models `jev-latest` / `jev-1.13.0`; $0.042 per million input tokens, output
   free; 70–500 ms; 1,200 req/min
 - Three primitives: `Noul` (calibrated 0–1 probability), `Score` (position on
-  ordered levels), `Choice` (categorical). All return `confidence` and a full
-  `probabilities` distribution. Many questions can ride in one call.
+  ordered levels), `Choice` (categorical). **`Noul` returns a probability and
+  has no separate confidence field.** `Score` and `Choice` return `confidence`,
+  which summarises how peaked their probability distribution is — it is *not*
+  the probability that a trade will be profitable. Many questions can ride in
+  one call.
 
 ```python
 from typesafe_sdk import TypeSafeClient, Noul, Score, Choice
@@ -82,15 +89,26 @@ through fills at the open. Trailing levels on day `t` are built from peaks
 through day `t-1`. Universe on day `t` is the most recent Wikipedia snapshot
 dated on or before `t`.
 
+**Decision-time boundary.** Information that exists only after an order fills
+must not be able to change whether it filled. `src/test_timing.py` enforces
+this and is proven to fail against the original defect. Run it after any change
+to the loop.
+
 **Costs.** 5 bp slippage per side, zero commission. **Dividends are not
 modelled** on either side — the benchmark `^GSPC` is a price index too, so the
 comparison is roughly fair, with a small residual bias *favouring* the strategy
 (buy-and-hold forgoes yield on 100% exposure, the strategy on ~55%).
 
 **Universe.** 635 tickers were ever S&P 500 or Nasdaq-100 members in the
-window; 586 have usable price history. The 49 missing are delisted names
-(ATVI, CERN, FRC, SIVB…) — residual survivorship bias, small, leaning
-favourable.
+window; 586 have usable price history. The 49 missing have **not** been
+individually verified as delistings — some may be symbol or entity-mapping
+failures. Their impact is unquantified. Do not repeat the earlier claim that
+it is "small". Snapshots are quarterly, so membership is a sampled historical
+universe, not exact daily membership.
+
+RS is now ranked only against names that were in the index on that date. It
+previously ranked against every name that was *ever* a member, which leaked
+future membership; fixing it removed 45 buy signals (398 → 353).
 
 ---
 
@@ -99,25 +117,28 @@ favourable.
 Shipped config: 5 positions, 15% trailing stop, 7% hard stop, macro and group
 filters off.
 
-| | Jev rules | S&P 500 |
-|---|---|---|
-| Final | **$130,828** | **$159,500** |
-| Total return | +30.8% | +59.5% |
-| CAGR | +5.9% | +10.4% |
-| Max drawdown | **−21.7%** | −25.4% |
-| Sharpe | 0.38 | 0.61 |
+| | Jev rules | O'Neil as written | S&P 500 |
+|---|---|---|---|
+| Final | **$124,242** | $86,897 | **$159,500** |
+| Total return | +24.2% | −13.1% | +59.5% |
+| CAGR | +4.7% | −2.9% | +10.4% |
+| Max drawdown | **−21.2%** | −23.2% | −25.4% |
+| Return ÷ volatility | 0.31 | −0.20 | 0.61 |
 
-93 closed trades, 34.4% win rate, profit factor 1.39, average hold 33 days.
-Best INTC +87.8%, worst PWR −13.3%.
+101 closed trades, 33.7% win rate, profit factor 1.31. Best INTC +87.8%,
+worst PWR −13.3%. Exits: 39% hard stop, 49% "broke the 50-day line", 13%
+trailing stop.
 
-Exits: 41% hard stop, 46% "broke the 50-day line", 13% trailing stop.
-
-**It did not fail evenly — it worked, then stopped working:**
+Note the second column: with O'Neil's fixed profit target the strategy now
+**loses money**. Pre-repair it showed +4.7%.
 
 | Period | Jev rules | S&P 500 |
 |---|---|---|
-| 2022-01 → 2024-03 | **+28.6%** | +9.5% |
-| 2024-04 → 2026-09 | +6.8% | **+45.9%** |
+| 2022-01 → 2024-03 | **+19.0%** | +9.5% |
+| 2024-04 → 2026-09 | +8.1% | **+45.9%** |
+
+The "worked then stopped working" shape survives repair but is much weaker:
+first-half outperformance is 9.5 points, not 19.
 
 ---
 
@@ -127,28 +148,42 @@ Each of these cost real work. Re-running them is waste.
 
 **O'Neil's fixed 20–25% profit target is the single most damaging rule.**
 It capped NVDA at +25% seventeen days after entry; the stock went 4.5× from
-that price. Replacing it with a 15% trailing stop took the run from +4.7% to
-+30.8%. Treat this as *"don't cap winners"*, **not** as a tuned number —
-anything from 15% to 25% is the same decision.
+that price. Replacing it with a 15% trailing stop takes the run from **−13.1%
+to +24.2%** — the difference between losing money and not. Treat this as
+*"don't cap winners"*, **not** as a tuned number: post-repair the full-period
+sweep favours a 12–15% trail while out-of-sample favours 10%, so the exact
+figure is unresolved.
 
-**Macro overlay and industry-group RS both reduce returns.** Scored on the full
-run and both halves; neither improves both. Both work by cutting exposure
-(55% → as low as 38%), which helps slightly in the weak half and costs heavily
-in the strong one. Kept in the tree, off by default. Note that breakouts
-*already* cluster in strong groups — 174 of 398 signals sit in the top
-quartile, 22 in the bottom — so an explicit group filter mostly deletes signals
-rather than improving them.
+**Macro overlay and industry-group RS both reduce full-period returns.**
+Baseline +24.2%; every variant is lower (macro veto +3.0%, macro symmetric
++7.5%, groups top-50 +13.9%, groups top-25 +5.3%, both combined −5.0%). Both
+work by cutting exposure (57% → as low as 41%). Note they *do* beat baseline in
+the weak half (up to +17.1% vs +8.1%) and lose heavily in the strong half — so
+the honest statement is "they trade strong-regime return for weak-regime
+protection", not "they don't work". Kept in the tree, off by default.
 
-**Walk-forward parameter re-fitting loses to a fixed setting.** $102,941 vs
-$113,031 over seven out-of-sample folds, beating the constant in only 2 of 7,
-and choosing a different configuration in 6 of 7. The parameters are noise.
+Breakouts also *already* cluster in strong groups — 189 of 353 signals sit in
+the top quartile, 24 in the bottom — so an explicit group filter mostly deletes
+signals rather than improving them.
 
-**Exposure is a dial, not an edge.** Raising the slot count in the YELLOW
-regime lifts the full-period return sharply (+30.8% → +49.4% at 4 slots) and
-improves both halves — but the out-of-sample column zigzags (11.6 → 13.0 → 5.3
-→ 15.1 → 7.1), so one slot either way swings ten points. Left at 2.
+**Walk-forward parameter re-fitting loses to a fixed setting, badly.**
+$84,783 vs $105,621 over seven out-of-sample folds, beating the constant in
+only **1 of 7**, and choosing a different configuration in **7 of 7**. The
+parameters are noise. Caveat: the harness carries equity but resets positions
+flat at each fold boundary, and that liquidation is currently uncosted — the
+intended carry policy needs specifying before these figures are quoted
+precisely.
 
-**Jev judging entry quality shows no predictive power.** 1,270 judgments across
+**Exposure is a dial, not an edge.** Sweeping the YELLOW slot count
+post-repair, full-period peaks at 3 slots (+41.3%) — which is the **worst**
+out-of-sample cell (+1.8%). The out-of-sample column zigzags (10.1 → 5.6 → 1.8
+→ 6.7 → 1.4) and is best at the *fewest* slots. Full-period and out-of-sample
+point in opposite directions, so the parameter is unresolved. Left at 2.
+
+**Jev judging entry quality shows no predictive power.** Note these judgments
+were produced **pre-repair**, on contaminated RS values and a leading prompt
+("A stock broke out of a consolidation today…" asserts the conclusion before
+asking whether the base is genuine). Treat as legacy evidence. 1,270 judgments across
 two framings, 32 seconds, $0.052 total. Rank correlation with forward return:
 
 | Feature | 20d | 60d |
@@ -167,19 +202,20 @@ returned +1.5%. Three readings remain open and were not separated — see **D1**
 
 | Cause | Share of days | Mean cash | Contribution |
 |---|---|---|---|
-| Regime RED — no buying allowed | 24.7% | 91.8% | **23 pts** |
-| Regime YELLOW — book halved to 2 | 19.5% | 56.4% | **11 pts** |
-| GREEN — genuine signal shortage | 55.8% | 20.9% | 12 pts |
+| Regime RED — no buying allowed | 24.7% | 91.2% | **23 pts** |
+| Regime YELLOW — book halved to 2 | 19.5% | 51.7% | **10 pts** |
+| GREEN — genuine signal shortage | 55.8% | 18.2% | 10 pts |
 
 **Three quarters of the cash is the market filter standing down on purpose**,
-not an empty screen. On GREEN days the book holds 3.9 of 5 at 21% cash.
+not an empty screen. On GREEN days the book holds 4.1 of 5 at 18% cash.
+Average cash is 43%.
 
 The RED block earns its keep — removing the filter entirely drops the weak half
 to +3.2% and deepens drawdown to −27.6%. The YELLOW halving is the questionable
 part and is **not O'Neil's rule**; it was invented by the first agent.
 
-Signal shortage is real but secondary: 398 qualifying signals in 4.7 years,
-about 1.4 on the one day in four that has any at all.
+Signal shortage is real but secondary: 353 qualifying signals in 4.7 years,
+on roughly one day in four.
 
 ---
 
@@ -202,16 +238,30 @@ Three explanations were never separated:
 More framings tested on the same data is p-hacking. If you try another,
 pre-register it and score it only on held-out folds.
 
-**Alternative worth weighing:** point Jev at the **exit** instead. 46% of exits
-come from the crude "closed below the 50-day line" rule, and those exits average
-roughly breakeven — the rule is demonstrably costing money. Shakeout-versus-
-breakdown is a genuine judgment call where rules are bad, and unlike entry
-quality there is direct evidence the current rule is weak. This is motivated by
-a diagnosed defect rather than by fishing.
+**Alternative worth weighing:** point Jev at the **exit**. Be careful how this
+is justified — an earlier version of this brief claimed the 50-day exits
+"average roughly breakeven" and were "demonstrably costing money". **That was
+false.** The 49 such exits average **+4.18%** (median +0.37%) and realise
++$36,591. The mean is carried by a few large winners while the median sits near
+zero, which is interesting, but it is not evidence the rule loses money.
 
-Other places Jev could sit: ranking among same-day candidates (currently a
-sort on integer RS with many ties), position sizing by calibrated confidence,
-or reading the market regime (currently two moving-average comparisons).
+More importantly, return-since-entry cannot measure an exit rule at all. To
+show the rule costs money you must compare selling against a *specified
+continuation from the same trigger state* — same day, same position, hold
+instead of sell, with a defined horizon and protection. That experiment has not
+been run. Codex retracted its own recommendation to move Jev to exits on the
+strength of the false claim, and so do I.
+
+Other places Jev could sit, with what is known about each:
+
+- **Ranking among same-day candidates** — only **12 days** in the whole run
+  have more candidates than open slots. There is almost nothing here to win.
+- **Position sizing by confidence** — do not. `Score`/`Choice` confidence
+  summarises how peaked a probability distribution is. It is not the
+  probability of a profitable trade and must not be used as a size multiplier.
+  `Noul` returns a probability and has no separate confidence field at all.
+- **Reading the market regime** — currently two moving-average comparisons,
+  and the regime is responsible for three quarters of the cash drag.
 
 ### D2 — How to fix exposure, given every filter tried makes it worse
 
@@ -265,8 +315,18 @@ profit target because NVDA was visibly cut short. That hand on the scale is
 unmeasured and unmeasurable with the current rig. Treat the headline number as
 optimistic.
 
-**Small sample.** 93 closed trades, one universe, 4.7 years, and a regime break
-in the middle. A parameter worth 19 percentage points cannot be settled on
+**Split-half is robustness, not independence.** The whole 2022–2026 period has
+already shaped structural choices, so walk-forward here remains exploratory. A
+newly designated holdout does not undo that exposure. Real confirmation needs
+genuinely unexamined data or a frozen prospective paper record. Also purge
+overlapping outcome windows at fold boundaries and account for dependence
+between nearby events and repeated issuer episodes.
+
+**Repeated questions are not new observations.** Two prompt framings over the
+same 635 events are not 1,270 independent market observations.
+
+**Small sample.** 101 closed trades, one universe, 4.7 years, and a regime break
+in the middle. A parameter worth 17 percentage points cannot be settled on
 this much data.
 
 **Tie-breaking.** `rs_rating` is rounded to whole numbers so ties are common.
