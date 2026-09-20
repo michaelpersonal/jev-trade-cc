@@ -23,13 +23,24 @@ import hashlib
 import json
 import os
 import threading
+from datetime import datetime, timezone
 from pathlib import Path
 
 from typesafe_sdk import Choice, Noul, Score, TypeSafeClient
 
 ROOT = Path(__file__).resolve().parent.parent
 CACHE_PATH = ROOT / "data" / "raw" / "jev_cache.json"
-QUESTION_VERSION = "v2"        # bump to invalidate the cache deliberately
+
+# Pin the model. `jev-latest` is an alias and can move underneath a cached
+# answer without anything in the key changing.
+MODEL = "jev-1.13.0"
+
+# The cache key is a hash of the COMPLETE request -- model, state and the full
+# text of every question and criterion. An earlier version hashed only a manual
+# version string plus the state, so editing a prompt silently reused answers
+# produced by the old one. Provenance is stored alongside each answer so a
+# result can always be traced to the exact request that produced it.
+CACHE_SCHEMA = 2
 
 _client: TypeSafeClient | None = None
 _cache: dict | None = None
@@ -95,8 +106,11 @@ ENTRY_QUESTIONS = {
 def describe_setup(r) -> str:
     """Anonymised, scale-free description of one breakout candidate."""
     ext = r["close"] / r["ma50"] - 1
+    # Neutral opening. The earlier wording asserted "broke out of a
+    # consolidation" and then asked whether a real consolidation existed,
+    # which puts the answer in the question.
     return (
-        f"A stock broke out of a consolidation today.\n"
+        f"Daily price statistics for one stock, as of today's close.\n"
         f"- Relative strength rank versus all other stocks: {int(r['rs_rating'])} of 99.\n"
         f"- It closed above the highest high of the prior "
         f"{int(r['base_len_wk'])} weeks.\n"
@@ -121,27 +135,67 @@ def _ordinal(p) -> str:
     return f"top {max(1, round((1-p)*100))}% of groups"
 
 
+def _canonical(question) -> dict:
+    """Everything about a question that could change the answer."""
+    d = {"type": type(question).__name__}
+    for attr in ("instructions", "criteria"):
+        v = getattr(question, attr, None)
+        if v is not None:
+            d[attr] = v
+    return d
+
+
+def request_fingerprint(state: str, questions: dict, kind: str) -> tuple[str, dict]:
+    req = {"schema": CACHE_SCHEMA, "model": MODEL, "kind": kind, "state": state,
+           "questions": {k: _canonical(q) for k, q in sorted(questions.items())}}
+    blob = json.dumps(req, sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(blob.encode()).hexdigest(), req
+
+
 def ask(state: str, questions: dict, kind: str) -> dict:
-    """Cached single call. Returns a plain dict of answers."""
-    key = hashlib.sha1(
-        f"{QUESTION_VERSION}|{kind}|{state}".encode()).hexdigest()
+    """Cached single call keyed on the complete request.
+
+    Returns `{question: {noul|score|choice, confidence, probabilities}}`. On an
+    API failure the exception propagates -- callers must decide what an absent
+    judgment means rather than silently receiving a neutral default, which
+    would quietly become a trading decision nobody chose.
+    """
+    key, req = request_fingerprint(state, questions, kind)
     c = cache()
-    if key in c:
+    hit = c.get(key)
+    if hit is not None:
         _stats["hits"] += 1
-        return c[key]
-    r = client().system_one(state=state, questions=questions)
-    out = {}
+        return hit["answers"]
+
+    r = client().system_one(state=state, questions=questions, model=MODEL)
+    answers = {}
     for name, a in r.answers.items():
-        out[name] = dict(confidence=getattr(a, "confidence", None))
+        rec = {}
         for f in ("noul", "score", "choice"):
             v = getattr(a, f, None)
             if v is not None:
-                out[name][f] = v
+                rec[f] = v
+        conf = getattr(a, "confidence", None)
+        if conf is not None:                 # Noul has none; do not invent one
+            rec["confidence"] = conf
+        probs = getattr(a, "probabilities", None)
+        if probs:
+            rec["probabilities"] = dict(probs)
+        answers[name] = rec
+
     with _lock:
-        c[key] = out
+        c[key] = {
+            "answers": answers,
+            "request": req,
+            "model_requested": MODEL,
+            "model_resolved": getattr(r, "model", None),
+            "usage": {"input_tokens": r.usage.input_tokens,
+                      "output_tokens": r.usage.output_tokens},
+            "asked_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        }
         _stats["calls"] += 1
         _stats["input_tokens"] += r.usage.input_tokens
-    return out
+    return answers
 
 
 def judge_entry(row) -> dict:
@@ -195,9 +249,9 @@ def describe_shape(r, bars) -> str:
             f"high {b.high/piv*100:6.1f} low {b.low/piv*100:6.1f} "
             f"close {b.close/piv*100:6.1f}  volume {b.vol_rel:.2f}x")
     return (
-        "Weekly price bars for a stock that broke out today, rebased so the\n"
-        "breakout pivot (the high of the base) equals 100. Volume is shown as a\n"
-        "multiple of its own 50-day average, so 1.00 is typical.\n\n"
+        "Weekly price bars for one stock, rebased so the highest high of the\n"
+        "prior 13 weeks equals 100. The most recent bar may be a partial week.\n"
+        "Volume is a multiple of its own 50-day average, so 1.00 is typical.\n\n"
         + "\n".join(lines) +
         f"\n\nContext:\n"
         f"- Relative strength rank versus all other stocks: {int(r['rs_rating'])} of 99.\n"
