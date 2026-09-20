@@ -7,7 +7,10 @@ __pycache__/
 # Large regenerable artifacts
 data/raw/
 data/edgar/
-web/data.js
+
+# web/data.js IS committed: without it web/index.html renders an empty page,
+# and the point of the page is that a clone can open it. Regenerate with
+# src/run_all.py after any change to the strategy or the data.
 
 # Local review surfaces
 .lavish/
