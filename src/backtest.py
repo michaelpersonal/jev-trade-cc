@@ -313,6 +313,13 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
 
         sell_set = {t for t, _ in pending_sells}
         open_slots = max_pos - (len(positions) - len(sell_set))
+        # Candidates that exist TODAY irrespective of regime, capacity or
+        # ranking. Needed to tell "no stock qualified" apart from "a rule
+        # stopped us buying one that did".
+        live_today = memb_on(today, memb)
+        avail = rows[rows["buyable"].fillna(False)]
+        n_available = int(avail.index.isin(live_today).sum()
+                          - avail.index.isin(positions).sum())
         n_cands = n_cands_pre = 0
         if open_slots > 0 and regime_name != "RED":
             live = set(memb_on(today, memb))
@@ -381,6 +388,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
             date=str(today.date()), equity=round(equity, 2), cash=round(cash, 2),
             regime=regime_name, slots=max_pos, open_slots=max(0, open_slots),
             n_cands=n_cands, n_cands_pre_jev=n_cands_pre,
+            n_available=max(0, n_available), n_held=len(positions),
             positions=[dict(t=t, sh=p.shares, entry=round(p.entry, 2),
                             px=round(px(t, "close"), 2),
                             pct=round((px(t, "close") / p.entry - 1) * 100, 1),
