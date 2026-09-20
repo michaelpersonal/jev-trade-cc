@@ -288,7 +288,8 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                                 below_ma_days=p.below_ma_days,
                                 sessions_left=left,
                                 stop_distance_pct=max(0.0, stop_gap))
-                            act = J.choice_of(d, "action", {"hold", "sell"})
+                            act = J.choice_of(d, "action",
+                                              {"hold", "sell", "unclear"})
                         except Exception as exc:
                             # Failure falls back to the mechanical rule and is
                             # recorded as a failure, never credited to Jev.
@@ -302,6 +303,13 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                         if act == "sell":
                             pending_sells.append((tkr, "Jev: breakdown"))
                             _log(ledger, today, tkr, "exit", "ok",
+                                 baseline="sell", action="sell")
+                        elif act == "unclear":
+                            # An abstention is not a decision to hold. Defer to
+                            # the mechanical rule and record it as an
+                            # abstention, distinct from an inference failure.
+                            pending_sells.append((tkr, "broke 50dma (abstain)"))
+                            _log(ledger, today, tkr, "exit", "abstain",
                                  baseline="sell", action="sell")
                         elif act == "hold":
                             jev_holds[0] += 1
@@ -408,8 +416,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                                 continue
                             try:
                                 d = J.decide_entry(row, bars)
-                                act = J.choice_of(d, "action", {"buy", "skip"})
-                                sc[tkr] = J.score_of(d, "conviction")
+                                act, sc[tkr] = J.entry_policy(d)
                             except Exception as exc:
                                 errors[0] += 1
                                 _log(ledger, today, tkr, "nearmiss", "error",

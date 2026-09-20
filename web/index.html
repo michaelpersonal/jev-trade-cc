@@ -177,6 +177,10 @@ details p{color:var(--muted);font-size:13px;max-width:72ch}
 details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
 .scrollx{overflow-x:auto}
 
+/* ?embed=1 — the replay only, for capture into a recording */
+body.embed .mast, body.embed .ctl, body.embed section { display: none !important; }
+body.embed .wrap { padding-block: 14px 14px; }
+
 @media (max-width:820px){
   .split,.two{grid-template-columns:minmax(0,1fr)}
   .brand{margin-right:0;width:100%}
@@ -778,7 +782,12 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
   $('coverage-note').textContent = D.meta.coverage || '';
 
   // Opens paused on day one and waits for Play, so a screen recording can be
-  // started first and catch the run from an empty chart.
+  // started first and catch the run from an empty chart. `?day=N` jumps
+  // straight to a session, which also lets a frame be rendered statically.
+  const qs = new URLSearchParams(location.search);
+  const jump = parseInt(qs.get('day'), 10);
+  if (Number.isFinite(jump)) cur = Math.max(0, Math.min(N - 1, jump));
+  if (qs.get('embed') === '1') document.body.classList.add('embed');
   frame(true);
   $('play').textContent = 'Play';
 })();
