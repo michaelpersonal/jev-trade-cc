@@ -35,11 +35,16 @@ def main() -> None:
     # the single source of truth for every runner.
     sig = pd.read_parquet(ROOT / "data" / "raw" / "signals_grouped.parquet")
     idx = D.index_prices()
+    B.load_panel(pd.read_parquet(ROOT / "data" / "raw" / "panel.parquet"))
     memb = U.membership()
 
-    def cfg(target=None, tpct=None, tatr=None, slots=5):
+    def cfg(target=None, tpct=None, tatr=None, slots=5, jev=True):
         S.MAX_POSITIONS, S.PROFIT_TARGET = slots, target
         S.TRAIL_PCT, S.TRAIL_ATR = tpct, tatr
+        # The exit-rule grid and the slot sweep compare RULES. Running them
+        # with Jev in the loop would conflate the model with the rule under
+        # test, so they run rules-only and are labelled as such.
+        S.JEV_ENTRY = S.JEV_EXIT = jev
 
     cfg(tpct=0.15)
     primary = B.run(sig, idx, memb)
@@ -64,7 +69,7 @@ def main() -> None:
     RULES += [(f"Chandelier {a:g}x ATR", dict(tatr=a)) for a in (2.5, 3.0, 4.0)]
 
     def span(kw, start, end):
-        cfg(**kw)
+        cfg(**kw, jev=False)
         B.START, B.END = start, end
         r = B.run(sig, idx, memb)
         st = M.summarize(r["equity"], r["dates"], "x")
@@ -89,7 +94,7 @@ def main() -> None:
     # position count, held separately -- it turned out not to matter
     slots_grid = []
     for n in (3, 4, 5, 6, 8):
-        cfg(tpct=0.15, slots=n)
+        cfg(tpct=0.15, slots=n, jev=False)
         r = B.run(sig, idx, memb)
         st = M.summarize(r["equity"], r["dates"], "x")
         slots_grid.append(dict(slots=n, total=st["total_return"], max_dd=st["max_dd"]))
@@ -113,9 +118,9 @@ def main() -> None:
     missing = sorted(ever - have)
     n_sig = int(sig[(sig["date"] >= "2022-01-03") & sig["buyable"].fillna(False)].shape[0])
 
-    stats = dict(strat=M.summarize(equity, dates, "Jev"),
+    stats = dict(strat=M.summarize(equity, dates, "Jev deciding"),
                  spx=M.summarize(spx, dates, "S&P 500"),
-                 aswritten=M.summarize(aswritten, dates, "Jev (20-25% target)"),
+                 aswritten=M.summarize(aswritten, dates, "Rules only (20-25% target)"),
                  trades=M.trade_stats(trades))
 
     payload = dict(

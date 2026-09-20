@@ -43,8 +43,10 @@ GROUP_MIN_PCT = None      # require the stock's industry group in this top fract
 # Jev in the loop. When on, Jev decides whether to take a candidate and
 # whether a weakening position is a shakeout or a breakdown. The hard stop and
 # the trailing stop stay in code and fire regardless.
-JEV_ENTRY = False
-JEV_EXIT = False
+# SHIPPED ON. Jev makes the buy and the hold/sell calls; code keeps the stops,
+# the sizing and the fills. This is the point of the project.
+JEV_ENTRY = True
+JEV_EXIT = True
 # Near-miss adjudication; see prereg_nearmiss.md. 0 off, 1 Jev, 2 mechanical
 # count-matched to Jev, 3 mechanical unlimited.
 # SHIPPED DEFAULT. 3 = admit near-misses mechanically, ranked by RS. This is

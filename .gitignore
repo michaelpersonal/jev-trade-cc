@@ -1,6 +1,13 @@
 .venv/
 .env
-data/raw/
-web/data.js
 __pycache__/
 *.pyc
+.DS_Store
+
+# Large regenerable artifacts
+data/raw/
+data/edgar/
+web/data.js
+
+# Local review surfaces
+.lavish/

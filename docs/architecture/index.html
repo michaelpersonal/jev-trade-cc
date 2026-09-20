@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<!-- ==================================================================
+     DIAGRAM · jev-trade-cc architecture (kami palette)
+     Source of truth. Re-export architecture.png after any content change;
+     never edit the PNG. Redraw context lives in prompt.md.
+     ================================================================== -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>jev-trade-cc · architecture</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --parchment:#f5f4ed; --ivory:#faf9f5; --near-black:#141413;
+    --olive:#504e49; --stone:#6b6a64; --brand:#1B365D;
+    --brand-tint:#EEF2F7; --border:#e8e6dc;
+    --serif: Charter, Georgia, Palatino, serif;
+    --mono: "JetBrains Mono","SF Mono",Consolas,monospace;
+  }
+  @page { size: 1080px 940px; margin: 0; }
+  body { font-family: var(--serif); background: var(--parchment);
+         color: var(--near-black); display:flex; align-items:center;
+         justify-content:center; padding: 2.5rem 2rem; }
+  .frame { max-width: 1010px; width: 100%; }
+  .eyebrow { font-family: var(--mono); font-size:.7rem; letter-spacing:.22em;
+             text-transform:uppercase; color:var(--stone); margin-bottom:.45rem; }
+  h1 { font-family: var(--serif); font-size:1.85rem; font-weight:500;
+       letter-spacing:-.3pt; margin-bottom:.35rem; }
+  .sub { font-size:.95rem; color:var(--olive); margin-bottom:1.4rem;
+         max-width:62ch; line-height:1.5; }
+  svg { width:100%; height:auto; display:block; }
+  .legend { display:flex; gap:1.6rem; flex-wrap:wrap; margin-top:1.1rem;
+            font-family:var(--mono); font-size:.66rem; color:var(--stone);
+            letter-spacing:.06em; }
+  .legend span { display:flex; align-items:center; gap:.45rem; }
+  .sw { width:22px; height:11px; border:1.2px solid var(--near-black);
+        background:var(--ivory); }
+  .sw.focal { border-color:var(--brand); background:var(--brand-tint); }
+  .sw.off { border-color:var(--stone); border-style:dashed; opacity:.55; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="eyebrow">jev-trade-cc</div>
+  <h1>Where the decisions are made</h1>
+  <p class="sub">A point-in-time backtest of a William O'Neil momentum strategy.
+  <strong>Jev &mdash; TypeSafe's System One model &mdash; picks the entries and judges
+  the exits.</strong> Deterministic code owns the data, the signals, the stops and the
+  fills, and never delegates risk. A comprehension exam scores whether Jev applies
+  O'Neil's criteria, separately from whether it makes money.</p>
+
+  <svg viewBox="0 0 1000 690" xmlns="http://www.w3.org/2000/svg"
+       role="img" aria-labelledby="t d">
+    <title id="t">Architecture of jev-trade-cc</title>
+    <desc id="d">Four layers top to bottom: external sources; point-in-time data
+    modules; deterministic signal construction; the day-by-day decision loop, in
+    which code owns risk and execution while a Jev boundary holds four judgment
+    hooks, all disabled; and an evaluation layer feeding the replay page.</desc>
+
+    <defs>
+      <marker id="a" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7"
+              markerHeight="7" orient="auto">
+        <path d="M0,0 L8,4 L0,8 z" fill="#6b6a64"/>
+      </marker>
+    </defs>
+
+    <!-- ── layer 1 · sources ───────────────────────────────────── -->
+    <text x="0" y="14" fill="#6b6a64" font-size="8" font-family="'JetBrains Mono',monospace" letter-spacing=".18em">EXTERNAL SOURCES</text>
+    <g font-family="'JetBrains Mono',monospace" font-size="9.5" fill="#504e49" text-anchor="middle">
+      <rect x="0"   y="24" width="235" height="40" rx="3" fill="#faf9f5" stroke="#141413" stroke-width="1"/>
+      <text x="117" y="41" fill="#141413" font-family="Charter,Georgia,serif" font-size="12">Wikipedia revisions</text>
+      <text x="117" y="55">index membership · GICS</text>
+
+      <rect x="255" y="24" width="235" height="40" rx="3" fill="#faf9f5" stroke="#141413" stroke-width="1"/>
+      <text x="372" y="41" fill="#141413" font-family="Charter,Georgia,serif" font-size="12">yfinance</text>
+      <text x="372" y="55">OHLCV · index · macro proxies</text>
+
+      <rect x="510" y="24" width="235" height="40" rx="3" fill="#faf9f5" stroke="#141413" stroke-width="1"/>
+      <text x="627" y="41" fill="#141413" font-family="Charter,Georgia,serif" font-size="12">SEC EDGAR</text>
+      <text x="627" y="55">8-K text · acceptance time</text>
+
+      <rect x="765" y="24" width="235" height="40" rx="3" fill="#EEF2F7" stroke="#1B365D" stroke-width="1.4"/>
+      <text x="882" y="41" fill="#1B365D" font-family="Charter,Georgia,serif" font-size="12">TypeSafe API</text>
+      <text x="882" y="55" fill="#1B365D">jev-1.13.0</text>
+    </g>
+
+    <!-- ── layer 2 · point-in-time data ────────────────────────── -->
+    <text x="0" y="100" fill="#6b6a64" font-size="8" font-family="'JetBrains Mono',monospace" letter-spacing=".18em">POINT-IN-TIME DATA · nothing after day t is visible</text>
+    <g font-family="'JetBrains Mono',monospace" font-size="9" fill="#504e49" text-anchor="middle">
+      <rect x="0"   y="110" width="178" height="34" rx="3" fill="#faf9f5" stroke="#141413"/>
+      <text x="89"  y="131">universe.py</text>
+      <rect x="192" y="110" width="178" height="34" rx="3" fill="#faf9f5" stroke="#141413"/>
+      <text x="281" y="131">sectors.py</text>
+      <rect x="384" y="110" width="178" height="34" rx="3" fill="#faf9f5" stroke="#141413"/>
+      <text x="473" y="131">data.py</text>
+      <rect x="576" y="110" width="169" height="34" rx="3" fill="#faf9f5" stroke="#141413"/>
+      <text x="660" y="131">macro.py</text>
+      <rect x="765" y="110" width="235" height="34" rx="3" fill="#faf9f5" stroke="#141413"/>
+      <text x="882" y="131">edgar.py</text>
+    </g>
+    <g stroke="#6b6a64" stroke-width="1" marker-end="url(#a)">
+      <path d="M117,64 L117,108" fill="none"/><path d="M300,64 L281,108" fill="none"/>
+      <path d="M372,64 L430,108" fill="none"/><path d="M627,64 L660,108" fill="none"/>
+      <path d="M627,64 L882,108" fill="none" opacity=".45"/>
+    </g>
+
+    <!-- ── layer 3 · deterministic signals ─────────────────────── -->
+    <text x="0" y="180" fill="#6b6a64" font-size="8" font-family="'JetBrains Mono',monospace" letter-spacing=".18em">DETERMINISTIC SIGNALS · no model</text>
+    <rect x="0" y="190" width="745" height="58" rx="3" fill="#faf9f5" stroke="#141413"/>
+    <text x="14" y="209" fill="#141413" font-family="Charter,Georgia,serif" font-size="12.5">strategy.py &nbsp;·&nbsp; groups.py</text>
+    <text x="14" y="226" fill="#504e49" font-family="'JetBrains Mono',monospace" font-size="9">stage-2 trend template · 13-week pivot · relative strength ranked</text>
+    <text x="14" y="240" fill="#504e49" font-family="'JetBrains Mono',monospace" font-size="9">against that day's members · near-miss band · industry-group RS</text>
+    <g stroke="#6b6a64" stroke-width="1" marker-end="url(#a)">
+      <path d="M89,144 L89,188" fill="none"/><path d="M281,144 L281,188" fill="none"/>
+      <path d="M473,144 L473,188" fill="none"/><path d="M660,144 L660,188" fill="none"/>
+    </g>
+
+    <!-- ── layer 4 · the decision loop ─────────────────────────── -->
+    <text x="0" y="282" fill="#6b6a64" font-size="8" font-family="'JetBrains Mono',monospace" letter-spacing=".18em">DECISION LOOP · backtest.py, one trading day at a time</text>
+    <rect x="0" y="292" width="1000" height="212" rx="4" fill="none" stroke="#141413" stroke-width="1.2"/>
+
+    <!-- code owns -->
+    <rect x="18" y="312" width="470" height="172" rx="3" fill="#faf9f5" stroke="#141413"/>
+    <text x="34" y="332" fill="#141413" font-family="Charter,Georgia,serif" font-size="12.5">Code owns &mdash; never delegated</text>
+    <g font-family="'JetBrains Mono',monospace" font-size="9.2" fill="#504e49">
+      <text x="34" y="352">7% hard stop · 15% trailing stop</text>
+      <text x="34" y="368">standing orders, fill intraday against day t</text>
+      <text x="34" y="384">position sizing, equity ÷ 5</text>
+      <text x="34" y="400">entries fill at day t+1's open</text>
+      <text x="34" y="416">market regime gate (RED blocks buying)</text>
+      <text x="34" y="432">portfolio accounting, costs, audit log</text>
+    </g>
+    <rect x="34" y="446" width="438" height="26" rx="2" fill="#EEF2F7" stroke="#1B365D" stroke-width=".9"/>
+    <text x="44" y="463" fill="#1B365D" font-family="'JetBrains Mono',monospace" font-size="8.6">test_timing.py · a later close cannot change an earlier fill</text>
+
+    <!-- jev boundary -->
+    <rect x="512" y="312" width="470" height="172" rx="3" fill="#EEF2F7" stroke="#1B365D" stroke-width="1.6"/>
+    <text x="528" y="332" fill="#1B365D" font-family="Charter,Georgia,serif" font-size="12.5">Jev boundary &mdash; src/jev.py</text>
+    <text x="528" y="348" fill="#504e49" font-family="'JetBrains Mono',monospace" font-size="8.6">anonymised weekly bars · no ticker, no date, no absolute price</text>
+    <text x="528" y="361" fill="#504e49" font-family="'JetBrains Mono',monospace" font-size="8.6">four narrow judgments per call · weights and gates live in code</text>
+
+    <g font-family="'JetBrains Mono',monospace" font-size="8.8">
+      <rect x="528" y="372" width="438" height="25" rx="2" fill="#faf9f5" stroke="#1B365D" stroke-width="1"/>
+      <text x="538" y="388" fill="#141413">supply · did volume dry up, then expand?</text>
+      <text x="960" y="388" fill="#1B365D" text-anchor="end">Noul</text>
+
+      <rect x="528" y="401" width="438" height="25" rx="2" fill="#faf9f5" stroke="#1B365D" stroke-width="1"/>
+      <text x="538" y="417" fill="#141413">orderly · how tight is the consolidation?</text>
+      <text x="960" y="417" fill="#1B365D" text-anchor="end">Score 0-4</text>
+
+      <rect x="528" y="430" width="438" height="25" rx="2" fill="#faf9f5" stroke="#1B365D" stroke-width="1"/>
+      <text x="538" y="446" fill="#141413">at_pivot · at the breakout, or run past it?</text>
+      <text x="960" y="446" fill="#1B365D" text-anchor="end">Noul · gate</text>
+
+      <rect x="528" y="459" width="438" height="25" rx="2" fill="#faf9f5" stroke="#1B365D" stroke-width="1"/>
+      <text x="538" y="475" fill="#141413">prior_advance · resting from a rise?</text>
+      <text x="960" y="475" fill="#1B365D" text-anchor="end">Noul · gate</text>
+    </g>
+    <g stroke="#1B365D" stroke-width="1" marker-end="url(#a)" opacity=".8">
+      <path d="M882,144 L882,290" fill="none"/>
+    </g>
+    <path d="M372,248 L372,290" fill="none" stroke="#6b6a64" stroke-width="1" marker-end="url(#a)"/>
+    <path d="M488,398 L510,398" fill="none" stroke="#1B365D" stroke-width="1" marker-end="url(#a)" opacity=".8"/>
+
+    <!-- ── layer 5 · evaluation ────────────────────────────────── -->
+    <text x="0" y="536" fill="#6b6a64" font-size="8" font-family="'JetBrains Mono',monospace" letter-spacing=".18em">EVALUATION · every claim scored on both halves and out of sample</text>
+    <g font-family="'JetBrains Mono',monospace" font-size="9" fill="#504e49" text-anchor="middle">
+      <rect x="0"   y="546" width="238" height="38" rx="3" fill="#faf9f5" stroke="#141413"/>
+      <text x="119" y="563" fill="#141413" font-family="Charter,Georgia,serif" font-size="11.5">walkforward.py</text>
+      <text x="119" y="576">18m train · 6m test · 7 folds</text>
+
+      <rect x="254" y="546" width="238" height="38" rx="3" fill="#faf9f5" stroke="#141413"/>
+      <text x="373" y="563" fill="#141413" font-family="Charter,Georgia,serif" font-size="11.5">experiments.py</text>
+      <text x="373" y="576">ablation · frozen contracts</text>
+
+      <rect x="508" y="546" width="238" height="38" rx="3" fill="#EEF2F7" stroke="#1B365D" stroke-width="1.3"/>
+      <text x="627" y="563" fill="#1B365D" font-family="Charter,Georgia,serif" font-size="11.5">exam_oneil.py</text>
+      <text x="627" y="576" fill="#1B365D">48 paired cases · 100% ranked</text>
+
+      <rect x="762" y="546" width="238" height="38" rx="3" fill="#faf9f5" stroke="#141413"/>
+      <text x="881" y="563" fill="#141413" font-family="Charter,Georgia,serif" font-size="11.5">run_all.py</text>
+      <text x="881" y="576">web/data.js</text>
+    </g>
+    <path d="M500,504 L500,544" fill="none" stroke="#6b6a64" stroke-width="1" marker-end="url(#a)"/>
+
+    <rect x="762" y="606" width="238" height="36" rx="3" fill="#EEF2F7" stroke="#1B365D" stroke-width="1.3"/>
+    <text x="881" y="629" fill="#1B365D" font-family="Charter,Georgia,serif" font-size="12" text-anchor="middle">animated replay page</text>
+    <path d="M881,584 L881,604" fill="none" stroke="#1B365D" stroke-width="1" marker-end="url(#a)"/>
+  </svg>
+
+  <div class="legend">
+    <span><i class="sw"></i>deterministic · shipped</span>
+    <span><i class="sw focal"></i>Jev boundary · model in the loop</span>
+    <span><i class="sw off"></i>comprehension exam &middot; scored separately from returns</span>
+  </div>
+</div>
+</body>
+</html>

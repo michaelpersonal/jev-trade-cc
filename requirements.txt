@@ -1,0 +1,8 @@
+pandas>=3.0
+numpy>=2.0
+yfinance>=1.7
+pyarrow>=16.0
+requests>=2.31
+lxml>=5.0
+beautifulsoup4>=4.12
+typesafe-sdk>=0.7

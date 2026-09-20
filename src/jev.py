@@ -291,44 +291,126 @@ def judge_shape(row, bars) -> dict:
 # regardless of what Jev thinks, because a calibrated probability is not a risk
 # limit and must never be allowed to override one.
 # --------------------------------------------------------------------------
+# Composite scoring: four narrow judgments over the same bars, asked together
+# in one call. Each is a single dimension, so "shape good but volume bad" has a
+# defined answer instead of collapsing into one mixed scale. Weights and gates
+# are policy and live in code (`entry_policy`), not in the model.
 ENTRY_DECISION = {
-    "action": Choice(
+    "supply": Noul(instructions=(
+        "Through the consolidation before the most recent bar, did weekly "
+        "volume run below its own average, and did volume then expand on the "
+        "week price cleared the top of that consolidation? Answer no if volume "
+        "stayed heavy through the consolidation, if the heaviest weeks were "
+        "down weeks, or if the week price cleared the high was quiet.")),
+
+    "orderly": Score(
         instructions=(
-            "A momentum strategy may open one position today. Given this "
-            "stock's price structure and standing, should it take this one?"),
-        criteria={
-            "buy": "Take the position",
-            "skip": "Pass - the structure or standing does not justify risk",
-        }),
-    # A Noul is the probability of a yes/no proposition, not a degree. Ranking
-    # candidates is a strength rating, so it needs ordered levels.
-    "conviction": Score(
-        instructions=("Rate this candidate's strength relative to a typical "
-                      "stock breaking to new highs."),
-        criteria=["Much weaker than typical", "Weaker than typical",
-                  "About typical", "Stronger than typical",
-                  "Much stronger than typical"]),
+            "How orderly is the consolidation? Judge the weekly ranges: an "
+            "orderly rest narrows and settles, a loose one stays wide and "
+            "swings erratically."),
+        criteria=[
+            "Weekly ranges are wide and swing erratically from week to week "
+            "with no settling anywhere in the pattern.",
+            "The pattern recovers in a straight line with no quiet period, and "
+            "its later weekly ranges are as wide as its earlier ones.",
+            "A recognisable rest of workable depth whose weekly ranges are "
+            "neither notably wide nor notably narrow.",
+            "Weekly ranges narrow through the later part of the rest, with "
+            "closes clustering in a tightening band.",
+            "The later weeks of the rest drift in a very shallow, narrow band, "
+            "each week's range small against the depth of the whole pattern.",
+        ]),
+
+    "at_pivot": Noul(instructions=(
+        "Is the most recent close at or only slightly above the highest high "
+        "of the weeks before it? Answer no if price has already run well above "
+        "that high, so that a buyer today would be paying materially more than "
+        "the breakout level.")),
+
+    "prior_advance": Noul(instructions=(
+        "Did a sustained advance come BEFORE this consolidation, so that the "
+        "pattern is a rest within a rise? Answer no if the weeks leading into "
+        "the pattern fell, so that the consolidation is forming at the bottom "
+        "of a decline rather than pausing within an uptrend.")),
 }
+
+
+def entry_policy(a: dict) -> tuple[str, float]:
+    """Code owns the policy. Jev supplies the four raw judgments.
+
+    Two hard gates, both O'Neil's and both previously unenforced: do not pay up
+    far beyond the breakout level, and do not buy a base that is not resting
+    from an advance. Everything else is a weighted score used for ranking.
+    """
+    supply = float(a["supply"]["noul"])
+    orderly = score_of(a, "orderly") / 4.0
+    at_pivot = float(a["at_pivot"]["noul"])
+    advance = float(a["prior_advance"]["noul"])
+
+    if at_pivot < 0.5 or advance < 0.5:
+        return "skip", 0.0
+    if min(supply, orderly, at_pivot, advance) > 0.35:
+        conviction = (0.40 * orderly + 0.25 * supply
+                      + 0.20 * at_pivot + 0.15 * advance)
+        return "buy", conviction
+    return "unclear", 0.0
+
 
 EXIT_DECISION = {
     "action": Choice(
         instructions=(
-            "An open position has weakened. Is this a normal shakeout within "
-            "an intact advance, or the start of a real breakdown?"),
+            "An open position in a William O'Neil momentum portfolio has "
+            "closed below its 50-day average. O'Neil expected leaders to be "
+            "shaken out on the way up: a brief undercut on lighter volume that "
+            "recovers is normal and selling into it forfeits the advance. A "
+            "break on heavy volume that keeps closing near the lows, after the "
+            "stock is already far from its base, is distribution and the move "
+            "is over. Which is this?"),
         criteria={
-            "hold": "Normal shakeout - the advance is intact, stay in",
-            "sell": "Breakdown - the move is over, exit",
+            "hold": ("A shakeout within an intact advance: the break is "
+                     "shallow or on unremarkable volume, recent closes sit in "
+                     "the upper part of their daily ranges, and the prior "
+                     "trend structure is undamaged."),
+            "sell": ("A breakdown: the decline is deep or persistent, recent "
+                     "closes sit near the lows of their ranges on heavy "
+                     "volume, and the advance no longer looks intact."),
+            "unclear": ("The supplied history does not settle it, or the "
+                        "signals point in opposite directions."),
         }),
 }
 
 
 def describe_position(r, gain_pct, days_held, peak_gain_pct, below_ma_days,
-                      sessions_left, stop_distance_pct) -> str:
+                      sessions_left, stop_distance_pct, recent=None,
+                      pivot_distance_pct=None, eight_week_left=None) -> str:
     """Anonymised state of an open position under review.
 
-    States the permitted action and its remaining horizon, so the judgment is
-    made against the authority actually on offer.
+    `recent` is the trailing daily sequence. Without it the question asks about
+    closes near the lows and undercuts that recover while the state carries
+    neither -- a day closing at its low and one closing at its high produced
+    byte-identical prompts before this was added.
     """
+    lines = []
+    if recent is not None and len(recent):
+        lines.append("\nRecent daily bars, price rebased so the entry is 100:")
+        for b in recent.itertuples():
+            rng = b.high - b.low
+            pos = ((b.close - b.low) / rng * 100) if rng > 0 else 50.0
+            lines.append(
+                f"  day -{b.ago:<2d} close {b.rel:6.1f}  "
+                f"range {b.lo_rel:5.1f}-{b.hi_rel:5.1f}  "
+                f"closed {pos:3.0f}% up its range  volume {b.vol_rel:.2f}x")
+    seq = "\n".join(lines)
+
+    extra = ""
+    if pivot_distance_pct is not None:
+        extra += (f"- Price is {pivot_distance_pct:+.1f}% from the top of the "
+                  f"base it broke out of.\n")
+    if eight_week_left is not None:
+        extra += (f"- This position gained 20% within three weeks of entry, so "
+                  f"O'Neil's eight-week rule applies: {eight_week_left} "
+                  f"session(s) of that hold remain.\n")
+
     return (
         f"An open position in a momentum portfolio has weakened.\n"
         f"- Held {days_held} trading days.\n"
@@ -340,26 +422,29 @@ def describe_position(r, gain_pct, days_held, peak_gain_pct, below_ma_days,
         f"- It has closed below the 50-day average on "
         f"{below_ma_days} consecutive day(s).\n"
         f"- Price is {(1-r['close']/r['hi52'])*100:.0f}% below its 52-week high.\n"
+        f"{extra}"
         f"- Relative strength rank versus all other stocks: "
         f"{int(r['rs_rating'])} of 99.\n"
-        f"- Today's volume was {r['vol_ratio']:.1f}x its 50-day average.\n"
         f"- The broad market is in a {r['regime'].lower()} trend.\n"
         f"- A protective stop sits {stop_distance_pct:.1f}% below the current "
         f"price and will execute on its own if reached.\n"
         f"- The only decision available is to keep the position for up to "
         f"{sessions_left} more trading session(s); after that it is sold "
         f"regardless of this answer."
+        f"{seq}"
     )
 
 
 def decide_entry(row, bars) -> dict:
-    return ask(describe_shape(row, bars), ENTRY_DECISION, "entry_decision")
+    return ask(describe_shape(row, bars), ENTRY_DECISION, "entry_decision_v2")
 
 
 def decide_exit(row, gain_pct, days_held, peak_gain_pct, below_ma_days,
-                sessions_left, stop_distance_pct) -> dict:
+                sessions_left, stop_distance_pct, recent=None,
+                pivot_distance_pct=None, eight_week_left=None) -> dict:
     state = describe_position(row, gain_pct, days_held, peak_gain_pct,
-                              below_ma_days, sessions_left, stop_distance_pct)
+                              below_ma_days, sessions_left, stop_distance_pct,
+                              recent, pivot_distance_pct, eight_week_left)
     return ask(state, EXIT_DECISION, "exit_decision")
 
 

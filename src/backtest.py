@@ -352,8 +352,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                         continue
                     try:
                         d = J.decide_entry(row, bars)
-                        act = J.choice_of(d, "action", {"buy", "skip"})
-                        strength = J.score_of(d, "conviction")
+                        act, strength = J.entry_policy(d)
                     except Exception as exc:
                         # An inference failure is not a decision to skip. It is
                         # recorded as a failure and the run is marked degraded.

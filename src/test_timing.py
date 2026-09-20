@@ -51,6 +51,8 @@ def _index(dates, last_close):
 
 def test_close_cannot_change_an_open_fill() -> bool:
     """Changing the LAST close must not change fills that happened at its open."""
+    S.JEV_ENTRY = S.JEV_EXIT = False      # this test is about the rules only
+    S.NEARMISS_MODE = 0
     pan = _panel()
     sig = S.build_signals(pan)
     sig["buyable"] = sig["breakout"].fillna(False)
@@ -114,7 +116,7 @@ def test_uninitialised_provider_is_an_error() -> bool:
     sig["buyable"] = sig["breakout"].fillna(False)
     memb = {pd.Timestamp("2021-01-01"): {"TEST"}}
     dates = pd.DatetimeIndex(sorted(sig["date"].unique()))
-    S.JEV_ENTRY = True
+    S.JEV_ENTRY, S.JEV_EXIT, S.NEARMISS_MODE = True, False, 0
     try:
         B.run(sig, _index(dates, 4200.0), memb, start=str(dates[300].date()),
               end=str(dates[-1].date()), capital=100_000.0)
@@ -127,7 +129,7 @@ def test_uninitialised_provider_is_an_error() -> bool:
     return ok
 
 
-def test_weekly_cache_invalidates() -> bool:
+def test_weekly_cache_invalidates() -> bool:  # noqa: D401
     """A reload must not serve bars built from the previous panel, and the
     lookback must be part of the cache identity."""
     import backtest
@@ -174,6 +176,7 @@ def test_deferral_is_bounded() -> bool:
     """A model that always says hold must not defer an exit indefinitely."""
     import backtest
     import jev
+    S.JEV_ENTRY, S.NEARMISS_MODE = False, 0   # isolate the exit path
     pan = _shakeout_panel()
     backtest.load_panel(pan)
     sig = S.build_signals(pan)

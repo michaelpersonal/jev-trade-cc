@@ -186,7 +186,7 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
 
 <header class="mast">
   <div class="mast-in">
-    <div class="brand"><b>Jev</b><span>O'Neil momentum &middot; 2022&ndash;2026</span></div>
+    <div class="brand"><b>Jev</b><span>trading O'Neil momentum &middot; 2022&ndash;2026</span></div>
     <div class="readout">
       <div class="ro"><i>Session</i><b id="r-date">&mdash;</b></div>
       <div class="ro"><i>Portfolio</i><b id="r-eq">&mdash;</b></div>
@@ -214,8 +214,8 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
 
   <div class="chart-card">
     <div class="legend">
-      <span><i class="sw" style="background:var(--accent)"></i>Jev &mdash; trailing stop -15%</span>
-      <span><i class="sw" style="background:repeating-linear-gradient(90deg,var(--accent) 0 4px,transparent 4px 7px)"></i>Jev &mdash; 20-25% target (as written)</span>
+      <span><i class="sw" style="background:var(--accent)"></i>Portfolio &mdash; Jev deciding, 15% trailing stop</span>
+      <span><i class="sw" style="background:repeating-linear-gradient(90deg,var(--accent) 0 4px,transparent 4px 7px)"></i>Rules only &mdash; O'Neil's 20-25% target</span>
       <span><i class="sw" style="background:var(--bench)"></i>S&amp;P 500 buy &amp; hold</span>
       <span><i class="sw" style="background:var(--red-band);border:1px solid var(--neg)"></i>Market regime RED &mdash; no new buys</span>
     </div>
@@ -605,8 +605,8 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
     'Return / downside vol':x=>x.return_downside_vol,
     'Max drawdown':x=>x.max_dd, 'Worst day':x=>x.worst_day};
   $('cmp').innerHTML =
-    '<thead><tr><th></th><th>Jev<br><span class="mut">trailing stop -15%</span></th>'+
-    '<th>Jev<br><span class="mut">20-25% target, as written</span></th>'+
+    '<thead><tr><th></th><th>Jev deciding<br><span class="mut">15% trailing stop</span></th>'+
+    '<th>Rules only<br><span class="mut">20-25% target</span></th>'+
     '<th>S&amp;P 500<br><span class="mut">buy &amp; hold</span></th></tr></thead><tbody>' +
     ROWS.map(([label,f,hiWins])=>{
       const vals = KEYS.map(RAW[label]);
@@ -680,7 +680,7 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
       .map(([k,v])=>fact(k, v+' &middot; '+(v/tot*100).toFixed(0)+'%')).join('');
 
   const edge = s.total_return - b.total_return;
-  $('verdict').innerHTML = `Jev finished at <b>${fmt0(s.final)}</b> against the index's `+
+  $('verdict').innerHTML = `The portfolio finished at <b>${fmt0(s.final)}</b> against the index's `+
     `<b>${fmt0(b.final)}</b> &mdash; ${edge >= 0 ? 'ahead of' : 'behind'} buying and `+
     `holding by <b>${Math.abs(edge).toFixed(0)} percentage points</b>, at lower `+
     `volatility and a shallower drawdown. Read the caveat below before weighing that.`;
@@ -761,7 +761,7 @@ details code{font-family:var(--font-num);font-size:12px;color:var(--accent)}
   }
 
   $('method-note').innerHTML =
-    `Jev now holds an average of <b>31% cash</b>, down from 43% before the entry `+
+    `The portfolio holds an average of <b>31% cash</b>, down from 43% before the entry `+
     `screen was relaxed. What remains is almost entirely the market filter standing `+
     `down on purpose: <b>RED</b> accounts for 21 of those 31 points, <b>YELLOW</b> `+
     `for 8, and only 2 points come from GREEN days, where the book now holds <b>4.8 `+
