@@ -49,6 +49,8 @@ def main(limit: int | None = None, sample: int | None = None) -> None:
     """
     sig = pd.read_parquet(ROOT / "data" / "raw" / "signals_grouped.parquet")
     B.load_panel(pd.read_parquet(ROOT / "data" / "raw" / "panel.parquet"))
+    fp = ROOT / "data" / "raw" / "fundamentals.parquet"
+    B.load_fundamentals(pd.read_parquet(fp) if fp.exists() else None)
     reg = S.market_regime(D.index_prices())["regime"]
     memb = U.membership()
 
@@ -81,15 +83,17 @@ def main(limit: int | None = None, sample: int | None = None) -> None:
             nohist[0] += 1
             return dict(base, status="no_history", setup=None, conf=None,
                         supply=None, prior_advance=None, pattern=None,
-                        pattern_conf=None)
+                        pattern_conf=None, earnings=None)
         try:
-            a = J.assess(r, bars)
+            a = J.assess(r, bars,
+                         B.earnings_state(r["ticker"], r["date"]))
             out = dict(base,
                        setup=J.choice_of(a, "setup",
                                          set(J.ASSESS["setup"].criteria)),
                        conf=a["setup"].get("confidence"),
                        supply=a["supply"]["noul"],
                        prior_advance=a["prior_advance"]["noul"],
+                       earnings=a["earnings"]["noul"],
                        pattern=J.choice_of(a, "pattern",
                                            set(J.ASSESS["pattern"].criteria)),
                        pattern_conf=a["pattern"].get("confidence"),
@@ -99,7 +103,7 @@ def main(limit: int | None = None, sample: int | None = None) -> None:
             failed[k] = failed.get(k, 0) + 1
             return dict(base, status="error", setup=None, conf=None,
                         supply=None, prior_advance=None, pattern=None,
-                        pattern_conf=None)
+                        pattern_conf=None, earnings=None)
         done[0] += 1
         if done[0] % 2000 == 0:
             print(f"  {done[0]:,}/{len(rows):,}  {time.time()-t0:.0f}s", flush=True)

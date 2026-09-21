@@ -42,6 +42,8 @@ def arm(sig, idx, memb, pan, *, jev: bool) -> float:
 
 def main() -> None:
     pan = pd.read_parquet(C.ROOT / "data" / "raw" / "panel.parquet")
+    fp = C.ROOT / "data" / "raw" / "fundamentals.parquet"
+    B.load_fundamentals(pd.read_parquet(fp) if fp.exists() else None)
     memb, idx = U.membership(), D.index_prices()
     have = sorted(pan["ticker"].unique())
 

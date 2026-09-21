@@ -34,6 +34,7 @@ class Policy:
     macro_mode: int
     group_min_pct: float | None
     rs_min: int
+    eps_growth_min: float | None
     notes: tuple[str, ...] = ()
 
     def as_record(self) -> dict:
@@ -72,7 +73,8 @@ def resolve() -> Policy:
         trail_pct=S.TRAIL_PCT, trail_atr=S.TRAIL_ATR,
         regime_mode=S.REGIME_MODE, yellow_slots=S.YELLOW_SLOTS,
         macro_mode=S.MACRO_MODE, group_min_pct=S.GROUP_MIN_PCT,
-        rs_min=S.RS_MIN, notes=tuple(notes))
+        rs_min=S.RS_MIN, eps_growth_min=S.EPS_GROWTH_MIN,
+        notes=tuple(notes))
 
 
 # An unclear cadence review is an abstention, not a decision to hold. Under

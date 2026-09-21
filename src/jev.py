@@ -300,7 +300,7 @@ def _ma_stack(r) -> str:
     return f"- {order}; the 200-day is {rising}.".lstrip("- ")
 
 
-def describe_shape(r, bars) -> str:
+def describe_shape(r, bars, earnings: str | None = None) -> str:
     """Weekly bars rebased to pivot=100, plus the scale-free context.
 
     `bars` is a DataFrame of the trailing weekly OHLCV ending on the breakout
@@ -326,7 +326,10 @@ def describe_shape(r, bars) -> str:
         f"- {_ma_stack(r)}\n"
         f"- Industry group ranks in the {_ordinal(r.get('group_pct'))}.\n"
         f"- Average daily turnover ${r['dollar_vol']/1e6:.0f} million.\n"
-        f"- The broad market is in a {r['regime'].lower()} trend."
+        f"- The broad market is in a {r['regime'].lower()} trend.\n"
+        + (f"\nEarnings, as filed with the SEC and public on this date:\n"
+           f"{earnings}\n" if earnings else
+           "\nNo SEC earnings information is available for this company.\n")
     )
 
 
@@ -500,8 +503,9 @@ def describe_position(r, gain_pct, days_held, peak_gain_pct, below_ma_days,
     )
 
 
-def decide_entry(row, bars) -> dict:
-    return ask(describe_shape(row, bars), ENTRY_DECISION, "entry_decision_v2")
+def decide_entry(row, bars, earnings: str | None = None) -> dict:
+    return ask(describe_shape(row, bars, earnings), ENTRY_DECISION,
+               "entry_decision_v3")
 
 
 def decide_exit(row, gain_pct, days_held, peak_gain_pct, below_ma_days,
@@ -630,6 +634,24 @@ ASSESS = {
                      "or shapeless chop."),
         }),
 
+    # The C of CAN SLIM. This was absent from the system entirely:
+    # strategy.py declared earnings out of reach because yfinance cannot
+    # supply point-in-time fundamentals for delisted names. EDGAR can -- every
+    # XBRL fact carries the date it was filed -- and on the 353 strict
+    # breakout signals this strategy took, O'Neil's 25% quarterly earnings
+    # test separated 60-day forward returns by 4.8 points (permutation
+    # p = 0.010). A stateless model cannot know a company's earnings for the
+    # same reason it cannot know what day it is: nobody had told it.
+    "earnings": Noul(instructions=(
+        "Judging only by the earnings figures supplied, does this company "
+        "show the profit growth William O'Neil required of a market leader? "
+        "He wanted quarterly earnings per share up at least 25% against the "
+        "same quarter a year earlier, ideally accelerating and backed by "
+        "similar sales growth. Answer no if growth is absent, negative or "
+        "slight, if the figures are too stale to describe the present "
+        "business, or if no earnings were supplied at all -- an unknown is "
+        "not a pass.")),
+
     "supply": Noul(instructions=(
         "Through the consolidation, did weekly volume run below its own "
         "average -- supply drying up -- and then expand to at least about 40% "
@@ -641,9 +663,9 @@ ASSESS = {
 }
 
 
-def assess(row, bars) -> dict:
+def assess(row, bars, earnings: str | None = None) -> dict:
     """One candidate, judged on its own evidence."""
-    return ask(describe_shape(row, bars), ASSESS, "assess_v1")
+    return ask(describe_shape(row, bars, earnings), ASSESS, "assess_v2")
 
 
 def select_question(labels: dict) -> dict:

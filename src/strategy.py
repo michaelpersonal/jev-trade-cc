@@ -74,6 +74,11 @@ REGIME_MODE = 2
 YELLOW_SLOTS = None       # slots allowed in YELLOW; None = MAX_POSITIONS // 2
 MACRO_MODE = 0            # 0 off, 1 macro may veto, 2 macro may veto or confirm
 RS_MIN = 80               # buy leaders: RS rating 80+
+# C of CAN SLIM as a mechanical gate: require quarterly EPS growth of at least
+# this much, measured only from SEC facts filed on or before the signal date.
+# None = off. This exists so "the earnings data helped" can be told apart from
+# "Jev helped": the same information, used by arithmetic instead of judgment.
+EPS_GROWTH_MIN = None
 VOL_SURGE = 1.4           # breakout needs 40%+ above average volume
 # BASE_MAX is the lookback for the pivot: the breakout must clear the highest
 # high of the prior 13 weeks. BASE_MIN is a de-duplication window -- it

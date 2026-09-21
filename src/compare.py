@@ -42,11 +42,12 @@ def apply_shipped() -> None:
 
 
 ARMS = [
-    # label                          ENTRY  EXIT  SELECT  NEARMISS
-    ("rules only (no Jev)",          False, False, False, 3),
-    ("Jev filters the rule pool",    True,  True,  False, 3),
-    ("Jev selects from the pool",    False, False, True,  3),
-    ("Jev selects, filters and exits", True, True,  True,  3),
+    # label                            ENTRY  EXIT  SELECT NM   EPS
+    ("rules only (no Jev)",            False, False, False, 3, None),
+    ("rules + mechanical C gate",      False, False, False, 3, 25),
+    ("Jev filters the rule pool",      True,  True,  False, 3, None),
+    ("Jev selects from the pool",      False, False, True,  3, None),
+    ("Jev selects, filters and exits",  True,  True, True,  3, None),
 ]
 
 
@@ -54,6 +55,8 @@ def main(arms=None) -> None:
     sig = pd.read_parquet(ROOT / "data" / "raw" / "signals_grouped.parquet")
     idx, memb = D.index_prices(), U.membership()
     B.load_panel(pd.read_parquet(ROOT / "data" / "raw" / "panel.parquet"))
+    fp = ROOT / "data" / "raw" / "fundamentals.parquet"
+    B.load_fundamentals(pd.read_parquet(fp) if fp.exists() else None)
     ap = ROOT / "data" / "raw" / "jev_assessments.parquet"
     B.load_assessments(pd.read_parquet(ap), json.loads(
         ap.with_suffix(".manifest.json").read_text()))
@@ -67,8 +70,9 @@ def main(arms=None) -> None:
     print(f"{'arm':<32}{'final':>12}{'profit':>11}{'maxDD':>8}"
           f"{'trades':>8}{'asks':>7}{'secs':>7}")
     print("-" * 85)
-    for label, ent, ext, sel, nm in (arms or ARMS):
+    for label, ent, ext, sel, nm, eps in (arms or ARMS):
         apply_shipped()
+        S.EPS_GROWTH_MIN = eps
         S.JEV_ENTRY, S.JEV_EXIT = ent, ext
         S.JEV_SELECT, S.NEARMISS_MODE = sel, nm
         st = J.stats(); c0 = st["calls"] + st["hits"]; t0 = time.time()

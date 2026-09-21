@@ -21,6 +21,7 @@ import numpy as np
 import pandas as pd
 
 import anchor as A
+import fundamentals as FU
 import jev as J
 import macro as MAC
 import policy as P
@@ -67,6 +68,7 @@ _PANEL: dict = {}
 _WEEKLY: dict = {}
 _ASSESS: dict = {}          # (date, ticker) -> Jev's assessment of that setup
 _ASSESS_FP: str | None = None   # provenance of the artifact they came from
+_FUND: pd.DataFrame | None = None   # point-in-time SEC earnings facts
 
 
 def load_assessments(df, manifest: dict | None = None,
@@ -105,8 +107,22 @@ def load_assessments(df, manifest: dict | None = None,
     _ASSESS = {(pd.Timestamp(r.date), r.ticker): dict(
         setup=r.setup, supply=r.supply, prior_advance=r.prior_advance,
         pattern=getattr(r, "pattern", None),
+        earnings=getattr(r, "earnings", None),
         pattern_conf=getattr(r, "pattern_conf", None))
         for r in df.itertuples(index=False)}
+
+
+def load_fundamentals(df: pd.DataFrame | None) -> None:
+    """Point-in-time SEC earnings. Absent is allowed; silently wrong is not."""
+    global _FUND
+    _FUND = df
+
+
+def earnings_state(ticker: str, upto) -> str | None:
+    """The earnings a trader could have read on `upto`, as prose, or None."""
+    if _FUND is None:
+        return None
+    return FU.describe(FU.pit(_FUND, ticker, upto))
 
 
 def load_panel(panel: pd.DataFrame) -> None:
@@ -473,6 +489,11 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
             else:
                 cands = rows[rows["buyable"].fillna(False)]
             cands = cands[cands.index.isin(live) & ~cands.index.isin(positions)]
+            if S.EPS_GROWTH_MIN is not None and _FUND is not None and len(cands):
+                keep = [t for t in cands.index
+                        if (FU.pit(_FUND, t, today).get("eps_q_growth") or
+                            float("-inf")) >= S.EPS_GROWTH_MIN]
+                cands = cands.loc[keep]
             if S.GROUP_MIN_PCT and "group_pct" in cands.columns:
                 # Buy leaders of leading groups. An unclassified name passes
                 # rather than being dropped: the gaps are Nasdaq-only listings,
@@ -498,7 +519,8 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                              baseline="buy", action="skip")
                         continue
                     try:
-                        d = J.decide_entry(row, bars)
+                        d = J.decide_entry(row, bars,
+                                           earnings_state(tkr, today))
                         act, strength = J.entry_policy(d)
                     except Exception as exc:
                         # An inference failure is not a decision to skip. It is
@@ -550,6 +572,8 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                         f"point; volume today {rr['vol_ratio']:.1f}x average; "
                         f"supply dried up and expanded {aa.get('supply', 0):.2f}; "
                         f"prior advance {aa.get('prior_advance', 0):.2f}; "
+                        f"earnings growth O'Neil would want "
+                        f"{aa.get('earnings', 0):.2f}; "
                         f"relative strength {int(rr['rs_rating'])} of 99")
                 state = "\n".join(f"Option {k}: {v}" for k, v in opts.items())
                 try:
@@ -593,6 +617,14 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                      baseline="-", action="none", detail="no buy this session")
             if pol.nearmiss_mode and spare > 0:
                 nm = rows[rows["nearmiss"].fillna(False)]
+                # The gate must apply to every path into the book. Gating only
+                # the strict pool made the portfolio buy MORE (123 vs 116),
+                # because each rejected breakout freed a slot for an ungated
+                # near-miss -- the filter quietly became a swap.
+                if S.EPS_GROWTH_MIN is not None and _FUND is not None and len(nm):
+                    nm = nm.loc[[t for t in nm.index
+                                 if (FU.pit(_FUND, t, today).get("eps_q_growth")
+                                     or float("-inf")) >= S.EPS_GROWTH_MIN]]
                 nm = nm[nm.index.isin(live) & ~nm.index.isin(positions)
                         & ~nm.index.isin([a.ticker for a in pending_buys])]
                 taken: list[str] = []
@@ -610,7 +642,8 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                             if bars is None or len(bars) < 8:
                                 continue
                             try:
-                                d = J.decide_entry(row, bars)
+                                d = J.decide_entry(row, bars,
+                                               earnings_state(tkr, today))
                                 act, sc[tkr] = J.entry_policy(d)
                             except Exception as exc:
                                 errors[0] += 1

@@ -42,6 +42,7 @@ class Anchor:
     setup: str | None = None        # valid / developing / extended / faulty ...
     supply: float | None = None
     prior_advance: float | None = None
+    earnings: float | None = None   # C of CAN SLIM, as judged
     prompt_fp: str | None = None    # fingerprint of the criteria that judged it
 
     def pattern_phrase(self) -> str:
@@ -85,4 +86,5 @@ def from_row(row, ticker: str, decided_on, source: str,
         pattern=a.get("pattern"), pattern_conf=a.get("pattern_conf"),
         setup=a.get("setup"),
         supply=a.get("supply"), prior_advance=a.get("prior_advance"),
+        earnings=a.get("earnings"),
         prompt_fp=prompt_fp)
