@@ -184,7 +184,7 @@ def test_deferral_is_bounded() -> bool:
     memb = {pd.Timestamp("2021-01-01"): {"TEST"}}
     dates = pd.DatetimeIndex(sorted(sig["date"].unique()))
     real = jev.decide_exit
-    jev.decide_exit = lambda *a, **k: {"action": {"choice": "hold"}}
+    jev.decide_exit = lambda *a, **k: {"action": {"choice": "override"}}
     S.JEV_EXIT = True
     try:
         r = B.run(sig, _index(dates, 4200.0), memb,

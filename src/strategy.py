@@ -54,6 +54,15 @@ JEV_EXIT = True
 # produces only 22 buys a year against the 39 needed to keep 5 slots full, so
 # the book sits ~43% in cash for want of candidates rather than by choice.
 # Jev adjudication (mode 1) was tested against this and did not beat it.
+# Stock selection. When on, the mechanical quality screen is bypassed: the
+# candidate pool is every eligible name Jev assessed as a valid setup, and Jev
+# chooses among them. Code keeps membership, tradability, sizing and stops.
+JEV_SELECT = False
+# 0 off · 1 Jev may override a 50-day sale · 2 Jev reviews every holding on a
+# cadence and decides hold or sell on its own evidence
+JEV_EXIT_MODE = 1
+REVIEW_EVERY = 5          # sessions between routine reviews in mode 2
+
 NEARMISS_MODE = 3
 NEARMISS_QUOTA: dict = {}     # date -> n, used only by mode 2
 NM_VOL_LO, NM_RS_LO = 1.15, 65

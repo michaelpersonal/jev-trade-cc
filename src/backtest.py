@@ -59,6 +59,15 @@ class Position:
 
 _PANEL: dict = {}
 _WEEKLY: dict = {}
+_ASSESS: dict = {}          # (date, ticker) -> Jev's assessment of that setup
+
+
+def load_assessments(df) -> None:
+    """Phase-A assessments, keyed for the day loop."""
+    global _ASSESS
+    _ASSESS = {(pd.Timestamp(r.date), r.ticker): dict(
+        setup=r.setup, supply=r.supply, prior_advance=r.prior_advance)
+        for r in df.itertuples(index=False)}
 
 
 def load_panel(panel: pd.DataFrame) -> None:
@@ -74,6 +83,29 @@ def load_panel(panel: pd.DataFrame) -> None:
     p["vol_rel"] = p["volume"] / p.groupby("ticker")["volume"].transform(
         lambda v: v.rolling(50).mean())
     _PANEL = {t: g.set_index("date") for t, g in p.groupby("ticker")}
+
+
+def recent_bars(ticker: str, upto, entry: float, days: int = 10):
+    """Trailing daily bars rebased so the entry price is 100.
+
+    The exit question asks about closes near the lows and undercuts that
+    recover. Without this the state carried neither, and Jev abstained on 95%
+    of exits because it genuinely could not tell.
+    """
+    g = _PANEL.get(ticker)
+    if g is None or entry <= 0:
+        return None
+    g = g[g.index <= upto].tail(days)
+    if len(g) < 3:
+        return None
+    return pd.DataFrame(dict(
+        ago=range(len(g) - 1, -1, -1),
+        rel=g["close"].to_numpy() / entry * 100,
+        lo_rel=g["low"].to_numpy() / entry * 100,
+        hi_rel=g["high"].to_numpy() / entry * 100,
+        high=g["high"].to_numpy(), low=g["low"].to_numpy(),
+        close=g["close"].to_numpy(),
+        vol_rel=g["vol_rel"].fillna(1.0).to_numpy()))
 
 
 def weekly_bars(ticker: str, upto, weeks: int = 16):
@@ -262,6 +294,48 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
             p.below_ma_days = p.below_ma_days + 1 if (
                 np.isfinite(ma50) and c < ma50) else 0
             need = 1 if regime_name == "RED" else 2
+
+            # --- mode 2: Jev reviews the holding on its own schedule -------
+            # No rule has to trigger. Jev can sell a position the 50-day rule
+            # is content with, which the override framing could never do.
+            if S.JEV_EXIT_MODE == 2 and tkr in rows.index:
+                due = (held > 0 and held % S.REVIEW_EVERY == 0)
+                if due or p.below_ma_days >= need:
+                    row = rows.loc[tkr].to_dict()
+                    row["regime"] = regime_name
+                    piv = px(tkr, "pivot")
+                    stop_gap = (1 - max(p.stop, p.peak * (1 - S.TRAIL_PCT)
+                                        if S.TRAIL_PCT else p.stop) / c) * 100
+                    try:
+                        d = J.review_holding(
+                            row, gain_pct=(c / p.entry - 1) * 100,
+                            days_held=held,
+                            peak_gain_pct=(p.peak / p.entry - 1) * 100,
+                            below_ma_days=p.below_ma_days,
+                            stop_distance_pct=max(0.0, stop_gap),
+                            recent=recent_bars(tkr, today, p.entry),
+                            pivot_distance_pct=(
+                                (c / piv - 1) * 100
+                                if np.isfinite(piv) and piv > 0 else None),
+                            eight_week_left=(p.hold_until - i
+                                             if p.hold_until is not None else None))
+                        act = J.choice_of(d, "action",
+                                          {"hold", "sell", "unclear"})
+                    except Exception as exc:
+                        errors[0] += 1
+                        _log(ledger, today, tkr, "review", "error",
+                             baseline="hold", action="hold", detail=str(exc)[:120])
+                        act = "hold"
+                    else:
+                        _log(ledger, today, tkr, "review", "ok",
+                             baseline="hold" if p.below_ma_days < need else "sell",
+                             action=act, value=held)
+                    if act == "sell":
+                        pending_sells.append((tkr, "Jev: advance over"))
+                    elif act == "hold" and p.below_ma_days >= need:
+                        jev_holds[0] += 1
+                continue
+
             if p.below_ma_days >= need:
                 if S.JEV_EXIT:
                     # Bounded deferral, per src/deferral_contract.md. Jev may
@@ -281,15 +355,24 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                         stop_gap = (1 - max(p.stop, p.peak * (1 - S.TRAIL_PCT)
                                             if S.TRAIL_PCT else p.stop) / c) * 100
                         try:
+                            piv = px(tkr, "pivot")
                             d = J.decide_exit(
                                 row, gain_pct=(c / p.entry - 1) * 100,
                                 days_held=held,
                                 peak_gain_pct=(p.peak / p.entry - 1) * 100,
                                 below_ma_days=p.below_ma_days,
                                 sessions_left=left,
-                                stop_distance_pct=max(0.0, stop_gap))
-                            act = J.choice_of(d, "action",
-                                              {"hold", "sell", "unclear"})
+                                stop_distance_pct=max(0.0, stop_gap),
+                                recent=recent_bars(tkr, today, p.entry),
+                                pivot_distance_pct=(
+                                    (c / piv - 1) * 100
+                                    if np.isfinite(piv) and piv > 0 else None),
+                                eight_week_left=(
+                                    p.hold_until - i
+                                    if p.hold_until is not None else None))
+                            act = J.choice_of(
+                                d, "action",
+                                {"override", "let_it_sell", "unclear"})
                         except Exception as exc:
                             # Failure falls back to the mechanical rule and is
                             # recorded as a failure, never credited to Jev.
@@ -300,8 +383,8 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                             pending_sells.append(
                                 (tkr, f"broke 50dma ({regime_name}) [fallback]"))
                             act = None
-                        if act == "sell":
-                            pending_sells.append((tkr, "Jev: breakdown"))
+                        if act == "let_it_sell":
+                            pending_sells.append((tkr, "broke 50dma (Jev agreed)"))
                             _log(ledger, today, tkr, "exit", "ok",
                                  baseline="sell", action="sell")
                         elif act == "unclear":
@@ -311,7 +394,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                             pending_sells.append((tkr, "broke 50dma (abstain)"))
                             _log(ledger, today, tkr, "exit", "abstain",
                                  baseline="sell", action="sell")
-                        elif act == "hold":
+                        elif act == "override":
                             jev_holds[0] += 1
                             _log(ledger, today, tkr, "exit", "ok",
                                  baseline="sell", action="hold", value=left)
@@ -332,7 +415,16 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
         n_cands = n_cands_pre = 0
         if open_slots > 0 and regime_name != "RED":
             live = set(memb_on(today, memb))
-            cands = rows[rows["buyable"].fillna(False)]
+            if S.JEV_SELECT:
+                # Candidates are every eligible name Jev judged a valid setup.
+                # No quality threshold of mine stands between them and the
+                # decision; code enforces only membership and holdings.
+                pool = [t for t in rows.index
+                        if t in live and t not in positions
+                        and _ASSESS.get((today, t), {}).get("setup") == "valid"]
+                cands = rows.loc[pool]
+            else:
+                cands = rows[rows["buyable"].fillna(False)]
             cands = cands[cands.index.isin(live) & ~cands.index.isin(positions)]
             if S.GROUP_MIN_PCT and "group_pct" in cands.columns:
                 # Buy leaders of leading groups. An unclassified name passes
@@ -384,18 +476,75 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
             rank_key = ("jev_conviction"
                         if S.JEV_ENTRY and "jev_conviction" in cands.columns
                         else "rs_rating")
-            pending_buys = (cands.sort_values(rank_key, ascending=False,
-                                              kind="mergesort")
-                            .sort_index(kind="mergesort")
-                            .sort_values(rank_key, ascending=False,
-                                         kind="mergesort")
-                            .index[:open_slots].tolist())
+            if S.JEV_SELECT and len(cands):
+                # Jev sees the competitors in one question and picks one, or
+                # none. This is the step the reranking design never had.
+                opts, key = {}, {}
+                # Order alphabetically, NOT by relative strength. Ranking the
+                # options by RS before showing them would let RS decide which
+                # candidates Jev sees and in what order, which is the selection
+                # this design is supposed to hand over. A cap still applies as
+                # a prompt-size limit, and when it binds it is recorded.
+                ranked = cands.sort_index(kind="mergesort")
+                truncated = max(0, len(ranked) - 10)
+                ranked = ranked.head(10)
+                for n, tkr in enumerate(ranked.index):
+                    rr = ranked.loc[tkr]
+                    lbl = chr(65 + n)          # A, B, C ... never the ticker
+                    key[lbl] = tkr
+                    aa = _ASSESS.get((today, tkr), {})
+                    opts[lbl] = (
+                        f"relative strength {int(rr['rs_rating'])} of 99, "
+                        f"{(1-rr['close']/rr['hi52'])*100:.0f}% below its "
+                        f"52-week high, {(rr['close']/rr['pivot']-1)*100:+.1f}% "
+                        f"past the top of a base {rr['base_depth']*100:.0f}% "
+                        f"deep, today's volume {rr['vol_ratio']:.1f}x average, "
+                        f"supply dried up {aa.get('supply', 0):.2f}, prior "
+                        f"advance {aa.get('prior_advance', 0):.2f}")
+                state = "\n".join(f"Option {k}: {v}" for k, v in opts.items())
+                try:
+                    ans = J.ask(state, J.select_question(opts), "select_v1")
+                    pick = J.choice_of(ans, "pick", set(opts) | {"none"})
+                except Exception as exc:
+                    errors[0] += 1
+                    _log(ledger, today, "-", "select", "error",
+                         baseline=cands["rs_rating"].idxmax(), action="none",
+                         detail=str(exc)[:120])
+                    pick = "none"
+                else:
+                    _log(ledger, today, key.get(pick, "-"), "select", "ok",
+                         baseline=cands["rs_rating"].idxmax(), action=pick,
+                         value=len(opts),
+                         detail=f"truncated={truncated}" if truncated else None)
+                pending_buys = [key[pick]] if pick in key else []
+                jev_declined = pick not in key
+            else:
+                jev_declined = False
+                pending_buys = (cands.sort_values(rank_key, ascending=False,
+                                                  kind="mergesort")
+                                .sort_index(kind="mergesort")
+                                .sort_values(rank_key, ascending=False,
+                                             kind="mergesort")
+                                .index[:open_slots].tolist())
 
             # --- near-miss adjudication (prereg_nearmiss.md) ---------------
             # Strict candidates take slots first; near-misses fill what is
             # left. This is the only path by which a model can INCREASE the
             # supply of candidates rather than filter one the rules built.
             spare = open_slots - len(pending_buys)
+            # When Jev is the selector, the mechanical near-miss path is off.
+            # It shares the same slots, so with both live a "none" answer --
+            # Jev looking at the day's candidates and declining all of them --
+            # left every slot open for the near-miss quota to fill, and the
+            # portfolio bought anyway. A refusal that the next twenty lines
+            # overrule is not a delegation. The two are separate arms: Jev
+            # chooses from the strict pool, or the rules widen the pool.
+            if S.JEV_SELECT and S.NEARMISS_MODE:
+                if jev_declined:
+                    _log(ledger, today, "-", "nearmiss", "skipped",
+                         baseline="-", action="none",
+                         detail="JEV_SELECT declined; near-miss path not run")
+                spare = 0
             if S.NEARMISS_MODE and spare > 0:
                 nm = rows[rows["nearmiss"].fillna(False)]
                 nm = nm[nm.index.isin(live) & ~nm.index.isin(positions)

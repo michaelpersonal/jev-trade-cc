@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import pandas as pd
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
@@ -249,6 +250,28 @@ SHAPE_QUESTIONS = {
 }
 
 
+def _ma_stack(r) -> str:
+    """The row's ACTUAL moving-average stack, stated as measured.
+
+    This line used to be the literal sentence "50-day above the 150-day, above
+    the 200-day, 200-day rising" -- O'Neil's trend template, asserted as fact.
+    It held for the old candidate pool because that pool was filtered on
+    `trend_ok`. The selection pool only requires price above the 200-day, and
+    the sentence is false for 10,071 of its 22,398 rows: Jev was being told a
+    stock passed a screen it had failed. State what is true of this row.
+    """
+    ma50, ma150, ma200 = r.get("ma50"), r.get("ma150"), r.get("ma200")
+    if any(pd.isna(x) or x is None for x in (ma50, ma150, ma200)):
+        return "Moving-average stack unavailable for this stock."
+    order = ("50-day average is above the 150-day, which is above the 200-day"
+             if ma50 > ma150 > ma200 else
+             f"50-day average sits {(ma50/ma150-1)*100:+.0f}% from the 150-day "
+             f"and {(ma50/ma200-1)*100:+.0f}% from the 200-day, so they are "
+             f"not stacked in the rising order O'Neil looks for")
+    rising = "rising" if bool(r.get("ma200_up")) else "NOT rising"
+    return f"- {order}; the 200-day is {rising}.".lstrip("- ")
+
+
 def describe_shape(r, bars) -> str:
     """Weekly bars rebased to pivot=100, plus the scale-free context.
 
@@ -272,7 +295,7 @@ def describe_shape(r, bars) -> str:
         f"- Relative strength rank versus all other stocks: {int(r['rs_rating'])} of 99.\n"
         f"- Price is {(1-r['close']/r['hi52'])*100:.0f}% below its 52-week high, "
         f"{(r['close']/r['lo52']-1)*100:.0f}% above its 52-week low.\n"
-        f"- 50-day average is above the 150-day, above the 200-day, 200-day rising.\n"
+        f"- {_ma_stack(r)}\n"
         f"- Industry group ranks in the {_ordinal(r.get('group_pct'))}.\n"
         f"- Average daily turnover ${r['dollar_vol']/1e6:.0f} million.\n"
         f"- The broad market is in a {r['regime'].lower()} trend."
@@ -359,23 +382,22 @@ def entry_policy(a: dict) -> tuple[str, float]:
 EXIT_DECISION = {
     "action": Choice(
         instructions=(
-            "An open position in a William O'Neil momentum portfolio has "
-            "closed below its 50-day average. O'Neil expected leaders to be "
-            "shaken out on the way up: a brief undercut on lighter volume that "
-            "recovers is normal and selling into it forfeits the advance. A "
-            "break on heavy volume that keeps closing near the lows, after the "
-            "stock is already far from its base, is distribution and the move "
-            "is over. Which is this?"),
+            "A mechanical rule has already decided to SELL this position "
+            "because it closed below its 50-day average. O'Neil's objection to "
+            "that rule is that leaders get shaken out on the way up: a brief "
+            "undercut on drying volume, with closes still finishing in the "
+            "upper part of their daily ranges, recovers and the advance "
+            "continues. Selling into one of those forfeits the move. Is this "
+            "such a shakeout, and should the sell be overridden?"),
         criteria={
-            "hold": ("A shakeout within an intact advance: the break is "
-                     "shallow or on unremarkable volume, recent closes sit in "
-                     "the upper part of their daily ranges, and the prior "
-                     "trend structure is undamaged."),
-            "sell": ("A breakdown: the decline is deep or persistent, recent "
-                     "closes sit near the lows of their ranges on heavy "
-                     "volume, and the advance no longer looks intact."),
-            "unclear": ("The supplied history does not settle it, or the "
-                        "signals point in opposite directions."),
+            "override": ("Yes, this is a shakeout. Recent closes still finish "
+                         "high in their ranges, volume on the decline is not "
+                         "heavy, and the advance looks intact."),
+            "let_it_sell": ("No, let the rule act. Closes are finishing near "
+                            "the lows, the decline is persistent or on heavy "
+                            "volume, or the position has given back its gain."),
+            "unclear": ("The supplied bars do not settle it. Let the rule act "
+                        "rather than guess."),
         }),
 }
 
@@ -411,8 +433,25 @@ def describe_position(r, gain_pct, days_held, peak_gain_pct, below_ma_days,
                   f"O'Neil's eight-week rule applies: {eight_week_left} "
                   f"session(s) of that hold remain.\n")
 
+    # sessions_left is None on a routine review: no rule is pending, so the
+    # position is not described as one the rules are about to sell and no
+    # deadline is offered. This used to be attempted by string-replacing the
+    # rendered prompt, which silently matched nothing -- every routine review
+    # still opened by telling Jev a mechanical sale was imminent.
+    pending = sessions_left is not None
+    opening = (
+        "An open position in a momentum portfolio has weakened, and the "
+        "mechanical rule is about to sell it.\n" if pending else
+        "An open position in a momentum portfolio is under routine review. "
+        "No rule is pending on it and nothing is about to force a sale.\n")
+    closing = (
+        f"- The only decision available is to keep the position for up to "
+        f"{sessions_left} more trading session(s); after that it is sold "
+        f"regardless of this answer." if pending else
+        f"- The position can be kept or closed; this answer decides it.")
+
     return (
-        f"An open position in a momentum portfolio has weakened.\n"
+        f"{opening}"
         f"- Held {days_held} trading days.\n"
         f"- Currently {gain_pct:+.1f}% from the entry price.\n"
         f"- At its best it was {peak_gain_pct:+.1f}% from entry; it has given "
@@ -428,9 +467,7 @@ def describe_position(r, gain_pct, days_held, peak_gain_pct, below_ma_days,
         f"- The broad market is in a {r['regime'].lower()} trend.\n"
         f"- A protective stop sits {stop_distance_pct:.1f}% below the current "
         f"price and will execute on its own if reached.\n"
-        f"- The only decision available is to keep the position for up to "
-        f"{sessions_left} more trading session(s); after that it is sold "
-        f"regardless of this answer."
+        f"{closing}"
         f"{seq}"
     )
 
@@ -468,3 +505,141 @@ def score_of(answer: dict, key: str) -> float:
     if not (v == v) or not (0.0 <= v <= 10.0):
         raise JevUnavailable(f"{key}: score out of range ({v})")
     return v
+
+
+# --------------------------------------------------------------------------
+# STOCK SELECTION. The architecture above hands Jev a shortlist the rules have
+# already reduced to ~0.3 names a day, so it can only rerank. Here code keeps
+# only what is mandatory -- index membership, tradability, and O'Neil's own
+# requirement that the stock be in an uptrend -- plus the factual event of a
+# close above the 13-week high. That leaves ~22 names a day for Jev to assess
+# and choose among. Quality is Jev's call, not a threshold in my code.
+# --------------------------------------------------------------------------
+# Criteria rebuilt from O'Neil's published numbers rather than recollection.
+# Sources consulted 2026-09-20 (see ONEIL_RULES.md for the full citations):
+#   prior uptrend ~30% before a base forms
+#   cup-with-handle  >= ~7 weeks, depth 12-33% in a normal market
+#   flat base        >= 5 weeks, depth < 15%
+#   double bottom    >= 7 weeks, depth < 40%, buy point is the middle peak
+#   handle           forms in the UPPER HALF of the base, drifts down on
+#                    contracting volume, at least one week
+#   breakout volume  >= 40% above average
+#   buy zone         up to 5% above the pivot; beyond that is extended
+#   third base and beyond fails more often (late-stage)
+#
+# KNOWN GAP: this project's pivot is a fixed 13-week high. That is the correct
+# buy point for a flat base, but NOT for a cup-with-handle (handle high) or a
+# double bottom (middle peak). The criteria therefore ask Jev to judge where
+# the buy point actually is, rather than assuming the 13-week high is it.
+ASSESS = {
+    "setup": Choice(
+        instructions=(
+            "This stock closed above the highest high of its prior 13 weeks. "
+            "Judge it against William O'Neil's base criteria. A base is a rest "
+            "inside an advance: roughly 30% or more of prior rise, then a "
+            "consolidation of a recognised shape, then a decisive move through "
+            "that consolidation's buy point on volume at least 40% above "
+            "average. The shapes and their limits: a flat base runs five weeks "
+            "or more and stays shallower than 15%; a cup, with or without a "
+            "handle, runs about seven weeks or more and is 12% to 33% deep in "
+            "a normal market; a double bottom runs seven weeks or more, is "
+            "less than 40% deep, and its buy point is the middle peak of the "
+            "W rather than the old high. A handle must form in the upper half "
+            "of the base and drift down on drying volume for at least a week."),
+        criteria={
+            "valid": (
+                "A consolidation of one of those shapes, inside its depth and "
+                "length limits, preceded by a real advance, and price is now "
+                "clearing that shape's buy point on volume clearly above "
+                "average, still within about 5% of the buy point."),
+            "developing": (
+                "A consolidation of a recognised shape is present but the move "
+                "is not yet a valid breakout: the buy point has not been "
+                "cleared, or it has been cleared on unremarkable volume, or a "
+                "handle is still forming, or the pattern is too young for its "
+                "type."),
+            "extended": (
+                "Price sits more than about 5% above the buy point of the "
+                "consolidation it came out of, so a buyer now pays materially "
+                "above where the breakout occurred."),
+            "faulty": (
+                "The shape fails O'Neil's limits: a consolidation deeper than "
+                "its type allows, wide and loose weekly ranges rather than an "
+                "orderly rest, a handle in the lower half of the base or one "
+                "that forms on rising volume, no real advance before the "
+                "pattern, or a pattern late in a long advance that has already "
+                "produced several bases."),
+            "insufficient": (
+                "The supplied bars do not span enough history to judge the "
+                "shape, or the pattern is ambiguous between types in a way "
+                "that changes the answer."),
+        }),
+    "supply": Noul(instructions=(
+        "Through the consolidation, did weekly volume run below its own "
+        "average -- supply drying up -- and then expand to at least about 40% "
+        "above average on the week price cleared the buy point?")),
+    "prior_advance": Noul(instructions=(
+        "Did the stock advance roughly 30% or more BEFORE this consolidation "
+        "began, so the pattern is a rest within a rise rather than a shape "
+        "forming at the bottom of a decline?")),
+}
+
+
+def assess(row, bars) -> dict:
+    """One candidate, judged on its own evidence."""
+    return ask(describe_shape(row, bars), ASSESS, "assess_v1")
+
+
+def select_question(labels: dict) -> dict:
+    """Build the day's selection. `labels` maps a candidate id to its one-line
+    description. Jev chooses one, or none -- the competitors are in the same
+    question, which is the part the reranking design never gave it."""
+    crit = dict(labels)
+    crit["none"] = ("None of these is worth the slot today; leave it in cash.")
+    return {"pick": Choice(
+        instructions=(
+            "A momentum portfolio following William O'Neil has one position "
+            "slot free. Each option below is a stock that closed above its "
+            "13-week high today, with its base assessment and current "
+            "standing. Choose the one to buy, or none."),
+        criteria=crit)}
+
+
+# --------------------------------------------------------------------------
+# HOLDING REVIEW. The override framing only lets Jev postpone a sale the
+# 50-day rule already triggered, so it can never sell a position the rule is
+# happy with. Here Jev reviews each holding on a cadence and decides on its
+# own evidence. Protective stops still fire in code regardless.
+# --------------------------------------------------------------------------
+HOLDING_REVIEW = {
+    "action": Choice(
+        instructions=(
+            "Review this open position the way William O'Neil reviewed his: a "
+            "leader is held while its advance stays intact, and sold when the "
+            "advance is over -- when it breaks its trend on heavy volume, "
+            "closes persistently near the lows of its daily ranges, or gives "
+            "back the gain it built. A brief undercut on drying volume that "
+            "still closes well up its range is a shakeout, and selling into "
+            "one forfeits the move. Which is this position doing?"),
+        criteria={
+            "hold": ("The advance is intact. Any weakness is shallow, volume "
+                     "on down days is unremarkable, and closes still finish in "
+                     "the upper part of their ranges."),
+            "sell": ("The advance is over. The decline is deep or persistent, "
+                     "recent closes finish near the lows, volume expands on "
+                     "the down days, or the position has surrendered its gain."),
+            "unclear": ("The supplied bars do not settle it."),
+        }),
+}
+
+
+def review_holding(row, gain_pct, days_held, peak_gain_pct, below_ma_days,
+                   stop_distance_pct, recent=None, pivot_distance_pct=None,
+                   eight_week_left=None) -> dict:
+    state = describe_position(row, gain_pct, days_held, peak_gain_pct,
+                              below_ma_days, sessions_left=None,
+                              stop_distance_pct=stop_distance_pct,
+                              recent=recent,
+                              pivot_distance_pct=pivot_distance_pct,
+                              eight_week_left=eight_week_left)
+    return ask(state, HOLDING_REVIEW, "holding_review_v2")
