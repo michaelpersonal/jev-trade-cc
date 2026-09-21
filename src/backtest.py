@@ -286,12 +286,22 @@ def weekly_bars(ticker: str, upto, weeks: int = 16):
 
 
 def _log(ledger, date, ticker, kind, status, baseline, action,
-         value=None, detail=None) -> None:
+         value=None, detail=None, conf=None, weak=None) -> None:
     """One immutable row per decision Jev was asked for, so a result can be
     traced back to what the model was asked and what the rule would have done."""
     ledger.append(dict(date=str(pd.Timestamp(date).date()), ticker=ticker,
                        kind=kind, status=status, baseline=baseline,
-                       action=action, value=value, detail=detail))
+                       action=action, value=value, detail=detail,
+                       # conf: how concentrated the answer was. Without it a
+                       # ledger cannot distinguish a confident call from a
+                       # near-coin-flip, which is the difference this whole
+                       # line of work turns on.
+                       conf=conf,
+                       # weak: was the mechanical rule already triggered? A
+                       # cadence review of a healthy holding and a review of a
+                       # weakened one are different populations and must not
+                       # be pooled when comparing keep rates.
+                       weak=weak))
 
 
 def index_by_date(sig: pd.DataFrame) -> dict:
@@ -507,7 +517,9 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                         _log(ledger, today, tkr, "review",
                              "abstain" if act == "unclear" else "ok",
                              baseline="hold" if p.below_ma_days < need else "sell",
-                             action=act, value=held)
+                             action=act, value=held,
+                             conf=d.get("action", {}).get("confidence"),
+                             weak=bool(p.below_ma_days >= need))
 
                     if act == "unclear":
                         # Declared policy, enforced here rather than falling

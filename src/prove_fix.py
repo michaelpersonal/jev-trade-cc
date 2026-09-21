@@ -99,19 +99,44 @@ def main() -> None:
     led = pd.DataFrame(r["ledger"])
     rev = led[led["kind"] == "review"]
     rev = rev[rev["status"].isin(["ok", "abstain"])]
-    keep = float((rev["action"] == "hold").mean()) if len(rev) else float("nan")
-    conf = np.nanmean([x for x in rev.get("conf", pd.Series(dtype=float))]) \
-        if "conf" in rev else float("nan")
-    print(f"  reviews answered       {len(rev)}")
-    print(f"  keep rate              {BASE['exit_keep']:.3f} (override) -> "
-          f"{keep:.3f}   target ~{BASE['neutral_keep']:.2f}")
-    b1 = keep > 0.20
-    print(f"  {'KEEP RATE RECOVERED' if b1 else 'STILL COLLAPSED -- premise still handed over'}")
+    if "conf" not in rev.columns:
+        raise RuntimeError("ledger carries no confidence; B2 cannot be tested")
+
+    # A cadence review of a healthy holding and a review of a weakened one are
+    # different questions. The 0.46 baseline was measured on WEAKENED
+    # positions only, so only that subset is comparable to it. Pooling them
+    # produced a 0.757 keep rate that looked like a pass and was not one.
+    weak = rev[rev["weak"] == True]                      # noqa: E712
+    healthy = rev[rev["weak"] == False]                  # noqa: E712
+    print(f"  reviews answered       {len(rev)}  "
+          f"({len(weak)} weakened, {len(healthy)} routine)")
+    for lab, grp, target in (("weakened", weak, BASE["neutral_keep"]),
+                             ("routine", healthy, None)):
+        if not len(grp):
+            continue
+        k = float((grp["action"] == "hold").mean())
+        print(f"  keep rate, {lab:<9} {k:.3f}"
+              + (f"   comparable baseline {target:.2f}" if target else
+                 "   (no baseline: this population never existed before)"))
+    b1 = float("nan")
+    if len(weak):
+        b1 = float((weak["action"] == "hold").mean())
+        print(f"  {'KEEP RATE RECOVERED' if b1 > 0.20 else 'STILL COLLAPSED'}"
+              f"   {BASE['exit_keep']:.3f} (override) -> {b1:.3f}")
+
+    cf = pd.to_numeric(rev["conf"], errors="coerce").dropna()
+    b2 = float(cf.mean()) if len(cf) else float("nan")
+    print(f"\n  B2 neutral confidence  {BASE['neutral_conf']:.3f} -> {b2:.3f}"
+          f"   (uniform over 3 = 0.333)")
+    b2_ok = b2 > BASE["neutral_conf"]
+    print(f"  {'EVIDENCE HELPED' if b2_ok else 'EVIDENCE DID NOT SHARPEN THE CALL'}")
     print(f"  run incomplete?        {r['incomplete']}  "
           f"(error rate {r['error_rate']:.1%})")
 
     print("\nsummary")
-    for lab, good in (("A entry state", a1 and a2), ("B exit framing", b1)):
+    for lab, good in (("A entry state", a1 and a2),
+                      ("B exit framing", b1 > 0.20),
+                      ("B2 exit evidence", b2_ok)):
         print(f"  {lab:<18} {'SUPPORTED' if good else 'NOT SUPPORTED'}")
     print(f"\nspend ${J.stats()['input_tokens']/1e6*0.042:.3f}")
     J.save_cache()

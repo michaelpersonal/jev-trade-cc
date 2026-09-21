@@ -98,23 +98,32 @@ flip. Fixing 1 without 2 yields an autonomous decider that is guessing.
       prompts longer, and the assessment pass is 22,398 requests. Price it on
       `--sample 300` first and report the projected full cost.
 - [x] **4.2** `test_timing.py` and `test_contracts.py` still pass.
-- [ ] **4.3** Re-run `run_exam.py`: ASSESS conformance and the selection call.
+- [x] **4.3** Re-run `run_exam.py`: ASSESS conformance and the selection call.
       **[ADDED IN REVIEW]** The first draft only re-ran the arms. A prompt
       change that improves returns and breaks conformance is not an
       improvement.
-- [ ] **4.4** Re-run the full assessment artifact (fingerprints change).
-- [ ] **4.5** Arms against the S&P.
-- [ ] **4.6** Paired jackknife. This is the verdict, not 4.5.
+- [x] **4.4** Re-run the full assessment artifact (fingerprints change).
+- [x] **4.5** Arms against the S&P.
+- [x] **4.6** Paired jackknife. This is the verdict, not 4.5.
 
-## BLOCKED 2026-09-21
+## RESULT 2026-09-21 (was blocked on credits; now run)
 
-4.4 onward cannot run: the TypeSafe account is out of credits. The full
-assessment pass returned HTTP 402 on 10,944 of 22,398 requests.
+All 17 items complete. The pre-registered sample proof passed on all three
+predictions (see prove_fix.py), the full assessment ran clean at 22,398/22,398
+with zero errors, and the exam holds conformance. The paired jackknife is the
+verdict and it does NOT support the headline:
 
-    402 Your organization has n[o credits]...
+    undeleted panel      Jev - rules = +$37,512
+    across 12 draws      mean +$4,048, sd $25,029, Jev ahead in 7 of 12
 
-Everything not requiring paid inference is complete (1.x, 2.x, 3.x, 4.1, 4.2).
-4.3, 4.4, 4.5 and 4.6 need credits and are the remaining work.
+Jev beating the S&P by $48,246 on the real panel is one favourable draw, not
+a demonstrated edge. What the fixes DID achieve is visible against the same
+measurement before them: the paired difference was -$23,315 with Jev behind
+in 11 of 12. The work moved a reliable loss to a coin flip, and did not
+produce a demonstrable gain.
+
+Note also that the paired standard deviation ($25,029) is LARGER than either
+arm alone ($17,952). Jev's decisions add variance rather than cancelling it.
 
 That failure also exposed a defect, now fixed: the manifest's `partial` flag
 records only whether --sample was used, so a run that exhausted its credits
