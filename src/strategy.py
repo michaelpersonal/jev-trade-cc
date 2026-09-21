@@ -69,6 +69,15 @@ NM_VOL_LO, NM_RS_LO = 1.15, 65
 NM_DEPTH_LO, NM_DEPTH_HI = 0.05, 0.45
 
 DEFER_MAX = 10            # sessions Jev may defer an exit; see deferral_contract.md
+# Consecutive abstentions allowed on one position in the autonomous exit mode
+# before the mechanical rule takes the decision back. Holds are NOT bounded:
+# holding a leader for months is the strategy working, and capping that would
+# force arbitrary sales. Repeated "I cannot tell" is the thing that must not
+# run forever.
+ABSTAIN_MAX = 3
+# A run whose required inference fails more often than this is reported as
+# incomplete rather than as a result.
+ERROR_RATE_MAX = 0.02
 
 REGIME_MODE = 2
 YELLOW_SLOTS = None       # slots allowed in YELLOW; None = MAX_POSITIONS // 2

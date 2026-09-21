@@ -30,17 +30,17 @@ agrees with it, confidently.
 - [ ] **1.1** Make `JEV_EXIT_MODE=2` (neutral `HOLDING_REVIEW`) the exit path.
       The standing stops stay in code and fire regardless: a calibrated
       probability is not a risk limit.
-- [ ] **1.2** Wire `pol.review_abstain`. It is declared in `policy.py` and
+- [x] **1.2** Wire `pol.review_abstain`. It is declared in `policy.py` and
       never read; `unclear` currently keeps the position by falling through an
       `if/elif`, which is the right outcome by accident. Record an abstention
       distinctly from a confident hold.
-- [ ] **1.3** An inference error must not become a hold.
+- [x] **1.3** An inference error must not become a hold.
       **[FIXED IN REVIEW]** The first draft said "don't hold" without saying
       what to do instead. Correct behaviour: fall back to the mechanical
       50-day rule, record it as a failure attributable to the run and not to
       Jev, and count it. A run whose error rate exceeds a declared threshold
       is reported as incomplete rather than as a result.
-- [ ] **1.4** Bound consecutive **abstentions**, not holds.
+- [x] **1.4** Bound consecutive **abstentions**, not holds.
       **[FIXED IN REVIEW]** The first draft said "bound consecutive holds".
       That is wrong and anti-O'Neil: holding a winning leader for months is
       the strategy working, and capping it would force arbitrary sales. What

@@ -81,5 +81,77 @@ line = [l for l in txt.split("\n") if "top of the base" in l]
 check("prompt states the frozen distance", line
       and f"{frozen:+.1f}%" in line[0], line[0].strip() if line else "missing")
 
+
+
+# --------------------------------------------------------------------------
+# Autonomous exit mode: the declared policy must be the executed one.
+# --------------------------------------------------------------------------
+print("\nautonomous exit mode (JEV_EXIT_MODE=2):")
+import compare as C          # noqa: E402
+import data as D             # noqa: E402
+import universe as U         # noqa: E402
+
+_sig = pd.read_parquet('../data/raw/signals_grouped.parquet')
+_idx, _memb = D.index_prices(), U.membership()
+_pan = pd.read_parquet('../data/raw/panel.parquet')
+
+
+def _run(answer, *, raises=False, end="2023-06-30"):
+    """Run the real loop with every review answered the same way."""
+    B.load_panel(_pan)
+    B.load_fundamentals(None)
+    C.apply_shipped()
+    S.JEV_ENTRY, S.JEV_EXIT = False, True
+    S.JEV_EXIT_MODE, S.JEV_SELECT, S.NEARMISS_MODE = 2, False, 3
+    real = J.ask
+
+    def fake(state, questions, kind):
+        if kind.startswith("holding_review"):
+            if raises:
+                raise J.JevUnavailable("simulated outage")
+            return {"action": {"choice": answer, "confidence": 0.9,
+                               "probabilities": {answer: 0.9}}}
+        return real(state, questions, kind)
+    J.ask = fake
+    try:
+        return B.run(_sig, _idx, _memb, start="2022-01-03", end=end)
+    finally:
+        J.ask = real
+
+
+r_unclear = _run("unclear")
+led = pd.DataFrame(r_unclear["ledger"])
+rev = led[led["kind"] == "review"]
+check("abstentions are recorded as abstentions, not as holds",
+      (rev["status"] == "abstain").any(),
+      f"{(rev['status']=='abstain').sum()} abstain rows")
+check("repeated abstention hands the decision back",
+      (rev["status"] == "abstain_expired").any(),
+      f"{(rev['status']=='abstain_expired').sum()} expiries")
+runs = rev[rev["status"] == "abstain_expired"]["value"]
+check("and only after the declared limit",
+      bool(len(runs)) and int(runs.max()) == S.ABSTAIN_MAX + 1,
+      f"expired at {int(runs.max()) if len(runs) else '-'} "
+      f"(ABSTAIN_MAX={S.ABSTAIN_MAX})")
+
+r_hold = _run("hold")
+led_h = pd.DataFrame(r_hold["ledger"])
+check("a confident hold is NOT bounded",
+      not (led_h[led_h["kind"] == "review"]["status"] == "abstain_expired").any(),
+      "holding a leader for months is the strategy working")
+
+r_err = _run("hold", raises=True)
+led_e = pd.DataFrame(r_err["ledger"])
+erows = led_e[(led_e["kind"] == "review") & (led_e["status"] == "error")]
+check("an inference failure is recorded as an error", len(erows) > 0,
+      f"{len(erows)} errors")
+check("and is NOT credited to Jev as a hold",
+      bool(len(erows)) and (erows["action"] == erows["baseline"]).all(),
+      "action equals the mechanical baseline")
+check("a run that could not infer is marked incomplete",
+      r_err["incomplete"] is True,
+      f"error_rate {r_err['error_rate']:.0%}")
+check("a run that could infer is not", r_unclear["incomplete"] is False)
+
 print("\n" + ("ALL PASS" if ok else "FAILURES ABOVE"))
 sys.exit(0 if ok else 1)

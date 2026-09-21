@@ -43,13 +43,14 @@ def _why_buy(rows, tkr) -> str:
 class Position:
     __slots__ = ("ticker", "shares", "entry", "entry_date", "entry_idx",
                  "stop", "target", "hold_until", "peak", "peak_high",
-                 "below_ma_days", "defer_start", "anchor")
+                 "below_ma_days", "defer_start", "anchor", "abstains")
 
     def __init__(self, ticker, shares, entry, entry_date, entry_idx,
                  anchor=None):
         # The base this position broke out of, frozen at the decision and
         # never recomputed. See anchor.py.
         self.anchor = anchor
+        self.abstains = 0   # consecutive 'unclear' reviews
         self.ticker, self.shares = ticker, shares
         self.entry, self.entry_date, self.entry_idx = entry, entry_date, entry_idx
         self.stop = entry * (1 - S.STOP_LOSS)
@@ -384,16 +385,48 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                         act = J.choice_of(d, "action",
                                           {"hold", "sell", "unclear"})
                     except Exception as exc:
+                        # An inference failure is not a decision to hold. It
+                        # hands the decision back to the mechanical rule and
+                        # is recorded against the RUN, never credited to Jev.
+                        # In this mode there is no other backstop, so treating
+                        # an outage as "hold" would silently keep every
+                        # position open and still print a final number.
                         errors[0] += 1
+                        mech = "sell" if p.below_ma_days >= need else "hold"
                         _log(ledger, today, tkr, "review", "error",
-                             baseline="hold", action="hold", detail=str(exc)[:120])
-                        act = "hold"
+                             baseline=mech, action=mech, detail=str(exc)[:120])
+                        act = "_fallback_" + mech
                     else:
-                        _log(ledger, today, tkr, "review", "ok",
+                        _log(ledger, today, tkr, "review",
+                             "abstain" if act == "unclear" else "ok",
                              baseline="hold" if p.below_ma_days < need else "sell",
                              action=act, value=held)
-                    if act == "sell":
-                        pending_sells.append((tkr, "Jev: advance over"))
+
+                    if act == "unclear":
+                        # Declared policy, enforced here rather than falling
+                        # through an if/elif and landing on the right answer
+                        # by accident. Repeated abstention is bounded; a
+                        # confident hold is not.
+                        p.abstains += 1
+                        if p.abstains > pol.abstain_max:
+                            act = ("sell" if p.below_ma_days >= need
+                                   else "hold")
+                            _log(ledger, today, tkr, "review", "abstain_expired",
+                                 baseline=act, action=act, value=p.abstains)
+                            # The episode is over: the mechanical rule has
+                            # taken this decision. Reset, so the next run of
+                            # abstentions is counted from zero rather than
+                            # re-expiring on every subsequent review.
+                            p.abstains = 0
+                        else:
+                            act = pol.review_abstain      # "keep"
+                    elif not act.startswith("_fallback_"):
+                        p.abstains = 0
+
+                    if act in ("sell", "_fallback_sell"):
+                        pending_sells.append(
+                            (tkr, "Jev: advance over" if act == "sell"
+                             else "50dma rule (inference failed)"))
                     elif act == "hold" and p.below_ma_days >= need:
                         jev_holds[0] += 1
                 continue
@@ -684,8 +717,17 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                        if np.isfinite(px(t, "close"))],
             trades=todays_trades))
 
+    asked = len([x for x in ledger if x.get("kind") in
+                 ("entry", "exit", "review", "select", "nearmiss")])
+    err_rate = (errors[0] / asked) if asked else 0.0
+    incomplete = err_rate > pol.error_rate_max
+    if incomplete:
+        print(f"  *** INCOMPLETE: {errors[0]} of {asked} required inferences "
+              f"failed ({err_rate:.1%} > {pol.error_rate_max:.1%}). This run "
+              f"is not a result. ***")
     return dict(daily=daily, trades=trades, equity=equity_curve, dates=dates,
                 jev_holds=jev_holds[0], jev_errors=errors[0], ledger=ledger,
+                error_rate=err_rate, incomplete=incomplete,
                 nm_taken=nm_taken, nm_total=sum(nm_taken.values()),
                 config=pol.as_record(),
                 final=equity_curve[-1] if equity_curve else capital)

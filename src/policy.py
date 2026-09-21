@@ -24,6 +24,8 @@ class Policy:
     nearmiss_mode: int
     review_every: int
     defer_max: int
+    abstain_max: int
+    error_rate_max: float
     review_abstain: str     # what an unclear cadence review does
     max_positions: int
     profit_target: float | None
@@ -68,7 +70,8 @@ def resolve() -> Policy:
     return Policy(
         jev_entry=bool(S.JEV_ENTRY), jev_select=bool(S.JEV_SELECT),
         exit_path=path, nearmiss_mode=nm, review_every=S.REVIEW_EVERY,
-        defer_max=S.DEFER_MAX, review_abstain=REVIEW_ABSTAIN,
+        defer_max=S.DEFER_MAX, abstain_max=S.ABSTAIN_MAX,
+        error_rate_max=S.ERROR_RATE_MAX, review_abstain=REVIEW_ABSTAIN,
         max_positions=S.MAX_POSITIONS, profit_target=S.PROFIT_TARGET,
         trail_pct=S.TRAIL_PCT, trail_atr=S.TRAIL_ATR,
         regime_mode=S.REGIME_MODE, yellow_slots=S.YELLOW_SLOTS,
