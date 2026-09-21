@@ -435,7 +435,8 @@ EXIT_DECISION = {
 
 def describe_position(r, gain_pct, days_held, peak_gain_pct, below_ma_days,
                       sessions_left, stop_distance_pct, recent=None,
-                      pivot_distance_pct=None, eight_week_left=None) -> str:
+                      pivot_distance_pct=None, eight_week_left=None,
+                      earnings=None, rs_change=None, holding=None) -> str:
     """Anonymised state of an open position under review.
 
     `recent` is the trailing daily sequence. Without it the question asks about
@@ -469,6 +470,31 @@ def describe_position(r, gain_pct, days_held, peak_gain_pct, below_ma_days,
     # deadline is offered. This used to be attempted by string-replacing the
     # rendered prompt, which silently matched nothing -- every routine review
     # still opened by telling Jev a mechanical sale was imminent.
+    # Plan 2.3/2.4: the shakeout-versus-breakdown call turns on whether the
+    # DOWN days carry the volume. Ten bars contained that implicitly and never
+    # stated it; a long holding cannot be shown bar by bar without flooding
+    # the prompt, so the whole holding is summarised and the recent window is
+    # shown in full.
+    hold_block = ""
+    if holding:
+        d, u = holding.get("dn_vol"), holding.get("up_vol")
+        cmp_ = ("not determinable" if not (d == d and u == u) else
+                f"{d:.2f}x on down days against {u:.2f}x on up days, so volume "
+                f"{'RISES' if d > u * 1.1 else 'falls' if d < u * 0.9 else 'is even'}"
+                f" when it falls")
+        hold_block = (
+            # The peak is already stated above from the position's own
+            # record; restating it from a second computation would put two
+            # numbers for one fact in the same prompt.
+            f"\nAcross the whole holding ({holding['sessions']} sessions):\n"
+            f"- The deepest give-back from any peak was "
+            f"{holding['max_giveback']:.1f}%.\n"
+            f"- Volume: {cmp_}.\n"
+            f"- {holding['heavy_down']} heavy-volume down days against "
+            f"{holding['heavy_up']} heavy-volume up days.")
+    earn_block = ("" if not earnings else
+                  f"\n\nEarnings, as filed with the SEC and public today:\n"
+                  f"{earnings}")
     pending = sessions_left is not None
     opening = (
         "An open position in a momentum portfolio has weakened, and the "
@@ -494,12 +520,18 @@ def describe_position(r, gain_pct, days_held, peak_gain_pct, below_ma_days,
         f"- Price is {(1-r['close']/r['hi52'])*100:.0f}% below its 52-week high.\n"
         f"{extra}"
         f"- Relative strength rank versus all other stocks: "
-        f"{int(r['rs_rating'])} of 99.\n"
+        f"{int(r['rs_rating'])} of 99"
+        + ("" if rs_change is None else
+           f", {'up' if rs_change > 0 else 'down' if rs_change < 0 else 'flat'}"
+           f" {abs(rs_change):.0f} places over the last 40 sessions")
+        + ".\n"
         f"- The broad market is in a {r['regime'].lower()} trend.\n"
         f"- A protective stop sits {stop_distance_pct:.1f}% below the current "
         f"price and will execute on its own if reached.\n"
         f"{closing}"
+        f"{hold_block}"
         f"{seq}"
+        f"{earn_block}"
     )
 
 
@@ -510,11 +542,13 @@ def decide_entry(row, bars, earnings: str | None = None) -> dict:
 
 def decide_exit(row, gain_pct, days_held, peak_gain_pct, below_ma_days,
                 sessions_left, stop_distance_pct, recent=None,
-                pivot_distance_pct=None, eight_week_left=None) -> dict:
+                pivot_distance_pct=None, eight_week_left=None,
+                earnings=None, rs_change=None, holding=None) -> dict:
     state = describe_position(row, gain_pct, days_held, peak_gain_pct,
                               below_ma_days, sessions_left, stop_distance_pct,
-                              recent, pivot_distance_pct, eight_week_left)
-    return ask(state, EXIT_DECISION, "exit_decision")
+                              recent, pivot_distance_pct, eight_week_left,
+                              earnings, rs_change, holding)
+    return ask(state, EXIT_DECISION, "exit_decision_v2")
 
 
 # --- F3: a malformed or missing answer is not a decision -----------------
@@ -727,11 +761,14 @@ HOLDING_REVIEW = {
 
 def review_holding(row, gain_pct, days_held, peak_gain_pct, below_ma_days,
                    stop_distance_pct, recent=None, pivot_distance_pct=None,
-                   eight_week_left=None) -> dict:
+                   eight_week_left=None, earnings=None, rs_change=None,
+                   holding=None) -> dict:
     state = describe_position(row, gain_pct, days_held, peak_gain_pct,
                               below_ma_days, sessions_left=None,
                               stop_distance_pct=stop_distance_pct,
                               recent=recent,
                               pivot_distance_pct=pivot_distance_pct,
-                              eight_week_left=eight_week_left)
-    return ask(state, HOLDING_REVIEW, "holding_review_v2")
+                              eight_week_left=eight_week_left,
+                              earnings=earnings, rs_change=rs_change,
+                              holding=holding)
+    return ask(state, HOLDING_REVIEW, "holding_review_v3")

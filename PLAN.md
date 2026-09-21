@@ -53,14 +53,14 @@ agrees with it, confidently.
 Neutral framing runs at 0.38 confidence against 0.33 uniform -- near a coin
 flip. Fixing 1 without 2 yields an autonomous decider that is guessing.
 
-- [ ] **2.1** Earnings into `describe_position`, from the same point-in-time
+- [x] **2.1** Earnings into `describe_position`, from the same point-in-time
       SEC facts the entry uses. O'Neil sells on earnings deterioration.
-- [ ] **2.2** Relative-strength **direction**, not only today's rank. The
+- [x] **2.2** Relative-strength **direction**, not only today's rank. The
       level is not the sell signal; the deterioration is.
-- [ ] **2.3** State the up-day versus down-day volume comparison explicitly.
+- [x] **2.3** State the up-day versus down-day volume comparison explicitly.
       It is the shakeout/breakdown discriminator and is currently only
       implicit in ten bars.
-- [ ] **2.4** Widen the bar window, with a cap.
+- [x] **2.4** Widen the bar window, with a cap.
       **[FIXED IN REVIEW]** The first draft said "life of the position",
       which is unbounded -- a 200-session holding would emit 200 lines and
       inflate every prompt. Correct design: the last 20 daily bars in full,

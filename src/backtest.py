@@ -141,7 +141,60 @@ def load_panel(panel: pd.DataFrame) -> None:
     _PANEL = {t: g.set_index("date") for t, g in p.groupby("ticker")}
 
 
-def recent_bars(ticker: str, upto, entry: float, days: int = 10):
+def since_entry(ticker: str, entry_date, upto, entry: float) -> dict | None:
+    """Compact summary of the whole holding, so the bar window can stay short.
+
+    Plan 2.4: the window was ten fixed days, which cannot show whether a
+    60-session advance is ending. Emitting every daily bar instead would put
+    200 lines in the prompt of a long holding. This carries the shape of the
+    full holding in a few numbers, alongside the last 20 bars in detail.
+    """
+    g = _PANEL.get(ticker)
+    if g is None or entry <= 0:
+        return None
+    g = g[(g.index >= pd.Timestamp(entry_date)) & (g.index <= upto)]
+    if len(g) < 3:
+        return None
+    c = g["close"].to_numpy()
+    v = g["vol_rel"].fillna(1.0).to_numpy()
+    up = c[1:] > c[:-1]
+    dn = c[1:] < c[:-1]
+    peak = np.maximum.accumulate(c)
+    return dict(
+        sessions=len(g),
+        peak_gain=(peak[-1] / entry - 1) * 100,
+        max_giveback=float(np.max((peak - c) / peak) * 100),
+        up_vol=float(v[1:][up].mean()) if up.any() else float("nan"),
+        dn_vol=float(v[1:][dn].mean()) if dn.any() else float("nan"),
+        heavy_down=int(((v[1:] > 1.25) & dn).sum()),
+        heavy_up=int(((v[1:] > 1.25) & up).sum()))
+
+
+def rs_direction(by_date, dates, i, ticker, lookback: int = 40) -> float | None:
+    """Change in relative-strength RANK over `lookback` sessions.
+
+    Plan 2.2: the prompt carried today's rank only. O'Neil sells on
+    DETERIORATING relative strength -- the direction is the signal, the level
+    is not. rs_rating lives in the signals table rather than the price panel,
+    so this reads the same by_date the loop already holds; a helper hung off
+    _PANEL would have returned None forever and nothing would have said so.
+    """
+    j = i - lookback
+    if j < 0:
+        return None
+    then = by_date.get(dates[j])
+    now = by_date.get(dates[i])
+    if then is None or now is None:
+        return None
+    if ticker not in then.index or ticker not in now.index:
+        return None
+    a, b = then.at[ticker, "rs_rating"], now.at[ticker, "rs_rating"]
+    if not (np.isfinite(a) and np.isfinite(b)):
+        return None
+    return float(b - a)
+
+
+def recent_bars(ticker: str, upto, entry: float, days: int = 20):
     """Trailing daily bars rebased so the entry price is 100.
 
     The exit question asks about closes near the lows and undercuts that
@@ -381,7 +434,11 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                                 (c / piv - 1) * 100
                                 if np.isfinite(piv) and piv > 0 else None),
                             eight_week_left=(p.hold_until - i
-                                             if p.hold_until is not None else None))
+                                             if p.hold_until is not None else None),
+                            earnings=earnings_state(tkr, today),
+                            rs_change=rs_direction(by_date, dates, i, tkr),
+                            holding=since_entry(tkr, p.entry_date, today,
+                                                p.entry))
                         act = J.choice_of(d, "action",
                                           {"hold", "sell", "unclear"})
                     except Exception as exc:
@@ -465,7 +522,11 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                                     if np.isfinite(piv) and piv > 0 else None),
                                 eight_week_left=(
                                     p.hold_until - i
-                                    if p.hold_until is not None else None))
+                                    if p.hold_until is not None else None),
+                                earnings=earnings_state(tkr, today),
+                                rs_change=rs_direction(by_date, dates, i, tkr),
+                                holding=since_entry(tkr, p.entry_date, today,
+                                                    p.entry))
                             act = J.choice_of(
                                 d, "action",
                                 {"override", "let_it_sell", "unclear"})
