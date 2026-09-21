@@ -13,41 +13,91 @@
 
 ## 先做个实验：问她"今天星期几"
 
-我随手问了一句。她答 **"Monday"**，那天恰好真是星期一。
+这个实验你自己就能跑，五分钟，总共花不到 0.0001 美元。
+完整代码在 [`examples/what_day_is_it.py`](examples/what_day_is_it.py)，
+核心就这么几行：
 
-看起来没问题。但看一眼置信度：
+```python
+from typesafe_sdk import TypeSafeClient, Choice, Noul
+
+client = TypeSafeClient(api_key=os.environ["TYPESAFE_API_KEY"])
+DAYS = ("Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday")
+
+# 同一个问题，两套选项：一套逼她必须挑一天，一套允许她说"说不出来"
+FORCED    = Choice(instructions="What day of the week is it today?",
+                   criteria={d: f"Today is {d}." for d in DAYS})
+WITH_EXIT = Choice(instructions="What day of the week is it today?",
+                   criteria={**{d: f"Today is {d}." for d in DAYS},
+                             "cannot_tell": "Nothing in the text says what day "
+                                            "it is, and it cannot be worked out."})
+
+client.system_one(state=" ", questions={"weekday": FORCED}, model="jev-1.13.0")
+```
+
+跑出来是这样（你的数字会有小幅出入，原因见下面第 6 条）：
+
+**① 不给任何背景，也不给退路**
 
 ```
-今天星期几？（什么背景都不给）
-  → Monday   置信度 0.12
-  七选一随机猜，期望值是 0.14
+weekday   Monday   置信度 0.14      ← 七选一瞎猜的基线正好是 0.14
+          Monday 0.26  Wednesday 0.23  Sunday 0.17
 ```
 
-**比瞎猜还低。** 概率几乎平摊在七天上。她不是"知道"今天是星期一，
-她是**被迫必须从七个选项里挑一个**，于是挑了个最像默认答案的。
+她答了"Monday"。那天恰好真是星期一——但**置信度和瞎猜一样**，
+概率几乎平摊在七天上。她不是知道，她是**被迫必须从七个里挑一个**。
 
-然后我只做了一个改动——在选项里加上"说不出来"：
+**② 同样不给背景，但在选项里加一个"说不出来"**
 
 ```
-选项里加上 cannot_tell   → cannot_tell   置信度 1.00
-背景里写"现在是周四下午"   → Thursday      置信度 1.00
+weekday   cannot_tell   置信度 1.00
+          cannot_tell 1.00   Thursday 0.00   Saturday 0.00
 ```
 
 **她一直都知道自己不知道。她只是没有地方可以说出来。**
 
-再看这一组，更直接：我在背景里写上"今天是星期一"，然后问她两个问题。
+**③ 把答案放进背景里**
 
 ```
-今天是星期一吗？          → 0.96
-这件事能从文本验证吗？     → 0.11
+state: "It is Thursday afternoon."
+weekday   Thursday   置信度 1.00
 ```
 
-她一边以 0.96 的把握说"是"，一边以 0.11 说"我根本没法核实"。
+**④ 背景里写什么，她就信什么**
 
-**Jev 没有时钟，没有日历，没有记忆。她所知道的一切，
-都是你在这一次请求里递给她的那段文字。**
+```
+state: "Today is Monday."   →   is_monday  0.96
+state: "Today is Friday."   →   is_monday  0.00
+```
 
-整套实验花了 0.00005 美元。
+同一个模型、同一个问题。**唯一的变量是那句背景。**
+
+**⑤ 背景自相矛盾时**
+
+```
+state: "Today is Monday. Today is Friday."
+weekday   Monday   置信度 0.39
+          Monday 0.48   Friday 0.41   Wednesday 0.09
+```
+
+她没有硬选一边装作确定，而是把概率分给两个说法，置信度自己掉下来。
+**她的诚实全部写在置信度里。**
+
+**⑥ 同一个请求连问六次**
+
+```
+Wed/0.13   Mon/0.16   Mon/0.12   Mon/0.15   Mon/0.13   Mon/0.13
+```
+
+**她不是确定性的。** 而且注意第一次的赢家是 Wednesday——
+当置信度贴近基线时，**连"哪个选项赢"本身都是不稳定的**。
+这也正是为什么你不该盯着答案看。
+
+（我自己就栽在这上面：这篇文章早先的版本里引用过一个 0.11 的数字，
+后来重跑时拿到 0.22、0.49、0.60。那个问题问得有歧义，
+所以答案不稳定。上面留下的都是我反复跑过、稳定复现的部分。）
+
+**结论：Jev 没有时钟、没有日历、没有记忆。
+她所知道的一切，都是你在这一次请求里递给她的那段文字。**
 
 ---
 
@@ -87,6 +137,10 @@ Jev 被问了 62 次要不要卖，62 次都说卖。
 七选一的基线是 0.14，五选一是 0.20，三选一是 0.33。
 我的形态识别当时是 0.257——听起来像个数，
 但对照 0.20 的基线，就知道那基本是在猜。
+
+而且别忘了上面实验⑥：**她不是确定性的。**
+置信度接近基线的时候，同一个请求连赢家都会变。
+所以"她选了 A"这件事,在低置信度下**根本不构成信息**。
 
 ### 3. 千万不要把结论写进状态里
 
