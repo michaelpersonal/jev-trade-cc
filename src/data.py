@@ -17,6 +17,7 @@ Output: data/raw/panel.parquet  (long: date, ticker, open/high/low/close/volume)
 from __future__ import annotations
 
 import hashlib
+import json
 import time
 from pathlib import Path
 
@@ -109,6 +110,22 @@ if __name__ == "__main__":
     missing = sorted(set(tickers) - got)
     print(f"panel: {len(got)} tickers, {len(df):,} rows, "
           f"{df['date'].min().date()} -> {df['date'].max().date()}")
-    print(f"no data for {len(missing)}: {missing[:25]}")
+    # This gap is survivorship bias, not a nuisance. yfinance does not serve
+    # tickers that stopped trading, so the names it silently omits are exactly
+    # the ones that were acquired, taken private or failed -- the outcomes a
+    # momentum backtest most needs to see. Printing it once and continuing is
+    # how it survived unnoticed through every result this project published.
+    # Write it down where the pipeline can read it, and say how bad it is.
+    frac = len(missing) / len(tickers)
+    (RAW / "panel_missing.json").write_text(json.dumps(
+        {"universe": len(tickers), "fetched": len(got),
+         "missing": missing, "missing_frac": round(frac, 4)}, indent=2))
+    print(f"no data for {len(missing)} ({frac:.1%}): {missing}")
+    if frac > 0.02:
+        print(f"\n*** SURVIVORSHIP GAP: {frac:.1%} of the point-in-time "
+              f"universe has no price data. ***\n*** These names cannot be "
+              f"bought and are absent from the RS ranking population. Any "
+              f"result\n*** built on this panel is biased by their absence. "
+              f"See SURVIVORSHIP.md.\n")
     idx = index_prices()
     print(f"SPX: {len(idx)} bars -> {idx.index.max().date()}")
