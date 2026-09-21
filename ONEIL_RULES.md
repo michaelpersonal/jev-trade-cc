@@ -14,7 +14,7 @@ code is wrong.
 | Handle | forms in the **upper half** of the base, drifts **down** on contracting volume, ≥ 1 week |
 | Breakout volume | ≥ 40–50% above average |
 | Buy zone | up to ~5% above the pivot; beyond that the stock is extended |
-| Protective stop | 7–8% below the buy point |
+| Protective stop | 7–8% below the **purchase price** |
 | Base count | third base and beyond fails more often — the story is widely known |
 
 ## Known gaps between these rules and this implementation
@@ -61,3 +61,16 @@ Defects 2 and 3 invalidated the assessment run that was in progress when the
 review arrived; it was discarded and re-run. Defect 3 is the one that matters
 most for anything measured before this date: the model was answering questions
 about a stock it had been given a false fact about.
+
+
+## Correction, 2026-09-21
+
+This table previously said the protective stop sits 7–8% below the **buy
+point**. It is 7–8% below the **price actually paid**. The distinction matters
+precisely when it is easiest to get wrong: buying 4% above the pivot and then
+stopping 7% below the pivot is an 11% loss, not the 7% the rule exists to cap.
+
+`Position.stop` in `src/backtest.py` has always used the fill price, so the
+implementation was already correct and was NOT changed to match the sentence.
+Only the sentence was wrong. Source: IBD's 20 rules,
+<https://shop.investors.com/images/promotional/20-Rules_102808.pdf>.

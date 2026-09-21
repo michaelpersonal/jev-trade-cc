@@ -35,48 +35,76 @@ def _bars(closes, vols, width):
 
 
 def case(dim: str, arm: str, seed: int) -> tuple[pd.DataFrame, dict]:
-    """One exam case. `arm` is 'good' (matches the method) or 'bad'."""
+    """One exam case. `arm` is 'good' (matches the method) or 'bad'.
+
+    Two invariants the earlier version did not hold, and which made its
+    results uninterpretable:
+
+    * **The paired arms differ only in the named dimension.** Noise is drawn
+      once per seed and shared, so the volume pair really is the same price
+      path with different volume. Previously each arm re-drew, so all sixteen
+      bars differed and a "volume" pair was two unrelated charts.
+    * **The pivot is derived, not asserted.** It is the highest high of the
+      bars actually generated before the breakout week, and the final close is
+      then placed a chosen distance above it. Previously pivot was hardcoded
+      to 100 while the generated highs ran past 102, so the "good" extension
+      cases did not clear their own stated breakout level at all.
+    """
     rng = np.random.default_rng(seed)
     n = WEEKS
-    # A default textbook shape: advance, 12% rest, breakout at the pivot.
+    noise = rng.normal(0, .004, n - 1)        # shared by both arms
+    wide = rng.normal(0, .035, 9)             # shared; used only by tightness
+
     adv = np.linspace(72, 100, 6)
     rest = np.concatenate([np.linspace(100, 88, 4), np.linspace(88, 99, 5)])
-    closes = np.concatenate([adv, rest, [101.5]])[:n]
-    closes = closes * (1 + rng.normal(0, .004, n))
-    vols = np.concatenate([np.full(6, 1.0), np.full(9, .62), [1.9]])[:n]
-    width = np.concatenate([np.full(6, .012), np.linspace(.020, .008, 9), [.014]])[:n]
-    pivot = 100.0
+    closes = np.concatenate([adv, rest])[:n - 1] * (1 + noise)
+    vols = np.concatenate([np.full(6, 1.0), np.full(9, .62)])[:n - 1]
+    width = np.concatenate([np.full(6, .012),
+                            np.linspace(.020, .008, 9)])[:n - 1]
+
+    break_vol, extension = 1.9, 0.015         # good-arm defaults
 
     if dim == "volume" and arm == "bad":
-        # identical price path; supply never dries up and the break is quiet
-        vols = np.concatenate([np.full(6, 1.0), np.full(9, 1.45), [0.85]])[:n]
+        vols = np.concatenate([np.full(6, 1.0), np.full(9, 1.45)])[:n - 1]
+        break_vol = 0.85                      # quiet break, heavy base
     elif dim == "extension" and arm == "bad":
-        # same base, but price has already run well beyond the pivot
-        closes = np.concatenate([adv, rest, [101.5]])[:n] * (1 + rng.normal(0, .004, n))
-        closes[-1] = 118.0
-        closes[-2] = 112.0
+        extension = 0.18                      # far beyond the buy zone
     elif dim == "tightness" and arm == "bad":
-        # same depth and length; ranges stay wide and erratic to the end
-        width = np.concatenate([np.full(6, .012), np.full(9, .042), [.040]])[:n]
-        closes[6:15] = closes[6:15] * (1 + rng.normal(0, .035, 9))
+        width = np.concatenate([np.full(6, .012), np.full(9, .042)])[:n - 1]
+        closes = closes.copy()
+        closes[6:15] = closes[6:15] * (1 + wide[:len(closes[6:15])])
     elif dim == "advance" and arm == "bad":
-        # no prior uptrend: the "base" sits at the bottom of a decline
-        closes = np.concatenate([np.linspace(132, 100, 6), rest, [101.5]])[:n]
-        closes = closes * (1 + rng.normal(0, .004, n))
+        closes = np.concatenate([np.linspace(132, 100, 6),
+                                 rest])[:n - 1] * (1 + noise)
 
-    bars = _bars(closes, vols, width)
-    # Moving averages, so the prompt's stack line describes these cases too.
-    # A "good" arm passes O'Neil's trend template; the no-prior-advance arm
-    # genuinely fails it, which is the truth the template line now reports.
+    prior = _bars(closes, vols, width)
+    # The buy point is the highest high of the base, measured on the bars that
+    # exist. Everything downstream is stated relative to this number.
+    pivot = float(prior["high"].max())
+    final_close = pivot * (1 + extension)
+    bars = pd.concat([prior, _bars_one(prior["close"].iloc[-1], final_close,
+                                       break_vol, .014)], ignore_index=True)
+
     up = not (dim == "advance" and arm == "bad")
-    c = float(closes[-1])
+    c = final_close
+    base = prior.iloc[6:]          # the consolidation, after the advance
     row = dict(pivot=pivot, close=c, rs_rating=88.0,
-               hi52=float(max(closes.max(), 101.5)), lo52=float(closes.min()) * .72,
+               base_depth=float(1 - base["low"].min() / pivot),
+               base_len_wk=float(len(base)),
+               hi52=float(bars["high"].max()), lo52=float(bars["low"].min()) * .72,
                dollar_vol=140e6, group_pct=0.86, regime="GREEN",
                ma50=c * (0.95 if up else 0.99),
                ma150=c * (0.88 if up else 1.02),
                ma200=c * (0.82 if up else 1.06), ma200_up=up)
     return bars, row
+
+
+def _bars_one(prev_close, close, vol_rel, w):
+    """The breakout week, opening from the prior close."""
+    o = float(prev_close)
+    return pd.DataFrame([dict(open=o, high=max(o, close) * (1 + w),
+                              low=min(o, close) * (1 - w), close=float(close),
+                              vol_rel=float(vol_rel))])
 
 
 DIMS = ("volume", "extension", "tightness", "advance")

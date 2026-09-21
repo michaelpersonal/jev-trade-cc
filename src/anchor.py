@@ -38,10 +38,29 @@ class Anchor:
 
     # What Jev concluded, when Jev was consulted. Empty for mechanical arms.
     pattern: str | None = None      # Jev's pattern identification
+    pattern_conf: float | None = None   # ... and how concentrated that was
     setup: str | None = None        # valid / developing / extended / faulty ...
     supply: float | None = None
     prior_advance: float | None = None
     prompt_fp: str | None = None    # fingerprint of the criteria that judged it
+
+    def pattern_phrase(self) -> str:
+        """The identification, stated with the certainty it actually had.
+
+        Jev identifies these patterns at about 0.25 confidence over five
+        options, against 0.20 for a uniform guess. Presenting the winning
+        label as a fact would turn a near-coin-flip into an assertion, which
+        is the failure mode this whole module exists to prevent.
+        """
+        if not self.pattern:
+            return "base pattern not identified"
+        name = self.pattern.replace("_", " ")
+        c = self.pattern_conf
+        if c is None:
+            return name
+        if c < 0.35:
+            return f"possibly a {name}, though the shape is not clear-cut"
+        return f"{name} (identified with {c:.0%} confidence)"
 
     def distance_pct(self, price: float) -> float:
         """Where `price` sits relative to THIS base's top, in percent."""
@@ -63,6 +82,7 @@ def from_row(row, ticker: str, decided_on, source: str,
         base_top=float(row["pivot"]),
         base_depth=float(row["base_depth"]),
         base_len_wk=float(row["base_len_wk"]),
-        pattern=a.get("pattern"), setup=a.get("setup"),
+        pattern=a.get("pattern"), pattern_conf=a.get("pattern_conf"),
+        setup=a.get("setup"),
         supply=a.get("supply"), prior_advance=a.get("prior_advance"),
         prompt_fp=prompt_fp)

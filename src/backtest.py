@@ -103,7 +103,9 @@ def load_assessments(df, manifest: dict | None = None,
     if "status" in df.columns:
         df = df[df["status"] == "ok"]
     _ASSESS = {(pd.Timestamp(r.date), r.ticker): dict(
-        setup=r.setup, supply=r.supply, prior_advance=r.prior_advance)
+        setup=r.setup, supply=r.supply, prior_advance=r.prior_advance,
+        pattern=getattr(r, "pattern", None),
+        pattern_conf=getattr(r, "pattern_conf", None))
         for r in df.itertuples(index=False)}
 
 
@@ -538,14 +540,17 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                     lbl = chr(65 + n)          # A, B, C ... never the ticker
                     key[lbl] = tkr
                     aa = _ASSESS.get((today, tkr), {})
+                    anc = A.from_row(rr, tkr, today, "jev_select", aa,
+                                     _ASSESS_FP)
                     opts[lbl] = (
-                        f"relative strength {int(rr['rs_rating'])} of 99, "
-                        f"{(1-rr['close']/rr['hi52'])*100:.0f}% below its "
-                        f"52-week high, {(rr['close']/rr['pivot']-1)*100:+.1f}% "
-                        f"past the top of a base {rr['base_depth']*100:.0f}% "
-                        f"deep, today's volume {rr['vol_ratio']:.1f}x average, "
-                        f"supply dried up {aa.get('supply', 0):.2f}, prior "
-                        f"advance {aa.get('prior_advance', 0):.2f}")
+                        f"{anc.pattern_phrase()}, "
+                        f"{anc.base_len_wk:.0f} weeks long and "
+                        f"{anc.base_depth*100:.0f}% deep; close is "
+                        f"{anc.distance_pct(rr['close']):+.1f}% from its buy "
+                        f"point; volume today {rr['vol_ratio']:.1f}x average; "
+                        f"supply dried up and expanded {aa.get('supply', 0):.2f}; "
+                        f"prior advance {aa.get('prior_advance', 0):.2f}; "
+                        f"relative strength {int(rr['rs_rating'])} of 99")
                 state = "\n".join(f"Option {k}: {v}" for k, v in opts.items())
                 try:
                     ans = J.ask(state, J.select_question(opts), "select_v1")

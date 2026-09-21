@@ -80,7 +80,8 @@ def main(limit: int | None = None, sample: int | None = None) -> None:
         if bars is None or len(bars) < 8:
             nohist[0] += 1
             return dict(base, status="no_history", setup=None, conf=None,
-                        supply=None, prior_advance=None)
+                        supply=None, prior_advance=None, pattern=None,
+                        pattern_conf=None)
         try:
             a = J.assess(r, bars)
             out = dict(base,
@@ -89,12 +90,16 @@ def main(limit: int | None = None, sample: int | None = None) -> None:
                        conf=a["setup"].get("confidence"),
                        supply=a["supply"]["noul"],
                        prior_advance=a["prior_advance"]["noul"],
+                       pattern=J.choice_of(a, "pattern",
+                                           set(J.ASSESS["pattern"].criteria)),
+                       pattern_conf=a["pattern"].get("confidence"),
                        status="ok")
         except Exception as exc:
             k = f"{type(exc).__name__}: {str(exc)[:70]}"
             failed[k] = failed.get(k, 0) + 1
             return dict(base, status="error", setup=None, conf=None,
-                        supply=None, prior_advance=None)
+                        supply=None, prior_advance=None, pattern=None,
+                        pattern_conf=None)
         done[0] += 1
         if done[0] % 2000 == 0:
             print(f"  {done[0]:,}/{len(rows):,}  {time.time()-t0:.0f}s", flush=True)

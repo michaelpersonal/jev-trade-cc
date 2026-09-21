@@ -1,57 +1,105 @@
-import sys; sys.path.insert(0,'/Users/michaelguo/projects/jev-trade-cc/src')
-from concurrent.futures import ThreadPoolExecutor
-import exam_oneil as E, jev as J
+"""Conformance exam for the prompts that actually decide trades.
 
-cases = E.build()
-print(f"{len(cases)} cases ({len(cases)//2} pairs, "
-      f"{len(cases)//len(E.DIMS)//2} per dimension)")
-def ask(c):
-    a = J.decide_entry(c["row"], c["bars"])
-    return dict(c, at_pivot=a["at_pivot"]["noul"], supply=a["supply"]["noul"],
-                orderly=J.score_of(a, "orderly"),
-                prior_advance=a["prior_advance"]["noul"])
-with ThreadPoolExecutor(max_workers=8) as ex:
-    res = list(ex.map(ask, cases))
-J.save_cache()
+The previous runner called ENTRY_DECISION, which the selection configuration
+does not use. It therefore could not say anything about whether the current
+selector understands O'Neil. This exercises ASSESS -- the question set that
+produces every assessment the selector reads -- and the selection call itself,
+on fixtures whose invariants are asserted rather than assumed.
+"""
+from __future__ import annotations
 
-FIELD = dict(volume="supply", extension="at_pivot", tightness="orderly",
-             advance="prior_advance")
-print(f"\n{'dimension':<12}{'judgment':<16}{'good':>7}{'bad':>7}  pairs ranked right")
-print("-"*62)
-for d in E.DIMS:
-    f = FIELD[d]
-    g = {r["k"]: r[f] for r in res if r["dim"]==d and r["arm"]=="good"}
-    b = {r["k"]: r[f] for r in res if r["dim"]==d and r["arm"]=="bad"}
-    ok = sum(g[k] > b[k] for k in g)
-    print(f"{d:<12}{f:<16}{sum(g.values())/len(g):>7.2f}"
-          f"{sum(b.values())/len(b):>7.2f}  {ok}/{len(g)}")
-print()
-gate = [r for r in res if r["arm"]=="bad"
-        and (r["at_pivot"] < .5 or r["prior_advance"] < .5)]
-bad = [r for r in res if r["arm"]=="bad"]
-print(f"code gates reject {len(gate)}/{len(bad)} bad arms "
-      f"({100*len(gate)/len(bad):.0f}%)")
-print(f"spend ${J.stats()['input_tokens']/1e6*0.042:.3f}")
-
-print("\n=== end-to-end entry_policy, not just the two gates ===")
-raw = {(r["dim"], r["k"], r["arm"]): {
-        "supply": {"noul": r["supply"]}, "at_pivot": {"noul": r["at_pivot"]},
-        "prior_advance": {"noul": r["prior_advance"]},
-        "orderly": {"score": r["orderly"]}} for r in res}
+import json
 import statistics
-print(f"{'dimension':<12}{'good arm buys':>15}{'bad arm buys':>14}"
-      f"{'conviction good':>17}{'bad':>8}")
-print("-"*66)
-tot_g = tot_b = 0
-for d in E.DIMS:
-    g = [J.entry_policy(raw[(d,k,'good')]) for k in range(12)]
-    b = [J.entry_policy(raw[(d,k,'bad')]) for k in range(12)]
-    ng = sum(x[0]=="buy" for x in g); nb = sum(x[0]=="buy" for x in b)
-    tot_g += ng; tot_b += nb
-    cg = statistics.mean(x[1] for x in g if x[0]=="buy") if ng else float('nan')
-    cb = statistics.mean(x[1] for x in b if x[0]=="buy") if nb else float('nan')
-    print(f"{d:<12}{ng:>12}/12{nb:>11}/12{cg:>17.3f}{cb:>8.3f}")
-print("-"*66)
-print(f"{'TOTAL':<12}{tot_g:>12}/48{tot_b:>11}/48")
-print(f"\npolicy rejects {48-tot_b}/48 bad arms ({100*(48-tot_b)/48:.0f}%), "
-      f"admits {tot_g}/48 good arms ({100*tot_g/48:.0f}%)")
+import sys
+from concurrent.futures import ThreadPoolExecutor
+
+import pandas as pd
+
+import anchor as A
+import exam_oneil as E
+import jev as J
+
+FIELD = {"volume": "supply", "advance": "prior_advance"}
+
+
+def main() -> None:
+    cases = E.build()
+    print(f"{len(cases)} cases, {len(cases)//2} pairs, "
+          f"ASSESS fingerprint {J.question_fingerprint(J.ASSESS, 'assess')}\n")
+
+    # assert the fixture invariants before spending anything on them
+    for c in cases:
+        piv, bars = c["row"]["pivot"], c["bars"]
+        assert abs(piv - bars["high"].iloc[:-1].max()) < 1e-9, "pivot not derived"
+        if c["arm"] == "good":
+            assert c["row"]["close"] > piv, "good arm does not clear its pivot"
+    print("fixture invariants hold: pivot derived from the bars, good arms "
+          "clear it\n")
+
+    def ask(c):
+        a = J.assess(c["row"], c["bars"])
+        return dict(c,
+                    setup=J.choice_of(a, "setup", set(J.ASSESS["setup"].criteria)),
+                    pattern=J.choice_of(a, "pattern", set(J.ASSESS["pattern"].criteria)),
+                    pattern_conf=a["pattern"].get("confidence"),
+                    setup_conf=a["setup"].get("confidence"),
+                    supply=a["supply"]["noul"],
+                    prior_advance=a["prior_advance"]["noul"])
+
+    with ThreadPoolExecutor(max_workers=8) as ex:
+        res = list(ex.map(ask, cases))
+    J.save_cache()
+
+    print("directional judgments (the two Nouls ASSESS actually asks):")
+    print(f"  {'dimension':<12}{'judgment':<16}{'good':>7}{'bad':>7}{'pairs right':>13}")
+    for d, f in FIELD.items():
+        g = {r["k"]: r[f] for r in res if r["dim"] == d and r["arm"] == "good"}
+        b = {r["k"]: r[f] for r in res if r["dim"] == d and r["arm"] == "bad"}
+        ok = sum(g[k] > b[k] for k in g)
+        print(f"  {d:<12}{f:<16}{statistics.mean(g.values()):>7.2f}"
+              f"{statistics.mean(b.values()):>7.2f}{ok:>9}/{len(g)}")
+
+    print("\nsetup label, by dimension and arm:")
+    df = pd.DataFrame(res)
+    print("  " + pd.crosstab([df["dim"], df["arm"]], df["setup"])
+          .to_string().replace("\n", "\n  "))
+
+    print("\nthe extension pair is the one ASSESS has an explicit label for:")
+    e = df[df["dim"] == "extension"]
+    for arm in ("good", "bad"):
+        v = e[e["arm"] == arm]["setup"].value_counts().to_dict()
+        print(f"  {arm:<5} {v}")
+
+    print(f"\npattern identification: mean confidence "
+          f"{df['pattern_conf'].mean():.2f} over "
+          f"{len(J.ASSESS['pattern'].criteria)} options "
+          f"(uniform would be {1/len(J.ASSESS['pattern'].criteria):.2f})")
+    print("  " + df["pattern"].value_counts().to_string().replace("\n", "\n  "))
+
+    # --- the selection call, on the same fixtures -------------------------
+    print("\nselection: one sound in-zone base against one extended one")
+    wins = 0
+    for k in range(12):
+        good, _ = E.case("extension", "good", 1000 + k)
+        gr = E.case("extension", "good", 1000 + k)[1]
+        br = E.case("extension", "bad", 1000 + k)[1]
+        opts, key = {}, {}
+        for lbl, r in (("A", gr), ("B", br)):
+            anc = A.from_row(r, "X", pd.Timestamp("2024-01-02"), "jev_select",
+                             {"pattern": "cup", "pattern_conf": 0.5})
+            key[lbl] = "sound" if r is gr else "extended"
+            opts[lbl] = (f"{anc.pattern_phrase()}, {anc.base_len_wk:.0f} weeks "
+                         f"long and {anc.base_depth*100:.0f}% deep; close is "
+                         f"{anc.distance_pct(r['close']):+.1f}% from its buy "
+                         f"point; relative strength 88 of 99")
+        state = "\n".join(f"Option {a}: {b}" for a, b in opts.items())
+        pick = J.choice_of(J.ask(state, J.select_question(opts), "select_v1"),
+                           "pick", set(opts) | {"none"})
+        wins += key.get(pick, "none") == "sound"
+    J.save_cache()
+    print(f"  chose the in-zone base over the extended one: {wins}/12")
+    print(f"\nspend ${J.stats()['input_tokens']/1e6*0.042:.3f}")
+
+
+if __name__ == "__main__":
+    main()

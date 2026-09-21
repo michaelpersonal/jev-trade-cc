@@ -602,6 +602,34 @@ ASSESS = {
                 "shape, or the pattern is ambiguous between types in a way "
                 "that changes the answer."),
         }),
+    # Which pattern this is, asked separately from whether it is tradable.
+    # The two were collapsed into one label, so a chart could be judged
+    # "extended" with nothing recording WHAT was extended, and the
+    # identification never survived Phase A: the selection prompt then
+    # recomputed a 65-session rolling high and presented it as "the base".
+    # Carried on the Anchor from here on.
+    "pattern": Choice(
+        instructions=(
+            "Which of William O'Neil's base patterns does the consolidation "
+            "before the most recent bar most resemble? Judge the shape only; "
+            "whether it is tradable is asked separately."),
+        criteria={
+            "flat_base": ("A shallow sideways rest, under about 15% deep, "
+                          "holding a tight range for five weeks or more."),
+            "cup": ("A rounded decline and recovery, roughly 12% to 33% deep "
+                    "over about seven weeks or more, with no pause below the "
+                    "old high before the most recent bar."),
+            "cup_with_handle": ("The same rounded shape, but after recovering "
+                                "it drifts down in a short, shallow handle on "
+                                "lighter volume before the most recent bar."),
+            "double_bottom": ("A W: a low, a bounce, then a second low that "
+                              "undercuts the first, then a recovery. Its buy "
+                              "point is the middle peak of the W, not the "
+                              "high of the pattern."),
+            "none": ("No recognisable base: a straight advance, a descent, "
+                     "or shapeless chop."),
+        }),
+
     "supply": Noul(instructions=(
         "Through the consolidation, did weekly volume run below its own "
         "average -- supply drying up -- and then expand to at least about 40% "
@@ -627,9 +655,23 @@ def select_question(labels: dict) -> dict:
     return {"pick": Choice(
         instructions=(
             "A momentum portfolio following William O'Neil has one position "
-            "slot free. Each option below is a stock that closed above its "
-            "13-week high today, with its base assessment and current "
-            "standing. Choose the one to buy, or none."),
+            "slot free, and one purchase may be made today. Each option is a "
+            "stock that closed above the highest high of its prior 13 weeks. "
+            "Each carries the base pattern already identified for it, how "
+            "long that base ran and how deep it was, how far the close now "
+            "sits above that base's buy point, whether volume dried up "
+            "through the base and expanded on the breakout, and whether a "
+            "real prior advance preceded it.\n\n"
+            "Prefer the stock whose base is the soundest example of its own "
+            "pattern and whose entry is closest to its buy point: O'Neil's "
+            "buy zone runs from the buy point to about 5% above it, and "
+            "beyond that the position is chasing. A sound base bought late "
+            "is worse than a slightly plainer base bought on time. Prefer "
+            "evidence over relative strength: a high rank does not redeem a "
+            "faulty or extended pattern.\n\n"
+            "Choose none when no option is both sound and still in its buy "
+            "zone. A slot left in cash costs nothing; a bad entry costs the "
+            "slot and the loss. Choose one, or none."),
         criteria=crit)}
 
 
