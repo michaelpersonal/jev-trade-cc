@@ -250,7 +250,8 @@ body.embed .wrap { padding-block: 14px 14px; }
       fixed and a regression test now guards the timing boundary; repairing them cost
       6.6 points. Separately, the entry screen was relaxed to admit near-misses,
       because the strict version produced only 22 buys a year against the 39 needed
-      to keep five slots full. Read the caveat on that below before trusting it.
+      to keep five slots full. The result below is one draw; read the caveat
+      before trusting the margin.
       Pre-repair outputs are kept in <code>data/pre_repair/</code>.</div>
     <p class="lede">Jan 3, 2022 &rarr; Sep 18, 2026. $100,000 starting capital, long only, no
       margin, no leverage. The benchmark is the same $100,000 put into the S&amp;P 500 on day
@@ -701,16 +702,29 @@ body.embed .wrap { padding-block: 14px 14px; }
     `touch that, which is where the next round of work belongs.`;
 
   $('caveat').innerHTML =
-    `Relaxing the screen is what takes this past the index, and it should be read `+
-    `with care. Of the <b>54 names the relaxed screen uniquely traded, aggregate `+
-    `profit is $1,807</b> &mdash; while a single position, MRVL at +125.9%, `+
-    `contributed <b>$25,468</b>. The other 53 lost roughly $23,700 between them. `+
-    `Both the strict and relaxed versions are carried by a handful of trades: strip `+
-    `the best five from either and both lose about $27,000&ndash;30,000, and the `+
-    `median trade is around &minus;4%. That is O'Neil's own design working as `+
-    `intended &mdash; cut losses, let a few winners pay for everything &mdash; but `+
-    `it means the margin over the index rests on one name, and the honest test is `+
-    `whether it survives on data that does not contain it.`;
+    `This page shows <b>one draw</b>, and the honest measurement is the spread `+
+    `around it. The book holds five positions and makes about 22 buys a year, so `+
+    `which stocks it happens to catch dominates the outcome. To size that, `+
+    `<code>src/jackknife.py</code> deletes 49 tickers from the universe &mdash; `+
+    `the same number genuinely missing from the price data &mdash; rebuilds every `+
+    `signal, and re-runs <em>both</em> arms on the identical panel, differencing `+
+    `them within each draw.<br><br>`+
+    `On the undeleted panel Jev beats the mechanical rules by <b>+$37,512</b>. `+
+    `Across twelve draws the paired difference is <b>+$4,048</b>, standard `+
+    `deviation <b>$25,029</b>, with Jev ahead in <b>seven of twelve</b>. Seven of `+
+    `twelve is what a coin does: <b>Jev does not beat the rules by any margin this `+
+    `experiment can resolve</b>, and the figure at the top of this page is a `+
+    `favourable draw rather than an edge.<br><br>`+
+    `What the work did achieve is visible only against the same measurement taken `+
+    `before it. The paired difference used to be <b>&minus;$23,315</b> with Jev `+
+    `behind in eleven of twelve &mdash; significant under a sign test. Giving Jev `+
+    `the evidence it was missing, and removing a conclusion that had been asserted `+
+    `inside its own exit prompt, moved it from <b>reliably worse</b> than the rules `+
+    `to <b>indistinguishable</b> from them. That is real and it is not an edge.<br><br>`+
+    `One risk note: the paired standard deviation ($25,029) exceeds either arm's `+
+    `own ($17,952). Jev's decisions <b>add</b> variance rather than cancelling it, `+
+    `so outcomes spread wider with the model in the loop &mdash; even though the `+
+    `drawdown on this particular panel was shallower.`;
 
   const X = D.experiments;
   if(X){

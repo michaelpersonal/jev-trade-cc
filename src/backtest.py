@@ -139,6 +139,26 @@ def load_assessments(df, manifest: dict | None = None,
         for r in df.itertuples(index=False)}
 
 
+def prepare(*, assessments: bool = False) -> pd.DataFrame:
+    """Load every input a run needs, and return the signals.
+
+    Runners used to each remember their own list: load_panel here,
+    load_fundamentals there, load_assessments somewhere else. run_all.py
+    loaded the panel and not the fundamentals, so the web page would have been
+    generated from prompts with the earnings silently missing while the README
+    quoted numbers from prompts that had them. One entry point, one list.
+    """
+    sig = pd.read_parquet(ROOT / "data" / "raw" / "signals_grouped.parquet")
+    load_panel(pd.read_parquet(ROOT / "data" / "raw" / "panel.parquet"))
+    fp = ROOT / "data" / "raw" / "fundamentals.parquet"
+    load_fundamentals(pd.read_parquet(fp) if fp.exists() else None)
+    if assessments:
+        ap = ROOT / "data" / "raw" / "jev_assessments.parquet"
+        load_assessments(pd.read_parquet(ap), json.loads(
+            ap.with_suffix(".manifest.json").read_text()))
+    return sig
+
+
 def load_fundamentals(df: pd.DataFrame | None) -> None:
     """Point-in-time SEC earnings. Absent is allowed; silently wrong is not."""
     global _FUND

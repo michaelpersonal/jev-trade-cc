@@ -33,9 +33,11 @@ def config(slots: int, target: float | None):
 def main() -> None:
     # signals_grouped carries the group ranks AND the near-miss column; it is
     # the single source of truth for every runner.
-    sig = pd.read_parquet(ROOT / "data" / "raw" / "signals_grouped.parquet")
+    # One entry point for every input; see backtest.prepare(). This used to
+    # load the panel only, so the page was built from prompts with no earnings
+    # in them while the README quoted runs that had them.
+    sig = B.prepare()
     idx = D.index_prices()
-    B.load_panel(pd.read_parquet(ROOT / "data" / "raw" / "panel.parquet"))
     memb = U.membership()
 
     def cfg(target=None, tpct=None, tatr=None, slots=5, jev=True):
@@ -48,6 +50,10 @@ def main() -> None:
 
     cfg(tpct=0.15)
     primary = B.run(sig, idx, memb)
+    if primary.get("incomplete"):
+        raise RuntimeError(
+            f"primary run is incomplete (error rate "
+            f"{primary['error_rate']:.1%}); refusing to publish it")
     cfg(target=0.25)                # O'Neil as written, kept for contrast
     variant = B.run(sig, idx, memb)
     cfg(tpct=0.15)
