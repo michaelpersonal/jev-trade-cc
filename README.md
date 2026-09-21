@@ -4,25 +4,58 @@ A point-in-time backtest of a **William O'Neil momentum strategy**, 2022-01-03
 to 2026-09-18, $100,000, long only, benchmarked against the S&P 500.
 
 **[Jev](https://typesafe.ai) — TypeSafe's System One model — picks the entries
-and judges the exits.** Deterministic code owns the data, the signals, the stops
-and the fills, and never delegates risk. It finished at **$171,060** against the
-index's $159,500, at a shallower drawdown.
+and decides the exits.** Deterministic code owns the data, the signals, the
+stops and the fills, and never delegates risk.
 
 ![Architecture](docs/architecture/architecture.png)
 
 ## Result
 
-| | Final | Profit | CAGR | Max drawdown | Return ÷ vol |
-|---|---|---|---|---|---|
-| **Jev deciding** | **$171,060** | **+$71,060** | **+12.1%** | **−19.7%** | **0.72** |
-| Rules only, O'Neil's 20–25% target | $106,500 | +$6,500 | +1.3% | −20.2% | 0.09 |
-| S&P 500 buy & hold | $159,500 | +$59,500 | +10.4% | −25.4% | 0.61 |
+| | Final | Profit | Max drawdown |
+|---|---|---|---|
+| **Jev entry + exit** | **$207,746** | **+$107,746** | **−15.9%** |
+| Rules only, no Jev | $170,234 | +$70,234 | −20.8% |
+| Rules + mechanical earnings gate | $159,395 | +$59,395 | −23.1% |
+| S&P 500 buy & hold | $159,500 | +$59,500 | −25.4% |
 
-113 closed trades, 32.7% win rate, profit factor 1.5. Jev makes ~124 decisions
-per run at a total cost under **$0.06**.
+**Do not cite that first row as an edge.** It is one draw from a wide
+distribution, and this repository measures the distribution rather than
+reporting the draw.
 
-Read [`NEARMISS_RESULT.md`](NEARMISS_RESULT.md) before citing the margin over
-the index: it leans heavily on one position (MRVL, +125.9%).
+### What the measurement actually says
+
+The portfolio holds 5 positions and makes ~22 buys a year, so which stocks it
+happens to catch dominates the outcome. To size that, `src/jackknife.py`
+deletes 49 tickers from the universe — the same number that are genuinely
+missing from the price data — rebuilds every signal, and re-runs **both** arms
+on the identical deleted panel, differencing them within each draw.
+
+```
+undeleted panel      Jev − rules = +$37,512
+across 12 draws      mean +$4,048   sd $25,029   Jev ahead in 7 of 12
+```
+
+Seven of twelve is what a coin does. **Jev does not beat the mechanical rules
+by any margin this experiment can resolve.**
+
+What the work *did* achieve is only visible against the same measurement taken
+before it:
+
+| | mean paired difference | Jev ahead in |
+|---|---|---|
+| before the prompt and contract fixes | **−$23,315** | 1 of 12 |
+| after | **+$4,048** | 7 of 12 |
+
+Jev used to be *reliably worse* than the rules. It is now indistinguishable
+from them. That is a real, measured improvement, and it is not an edge.
+
+One risk characteristic: the paired standard deviation ($25,029) exceeds
+either arm's own ($17,952). Jev's decisions **add** variance rather than
+cancelling it, so outcomes spread wider with the model in the loop — even
+though the drawdown on this particular panel was smaller.
+
+Jev makes ~790 decisions per run. A full run costs about **$0.12**; rebuilding
+the 22,398-row assessment artifact costs about **$1.35**.
 
 ## How Jev is used
 
@@ -31,41 +64,92 @@ calibrated probabilities in 70–500 ms. It cannot be fine-tuned and does not
 learn between calls — every call is stateless, and its specialization comes
 entirely from the rules supplied in the request.
 
-Four narrow judgments, asked in one call over the same anonymised weekly bars:
+**Entry.** Five narrow judgments over the same anonymised evidence — 16 weekly
+bars, 20 daily bars into the breakout, and the company's SEC earnings as filed:
 
 | Question | Primitive | Role |
 |---|---|---|
-| `supply` | `Noul` | Did volume contract through the base, then expand on the break? |
-| `orderly` | `Score` 0–4 | How tight are the weekly ranges? |
-| `at_pivot` | `Noul` | At the breakout level, or already run past it? **Hard gate.** |
-| `prior_advance` | `Noul` | Resting from a rise, or forming in a decline? **Hard gate.** |
+| `setup` | `Choice` | Valid / developing / faulty / insufficient base |
+| `pattern` | `Choice` | Flat base, cup, cup with handle, double bottom, none |
+| `earnings` | `Noul` | Does profit growth meet O'Neil's 25% test? |
+| `supply` | `Noul` | Volume contracting through the base, expanding on the break? |
+| `prior_advance` | `Noul` | Resting from a rise, or forming in a decline? |
 
-Weights and gates are **policy and live in code** (`jev.entry_policy`), not in
-the model — so a weight can change without re-running inference, and any trade
-can be traced to the judgments behind it.
+**Exit.** Jev reviews each holding on a cadence and decides hold or sell on its
+own evidence. There is no mechanical rule for it to veto.
+
+Weights, gates and the buy zone are **policy and live in code**
+(`jev.entry_policy`, `strategy.BUY_ZONE_MAX_PCT`), not in the model. The 7%
+stop and the 15% trailing stop are standing orders that fire regardless of what
+Jev thinks: a calibrated probability is not a risk limit.
 
 Every `state` is anonymised: **no ticker, no date, no absolute price.** A model
 with a 2026 cutoff knows what happened in this window; showing it a symbol would
 defeat every other point-in-time safeguard in the project.
 
+### The thing that mattered most: Jev knows only what it is told
+
+Ask Jev what day it is with nothing in the state and it answers "Monday" at
+**0.12 confidence** — below the 0.14 you get from guessing. Give it a
+`cannot_tell` option and it answers that, at **1.00**. Put "today is Thursday"
+in the state and it answers Thursday, at 1.00. It has no clock. It knows what
+you hand it.
+
+Two distinct failures follow from that, and this project had both.
+
+**Assert a conclusion in the state and Jev ratifies it.** The exit prompt used
+to open *"a mechanical rule has already decided to SELL this position — should
+it be overridden?"* Measured across cached answers on the same positions, with
+only the wording differing:
+
+| framing | keeps the position | mean confidence |
+|---|---|---|
+| neutral — "which is this doing?" | 46.0% | 0.38 |
+| override — "should the sell be overridden?" | **2.4%** | **0.90** |
+
+Jev was not judging the chart. It was agreeing with a sentence, confidently —
+exactly as it answers 0.96 that today is Monday while answering 0.11 that it
+could verify that.
+
+**Withhold evidence and the distribution goes flat.** `strategy.py` declared
+the C and A of CAN SLIM out of reach because "yfinance cannot supply
+point-in-time fundamentals for delisted names." True of yfinance, false of
+EDGAR: every XBRL fact carries the date it was *filed*, so the facts visible on
+day *t* are exactly those with `filed <= t`. On the 353 breakouts this strategy
+took, O'Neil's 25% quarterly earnings test separates 60-day forward returns by
+**4.8 points (permutation p = 0.0095)**. Given those figures, Jev's judgment
+agrees with the arithmetic on **95%** of a 289-row sample.
+
+Both fixes were validated on a **$0.05 sample with the predictions committed to
+git beforehand** (`src/prove_fix.py`), so a disappointing result could not be
+reinterpreted afterwards as a success:
+
+| | before | after |
+|---|---|---|
+| `pattern` confidence (uniform 0.200) | 0.257 | **0.297** |
+| undecided Nouls (within ±0.15 of 0.50) | 45.4% | **37.0%** |
+| exit keep rate, weakened positions | 2.4% | **28.6%** |
+| exit confidence, weakened (uniform 0.333) | 0.380 | **0.676** |
+
 ### Does Jev actually understand O'Neil?
 
 Tested separately from profitability, because a correct pattern reading can
 still lose money. [`src/exam_oneil.py`](src/exam_oneil.py) generates 48 paired
-cases that differ in exactly one dimension, so the label follows from how the
-bars were built rather than from anyone's judgment.
+cases whose invariants hold **by construction**: noise is drawn once per seed
+and shared between the arms, so a volume pair really is one price path with two
+volume profiles, and the pivot is derived from the generated highs rather than
+asserted.
 
-| Dimension | Judgment | Good | Bad | Pairs ranked correctly |
-|---|---|---|---|---|
-| Volume dry-up | `supply` | 0.89 | 0.16 | 100% |
-| Extension past the pivot | `at_pivot` | 0.70 | 0.40 | 100% |
-| Tightness of the base | `orderly` | 2.70 | 1.67 | 100% |
-| Prior advance | `prior_advance` | 0.93 | 0.30 | 100% |
+| Test | Result |
+|---|---|
+| `supply` on the volume pairs | 0.90 vs 0.15 — **12/12** |
+| `prior_advance` on the advance pairs | 0.88 vs 0.51 — **12/12** |
+| Selection: sound in-zone base vs extended one | **12/12** |
+| `pattern` confidence on clean fixtures | 0.43 (uniform 0.20) |
 
-An earlier version failed two of these: it bought bases forming at the bottom of
-a decline 100% of the time, and barely registered buying 18% above the pivot.
-Both were defects in the prompt, not the model — the criteria never mentioned
-either rule. See [`codex-oneil-prompt-review.md`](codex-oneil-prompt-review.md).
+An earlier version of this exam tested questions the shipped strategy never
+called, on fixtures whose "good" cases did not clear their own stated breakout
+level. See [`codex-rereview.md`](codex-rereview.md).
 
 ## Honesty machinery
 
@@ -76,12 +160,33 @@ This repo is mostly an apparatus for not fooling yourself.
   `src/test_timing.py` proves a later close cannot change an earlier fill, and
   is itself proven to fail against the original defect.
 - **Point-in-time universe.** Index membership is read from the Wikipedia
-  revision live on each date, so delisted names are still present. RS is ranked
-  only against that day's members.
+  revision live on each date. RS is ranked only against that day's members.
+  **49 of 635 members (7.7%) have no price data** because yfinance does not
+  serve delisted tickers — see [`SURVIVORSHIP.md`](SURVIVORSHIP.md). The gap
+  cannot be closed with the available providers, so it is measured instead.
 - **Frozen contracts.** `prereg_*.md`, `rubric.md`, `deferral_contract.md` and
   `policy_contract.md` are written before the runs they govern.
-- **Bounded delegation.** Jev may defer a mechanical exit at most 10 sessions;
-  the 7% stop and 15% trailing stop fire regardless.
+- **Carried contract.** `anchor.py` freezes what was concluded about a setup at
+  the decision and carries it forward. The base a position broke out of used to
+  be recomputed from a rolling 65-session high, which climbs with the stock: ten
+  sessions after one real breakout the prompt said −3.3% when the truth was
+  +0.1%. The sign was wrong, not just the magnitude.
+- **One policy resolution.** `policy.py` turns the switches into the policy that
+  executes, once. `JEV_EXIT_MODE=2` used to fire without consulting `JEV_EXIT`,
+  and the result's config recorded neither.
+- **Artifact provenance.** Assessment files carry a manifest — question
+  fingerprint, model, coverage, per-row status — and the loader refuses one
+  written by different criteria, or below `COVERAGE_MIN`. A run that exhausted
+  its API credits half way wrote 51% coverage and would otherwise have loaded as
+  a complete universe.
+- **Bounded delegation.** Jev may defer a mechanical exit at most 10 sessions,
+  and may abstain at most `ABSTAIN_MAX` times in a row before the rule takes the
+  decision back. Confident holds are **not** bounded: holding a leader for
+  months is the strategy working. The 7% stop and 15% trailing stop fire
+  regardless.
+- **Failure is not a decision.** An inference error hands the call back to the
+  mechanical rule and is charged to the run, never credited to Jev. A run whose
+  error rate exceeds `ERROR_RATE_MAX` prints *"this run is not a result."*
 - **Reproducible.** `run_jev.py --replay` serves only from cache and reproduces
   every figure with zero network calls.
 - **Pre-repair outputs** are kept in `data/pre_repair/` and must not be cited.
@@ -97,6 +202,10 @@ Each cost real work; see [`help-me-design.md`](help-me-design.md).
   pre-registered framings, all null — `help-me-design.md` §5).
 - Jev reads SEC filings well (F1 0.931 on guidance withdrawal) but trading on
   it has no decision value — the ceiling test fails too (`GUIDANCE_EVAL.md`).
+- A mechanical earnings gate **hurts**, costing $10,839, even though the same
+  criterion separates forward returns at p = 0.0095. The book holds 5 positions
+  and makes ~22 buys a year, so a real per-signal edge cannot be expressed.
+  More slots or more candidates, not more prompt work, is the open lever.
 
 ## Run it
 
@@ -108,13 +217,23 @@ echo "TYPESAFE_API_KEY=..." > .env          # gitignored
 .venv/bin/python src/universe.py            # PIT index membership
 .venv/bin/python src/sectors.py             # PIT GICS
 cd src
-../.venv/bin/python data.py                 # ~586 tickers of daily bars
-../.venv/bin/python backtest.py             # signals
-../.venv/bin/python exam_oneil.py           # comprehension exam
-../.venv/bin/python run_jev.py              # all configurations + decision ledger
-../.venv/bin/python run_all.py              # web/data.js for the replay page
-../.venv/bin/python test_timing.py          # six guard tests
+../.venv/bin/python data.py                 # ~586 tickers of daily bars; shouts
+                                            #   if the survivorship gap > 2%
+../.venv/bin/python fundamentals.py         # PIT SEC earnings, by filing date
+../.venv/bin/python test_timing.py          # 6 timing / integration guards
+../.venv/bin/python test_contracts.py       # 27 anchor / policy / exit guards
+../.venv/bin/python prove_fix.py            # ~$0.05 pre-registered sample proof
+../.venv/bin/python jev_select.py           # ~$1.35 full assessment artifact
+../.venv/bin/python run_exam.py             # conformance exam
+../.venv/bin/python compare.py              # the five arms
+../.venv/bin/python jackknife.py 12         # the verdict
 ```
+
+**Spend discipline.** Changing any prompt changes its fingerprint and forces a
+full 22,398-row re-ask. Batch every prompt change, validate on
+`jev_select.py --sample 300` (about 3¢), and spend a full pass only when the
+wording is frozen. Re-running an *unchanged* prompt is free — it is served from
+cache.
 
 Strategy parameters are at the top of `src/strategy.py`.
 
@@ -129,13 +248,21 @@ src/groups.py       industry-group relative strength
 src/macro.py        macro regime from traded proxies
 src/edgar.py        SEC filing corpus with acceptance timestamps
 src/jev.py          the Jev boundary — anonymised state, cached, policy in code
+src/anchor.py       the carried contract — what was concluded, frozen
+src/policy.py       one resolution of the switches into the executed policy
+src/fundamentals.py point-in-time SEC XBRL earnings, keyed on filing date
 src/exam_oneil.py   strategy-comprehension exam, 48 paired cases
+src/run_exam.py     runs the exam against the questions that actually ship
+src/prove_fix.py    pre-registered sample proof of the state/framing fixes
+src/compare.py      the fixed five-arm comparison
+src/jackknife.py    paired deletion experiment — the verdict
 src/backtest.py     day-by-day simulation
 src/walkforward.py  18m train / 6m test / 6m step
 src/experiments.py  ablation runner
 src/run_jev.py      supported entry point; writes the decision ledger
 src/run_all.py      driver; writes web/data.js
 src/test_timing.py  timing and integration guards
+src/test_contracts.py  anchor, policy and autonomous-exit guards
 web/index.html      animated replay page
 docs/architecture/  diagram trio — index.html, PNG, prompt.md
 ```
