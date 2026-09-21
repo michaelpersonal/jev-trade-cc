@@ -34,7 +34,17 @@ def eligible(sig: pd.DataFrame) -> pd.DataFrame:
     return w[m]
 
 
-def main(limit: int | None = None) -> None:
+def main(limit: int | None = None, sample: int | None = None) -> None:
+    """`sample` draws a fixed-seed random sample instead of running the pool.
+
+    A full pass is 22,398 requests and about $1.60. The criteria prose is the
+    part of this system that actually gets iterated, so validating a wording
+    change against the whole pool means paying for the whole pool every time.
+    A 500-row sample costs about four cents and is enough to see a label
+    distribution move. `limit` takes the FIRST n rows, which are all 2022 and
+    therefore one market; prefer `sample`. Sample runs write to their own file
+    and never overwrite the real assessments.
+    """
     sig = pd.read_parquet(ROOT / "data" / "raw" / "signals_grouped.parquet")
     B.load_panel(pd.read_parquet(ROOT / "data" / "raw" / "panel.parquet"))
     reg = S.market_regime(D.index_prices())["regime"]
@@ -45,11 +55,15 @@ def main(limit: int | None = None) -> None:
     keep = [i for i, r in zip(c.index, c.itertuples())
             if r.ticker in B.memb_on(r.date, memb)]
     c = c.loc[keep]
+    if sample:
+        c = c.sample(min(sample, len(c)), random_state=0).sort_values("date")
     rows = c.to_dict("records")
     if limit:
         rows = rows[:limit]
     print(f"assessing {len(rows):,} eligible candidates "
-          f"({len(rows)/c['date'].nunique():.1f}/day)", flush=True)
+          f"({len(rows)/c['date'].nunique():.1f}/day)"
+          + (f"  [SAMPLE of {len(rows)}, seed 0]" if sample else ""),
+          flush=True)
 
     t0, done = time.time(), [0]
     # Failures used to return None, which is also what "not enough history"
@@ -85,7 +99,8 @@ def main(limit: int | None = None) -> None:
         res = [x for x in ex.map(work, rows) if x]
     J.save_cache()
     df = pd.DataFrame(res)
-    df.to_parquet(OUT)
+    df.to_parquet(OUT.with_name("jev_assessments_sample.parquet")
+                  if sample else OUT)
     print(f"\ndone in {time.time()-t0:.0f}s | {len(df):,} assessments "
           f"| ${J.stats()['input_tokens']/1e6*0.042:.2f}", flush=True)
     print(f"dropped: {nohist[0]:,} without enough weekly history, "
@@ -97,4 +112,8 @@ def main(limit: int | None = None) -> None:
 
 
 if __name__ == "__main__":
-    main(int(sys.argv[1]) if len(sys.argv) > 1 else None)
+    av = sys.argv[1:]
+    if av and av[0] == "--sample":
+        main(sample=int(av[1]) if len(av) > 1 else 500)
+    else:
+        main(int(av[0]) if av else None)

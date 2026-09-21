@@ -65,9 +65,17 @@ def case(dim: str, arm: str, seed: int) -> tuple[pd.DataFrame, dict]:
         closes = closes * (1 + rng.normal(0, .004, n))
 
     bars = _bars(closes, vols, width)
-    row = dict(pivot=pivot, close=float(closes[-1]), rs_rating=88.0,
+    # Moving averages, so the prompt's stack line describes these cases too.
+    # A "good" arm passes O'Neil's trend template; the no-prior-advance arm
+    # genuinely fails it, which is the truth the template line now reports.
+    up = not (dim == "advance" and arm == "bad")
+    c = float(closes[-1])
+    row = dict(pivot=pivot, close=c, rs_rating=88.0,
                hi52=float(max(closes.max(), 101.5)), lo52=float(closes.min()) * .72,
-               dollar_vol=140e6, group_pct=0.86, regime="GREEN")
+               dollar_vol=140e6, group_pct=0.86, regime="GREEN",
+               ma50=c * (0.95 if up else 0.99),
+               ma150=c * (0.88 if up else 1.02),
+               ma200=c * (0.82 if up else 1.06), ma200_up=up)
     return bars, row
 
 
@@ -79,6 +87,9 @@ def build(n_per_dim: int = 12) -> list[dict]:
     for d in DIMS:
         for k in range(n_per_dim):
             for arm in ("good", "bad"):
-                bars, row = case(d, arm, seed=hash((d, k)) % 10_000)
+                # hash() on a str is salted per process, so this used to
+                # generate different cases on every run and no two exam
+                # results were comparable. Index the dimension instead.
+                bars, row = case(d, arm, seed=DIMS.index(d) * 1000 + k)
                 out.append(dict(dim=d, k=k, arm=arm, bars=bars, row=row))
     return out
