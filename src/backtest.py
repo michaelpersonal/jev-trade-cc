@@ -32,7 +32,18 @@ ROOT = Path(__file__).resolve().parent.parent
 START, END = "2022-01-03", "2026-09-18"
 CAPITAL = 100_000.0
 SLIPPAGE = 0.0005      # 5bp each side
+COVERAGE_MIN = 0.99    # assessed fraction below which an artifact is void
 COMMISSION = 0.0       # modern retail
+
+
+def _in_buy_zone(r) -> bool:
+    """O'Neil's buy zone, measured rather than judged. See BUY_ZONE_MAX_PCT."""
+    if S.BUY_ZONE_MAX_PCT is None:
+        return True
+    piv, c = r.get("pivot"), r.get("close")
+    if piv is None or not np.isfinite(piv) or piv <= 0:
+        return False
+    return (c / piv - 1) * 100 <= S.BUY_ZONE_MAX_PCT
 
 
 def _why_buy(rows, tkr) -> str:
@@ -99,6 +110,21 @@ def load_assessments(df, manifest: dict | None = None,
                 f"assessment artifact is a PARTIAL run "
                 f"({manifest.get('returned')} of {manifest.get('requested')} "
                 f"rows); it is not a universe.")
+        # `partial` only records that --sample or limit was used. It says
+        # nothing about how many requests actually SUCCEEDED. A run that hit
+        # its credit limit half way through wrote partial=false with 11,454 of
+        # 22,398 rows answered, and would have loaded as a complete universe
+        # with the other 10,944 silently absent -- indistinguishable from
+        # "nothing qualified that day".
+        req, okn = manifest.get("requested"), manifest.get("ok")
+        if req and okn is not None and okn < req * COVERAGE_MIN:
+            raise RuntimeError(
+                f"assessment artifact covers only {okn:,} of {req:,} "
+                f"candidates ({okn/req:.0%}); {manifest.get('errors', 0):,} "
+                f"requests failed. Absent rows are indistinguishable from "
+                f"rejected ones, so this cannot be used as a universe. "
+                f"First failure: "
+                f"{next(iter(manifest.get('error_kinds', {})), 'unknown')[:90]}")
     _ASSESS_FP = got
     # An error or a missing history is not an assessed negative. Only rows the
     # model actually answered become assessments; the rest stay absent, so a
@@ -192,6 +218,30 @@ def rs_direction(by_date, dates, i, ticker, lookback: int = 40) -> float | None:
     if not (np.isfinite(a) and np.isfinite(b)):
         return None
     return float(b - a)
+
+
+def daily_into_base(ticker: str, upto, pivot: float, days: int = 20):
+    """Daily bars into the breakout, rebased so the buy point is 100.
+
+    Plan 3.1: the entry prompt carried 16 weekly bars and nothing else. A
+    handle forms over DAYS -- a week bar averages away the drift and the light
+    volume that define it -- and `pattern` was being identified at 0.257
+    against 0.200 for a uniform guess. Emitting every day of a 5-13 week base
+    would be 25-65 lines on top of the weeklies, so the weeklies keep the long
+    structure and this shows the part that decides the entry.
+    """
+    g = _PANEL.get(ticker)
+    if g is None or not np.isfinite(pivot) or pivot <= 0:
+        return None
+    g = g[g.index <= upto].tail(days)
+    if len(g) < 5:
+        return None
+    return pd.DataFrame(dict(
+        ago=range(len(g) - 1, -1, -1),
+        rel=g["close"].to_numpy() / pivot * 100,
+        lo_rel=g["low"].to_numpy() / pivot * 100,
+        hi_rel=g["high"].to_numpy() / pivot * 100,
+        vol_rel=g["vol_rel"].fillna(1.0).to_numpy()))
 
 
 def recent_bars(ticker: str, upto, entry: float, days: int = 20):
@@ -578,7 +628,8 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                 # decision; code enforces only membership and holdings.
                 pool = [t for t in rows.index
                         if t in live and t not in positions
-                        and _ASSESS.get((today, t), {}).get("setup") == "valid"]
+                        and _ASSESS.get((today, t), {}).get("setup") == "valid"
+                        and _in_buy_zone(rows.loc[t])]
                 cands = rows.loc[pool]
             else:
                 cands = rows[rows["buyable"].fillna(False)]
@@ -614,7 +665,8 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                         continue
                     try:
                         d = J.decide_entry(row, bars,
-                                           earnings_state(tkr, today))
+                                           earnings_state(tkr, today),
+                                           daily_into_base(tkr, today, row.get("pivot", float("nan"))))
                         act, strength = J.entry_policy(d)
                     except Exception as exc:
                         # An inference failure is not a decision to skip. It is
@@ -737,7 +789,8 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                                 continue
                             try:
                                 d = J.decide_entry(row, bars,
-                                               earnings_state(tkr, today))
+                                               earnings_state(tkr, today),
+                                               daily_into_base(tkr, today, row.get("pivot", float("nan"))))
                                 act, sc[tkr] = J.entry_policy(d)
                             except Exception as exc:
                                 errors[0] += 1

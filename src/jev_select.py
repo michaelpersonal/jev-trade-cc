@@ -86,7 +86,9 @@ def main(limit: int | None = None, sample: int | None = None) -> None:
                         pattern_conf=None, earnings=None)
         try:
             a = J.assess(r, bars,
-                         B.earnings_state(r["ticker"], r["date"]))
+                         B.earnings_state(r["ticker"], r["date"]),
+                         B.daily_into_base(r["ticker"], r["date"],
+                                           r.get("pivot", float("nan"))))
             out = dict(base,
                        setup=J.choice_of(a, "setup",
                                          set(J.ASSESS["setup"].criteria)),

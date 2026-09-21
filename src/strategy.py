@@ -88,6 +88,12 @@ RS_MIN = 80               # buy leaders: RS rating 80+
 # None = off. This exists so "the earnings data helped" can be told apart from
 # "Jev helped": the same information, used by arithmetic instead of judgment.
 EPS_GROWTH_MIN = None
+# O'Neil's buy zone: the pivot to about 5% above it. Beyond that the entry is
+# chasing and a 7% stop sits inside the base's own noise. This was an ASSESS
+# label ("extended") that never once fired in 96 exam cases, because it
+# competed with "valid" over a fact that is arithmetic: the anchor knows the
+# base top, so the distance is measured, not judged.
+BUY_ZONE_MAX_PCT = 5.0
 VOL_SURGE = 1.4           # breakout needs 40%+ above average volume
 # BASE_MAX is the lookback for the pivot: the breakout must clear the highest
 # high of the prior 13 weeks. BASE_MIN is a de-duplication window -- it
@@ -166,6 +172,21 @@ def indicators(g: pd.DataFrame) -> pd.DataFrame:
         & (c >= MIN_PRICE)
         & (g["dollar_vol"] >= MIN_DOLLAR_VOL)
     )
+    # --- base count (O'Neil's stage) --------------------------------------
+    # How many bases this stock has completed since the current advance began.
+    # O'Neil: first- and second-stage bases work; late-stage bases fail more
+    # often, because by then the move is widely recognised. Sixteen weekly
+    # bars cannot establish this, so it is NOT asked of the model -- it is
+    # counted here from the price history and handed over as a fact.
+    #
+    # The advance begins at the last session the close was below the 200-day
+    # average; a stock that has fallen back through its long-term trend has
+    # ended one advance and any later base starts a new count.
+    below = (c < g["ma200"]).fillna(True)
+    era = below.cumsum()                    # increments on every break
+    g["base_count"] = (g["breakout"].fillna(False).astype(int)
+                       .groupby(era).cumsum())
+
     return g
 
 

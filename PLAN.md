@@ -71,12 +71,12 @@ flip. Fixing 1 without 2 yields an autonomous decider that is guessing.
 
 16 rebased weekly bars. `pattern` sits at 0.257 against 0.200 uniform.
 
-- [ ] **3.1** Daily bars through the handle and breakout, **capped**.
+- [x] **3.1** Daily bars through the handle and breakout, **capped**.
       **[FIXED IN REVIEW]** A base runs 5-13+ weeks; emitting every daily bar
       would be 25-65+ lines on top of the weeklies. Correct design: keep the
       16 weekly bars for the long structure and add the most recent ~20 daily
       bars, which is where the handle and the breakout live.
-- [ ] **3.2** Base count, **computed in code**.
+- [x] **3.2** Base count, **computed in code**.
       **[FIXED IN REVIEW]** The first draft did not define it or say who
       computes it. Sixteen weekly bars cannot establish a multi-base history,
       so Jev must not be asked to infer it. Definition: the number of prior
@@ -84,7 +84,7 @@ flip. Fixing 1 without 2 yields an autonomous decider that is guessing.
       where the advance begins at the last session the close was below the
       200-day average. Computed in `strategy.py`, carried on the Anchor, and
       stated in the prompt. O'Neil: late-stage bases fail more often.
-- [ ] **3.3** Make the `extended` label reachable.
+- [x] **3.3** Make the `extended` label reachable.
       **[ADDED IN REVIEW]** Not in the first draft. `extended` never fires in
       96 exam cases and 6 of 12 genuinely extended setups return `valid`, so
       an entry criterion O'Neil is most explicit about is dead. It is an entry
@@ -93,11 +93,11 @@ flip. Fixing 1 without 2 yields an autonomous decider that is guessing.
 
 ## 4. Verify and measure
 
-- [ ] **4.1** Cost check on a sample before any full run.
+- [x] **4.1** Cost check on a sample before any full run.
       **[ADDED IN REVIEW]** Not in the first draft. Every item above makes
       prompts longer, and the assessment pass is 22,398 requests. Price it on
       `--sample 300` first and report the projected full cost.
-- [ ] **4.2** `test_timing.py` and `test_contracts.py` still pass.
+- [x] **4.2** `test_timing.py` and `test_contracts.py` still pass.
 - [ ] **4.3** Re-run `run_exam.py`: ASSESS conformance and the selection call.
       **[ADDED IN REVIEW]** The first draft only re-ran the arms. A prompt
       change that improves returns and breaks conformance is not an
@@ -105,6 +105,23 @@ flip. Fixing 1 without 2 yields an autonomous decider that is guessing.
 - [ ] **4.4** Re-run the full assessment artifact (fingerprints change).
 - [ ] **4.5** Arms against the S&P.
 - [ ] **4.6** Paired jackknife. This is the verdict, not 4.5.
+
+## BLOCKED 2026-09-21
+
+4.4 onward cannot run: the TypeSafe account is out of credits. The full
+assessment pass returned HTTP 402 on 10,944 of 22,398 requests.
+
+    402 Your organization has n[o credits]...
+
+Everything not requiring paid inference is complete (1.x, 2.x, 3.x, 4.1, 4.2).
+4.3, 4.4, 4.5 and 4.6 need credits and are the remaining work.
+
+That failure also exposed a defect, now fixed: the manifest's `partial` flag
+records only whether --sample was used, so a run that exhausted its credits
+half way wrote partial=false with 51% coverage and would have loaded as a
+complete universe -- the 10,944 absent rows being indistinguishable from
+"nothing qualified that day". The loader now refuses any artifact below
+COVERAGE_MIN.
 
 ## Known-open, deliberately NOT in this plan
 

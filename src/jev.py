@@ -22,6 +22,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import numpy as np
 import pandas as pd
 import threading
 from datetime import datetime, timezone
@@ -300,7 +301,35 @@ def _ma_stack(r) -> str:
     return f"- {order}; the 200-day is {rising}.".lstrip("- ")
 
 
-def describe_shape(r, bars, earnings: str | None = None) -> str:
+def _base_stage(r) -> str:
+    """How many bases deep this advance is. Counted in code, not inferred.
+
+    Sixteen weekly bars cannot establish a multi-base history, so asking the
+    model to judge stage would turn an unknown into an inferred certainty.
+    """
+    n = r.get("base_count")
+    if n is None or not np.isfinite(n) or n < 1:
+        return ""
+    if n == 1:
+        return ("- This is the FIRST base since the stock rose above its "
+                "200-day average; the advance is young.\n")
+    return (f"- This is base number {int(n)} since the stock rose above its "
+            f"200-day average. O'Neil held that third- and later-stage bases "
+            f"fail more often, the move being widely recognised by then.\n")
+
+
+def _daily_block(daily) -> str:
+    if daily is None or not len(daily):
+        return ""
+    lines = [f"  day -{int(b.ago):<2d} close {b.rel:6.1f}  "
+             f"range {b.lo_rel:6.1f}-{b.hi_rel:6.1f}  volume {b.vol_rel:.2f}x"
+             for b in daily.itertuples()]
+    return ("\nDaily bars into the breakout, rebased so the buy point is 100 "
+            "(the handle, if there is one, is here):\n" + "\n".join(lines) + "\n")
+
+
+def describe_shape(r, bars, earnings: str | None = None,
+                   daily=None) -> str:
     """Weekly bars rebased to pivot=100, plus the scale-free context.
 
     `bars` is a DataFrame of the trailing weekly OHLCV ending on the breakout
@@ -327,6 +356,8 @@ def describe_shape(r, bars, earnings: str | None = None) -> str:
         f"- Industry group ranks in the {_ordinal(r.get('group_pct'))}.\n"
         f"- Average daily turnover ${r['dollar_vol']/1e6:.0f} million.\n"
         f"- The broad market is in a {r['regime'].lower()} trend.\n"
+        + _base_stage(r)
+        + _daily_block(daily)
         + (f"\nEarnings, as filed with the SEC and public on this date:\n"
            f"{earnings}\n" if earnings else
            "\nNo SEC earnings information is available for this company.\n")
@@ -535,9 +566,9 @@ def describe_position(r, gain_pct, days_held, peak_gain_pct, below_ma_days,
     )
 
 
-def decide_entry(row, bars, earnings: str | None = None) -> dict:
-    return ask(describe_shape(row, bars, earnings), ENTRY_DECISION,
-               "entry_decision_v3")
+def decide_entry(row, bars, earnings: str | None = None, daily=None) -> dict:
+    return ask(describe_shape(row, bars, earnings, daily), ENTRY_DECISION,
+               "entry_decision_v4")
 
 
 def decide_exit(row, gain_pct, days_held, peak_gain_pct, below_ma_days,
@@ -617,17 +648,15 @@ ASSESS = {
                 "A consolidation of one of those shapes, inside its depth and "
                 "length limits, preceded by a real advance, and price is now "
                 "clearing that shape's buy point on volume clearly above "
-                "average, still within about 5% of the buy point."),
+                "average. Judge the SHAPE only -- how far price has since run "
+                "past the buy point is measured in code and is not your "
+                "concern here."),
             "developing": (
                 "A consolidation of a recognised shape is present but the move "
                 "is not yet a valid breakout: the buy point has not been "
                 "cleared, or it has been cleared on unremarkable volume, or a "
                 "handle is still forming, or the pattern is too young for its "
                 "type."),
-            "extended": (
-                "Price sits more than about 5% above the buy point of the "
-                "consolidation it came out of, so a buyer now pays materially "
-                "above where the breakout occurred."),
             "faulty": (
                 "The shape fails O'Neil's limits: a consolidation deeper than "
                 "its type allows, wide and loose weekly ranges rather than an "
@@ -697,9 +726,9 @@ ASSESS = {
 }
 
 
-def assess(row, bars, earnings: str | None = None) -> dict:
+def assess(row, bars, earnings: str | None = None, daily=None) -> dict:
     """One candidate, judged on its own evidence."""
-    return ask(describe_shape(row, bars, earnings), ASSESS, "assess_v2")
+    return ask(describe_shape(row, bars, earnings, daily), ASSESS, "assess_v3")
 
 
 def select_question(labels: dict) -> dict:
