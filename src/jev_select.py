@@ -9,7 +9,9 @@ Every quality question O'Neil asks is Jev's to answer, not a threshold here.
 """
 from __future__ import annotations
 
+import json
 import sys, time
+from datetime import datetime, timezone
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -73,22 +75,26 @@ def main(limit: int | None = None, sample: int | None = None) -> None:
     nohist, failed = [0], {}
 
     def work(r):
+        base = dict(date=r["date"], ticker=r["ticker"])
         bars = B.weekly_bars(r["ticker"], r["date"])
         if bars is None or len(bars) < 8:
             nohist[0] += 1
-            return None
+            return dict(base, status="no_history", setup=None, conf=None,
+                        supply=None, prior_advance=None)
         try:
             a = J.assess(r, bars)
-            out = dict(date=r["date"], ticker=r["ticker"],
+            out = dict(base,
                        setup=J.choice_of(a, "setup",
                                          set(J.ASSESS["setup"].criteria)),
                        conf=a["setup"].get("confidence"),
                        supply=a["supply"]["noul"],
-                       prior_advance=a["prior_advance"]["noul"])
+                       prior_advance=a["prior_advance"]["noul"],
+                       status="ok")
         except Exception as exc:
             k = f"{type(exc).__name__}: {str(exc)[:70]}"
             failed[k] = failed.get(k, 0) + 1
-            return None
+            return dict(base, status="error", setup=None, conf=None,
+                        supply=None, prior_advance=None)
         done[0] += 1
         if done[0] % 2000 == 0:
             print(f"  {done[0]:,}/{len(rows):,}  {time.time()-t0:.0f}s", flush=True)
@@ -99,8 +105,27 @@ def main(limit: int | None = None, sample: int | None = None) -> None:
         res = [x for x in ex.map(work, rows) if x]
     J.save_cache()
     df = pd.DataFrame(res)
-    df.to_parquet(OUT.with_name("jev_assessments_sample.parquet")
-                  if sample else OUT)
+    partial = bool(sample or limit)
+    out = (OUT.with_name("jev_assessments_sample.parquet") if partial else OUT)
+    df.to_parquet(out)
+    # A partial run must not be able to masquerade as the production dataset:
+    # `main(limit)` used to write OUT directly, so a 200-row smoke test could
+    # silently replace a 22,398-row artifact and the backtest would read it
+    # as a complete universe.
+    manifest = dict(
+        artifact=out.name,
+        question_fingerprint=J.question_fingerprint(J.ASSESS, "assess"),
+        model=J.MODEL,
+        partial=partial,
+        requested=len(rows),
+        returned=len(df),
+        ok=int((df["status"] == "ok").sum()) if len(df) else 0,
+        no_history=nohist[0],
+        errors=sum(failed.values()),
+        error_kinds=failed,
+        written_at=datetime.now(timezone.utc).isoformat(timespec="seconds"))
+    out.with_suffix(".manifest.json").write_text(json.dumps(manifest, indent=2))
+    print(json.dumps(manifest, indent=2), flush=True)
     print(f"\ndone in {time.time()-t0:.0f}s | {len(df):,} assessments "
           f"| ${J.stats()['input_tokens']/1e6*0.042:.2f}", flush=True)
     print(f"dropped: {nohist[0]:,} without enough weekly history, "

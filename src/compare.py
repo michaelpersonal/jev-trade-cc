@@ -8,6 +8,7 @@ both. Every arm uses identical data, dates, capital and stops.
 """
 from __future__ import annotations
 
+import json
 import sys
 import time
 
@@ -53,8 +54,9 @@ def main(arms=None) -> None:
     sig = pd.read_parquet(ROOT / "data" / "raw" / "signals_grouped.parquet")
     idx, memb = D.index_prices(), U.membership()
     B.load_panel(pd.read_parquet(ROOT / "data" / "raw" / "panel.parquet"))
-    B.load_assessments(pd.read_parquet(
-        ROOT / "data" / "raw" / "jev_assessments.parquet"))
+    ap = ROOT / "data" / "raw" / "jev_assessments.parquet"
+    B.load_assessments(pd.read_parquet(ap), json.loads(
+        ap.with_suffix(".manifest.json").read_text()))
 
     spx = idx["Close"]
     spx = spx[(spx.index >= B.START) & (spx.index <= B.END)]

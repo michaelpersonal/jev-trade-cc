@@ -86,9 +86,22 @@ def cache() -> dict:
 
 
 def save_cache() -> None:
-    if _cache is not None:
-        CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
-        CACHE_PATH.write_text(json.dumps(_cache))
+    """Write the cache atomically.
+
+    This used to write in place. The file is ~300MB and the workers save it
+    periodically while other threads are reading it, so a reader could open a
+    half-written file -- and because a shorter write leaves the tail of the
+    longer previous one, it parsed as valid JSON followed by garbage. That
+    surfaced as five JSONDecodeErrors on a run that made no network calls at
+    all. Write to a sibling and rename; rename is atomic on POSIX.
+    """
+    if _cache is None:
+        return
+    CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with _lock:
+        tmp = CACHE_PATH.with_suffix(f".{os.getpid()}.tmp")
+        tmp.write_text(json.dumps(_cache))
+        os.replace(tmp, CACHE_PATH)
 
 
 def stats() -> dict:
@@ -163,6 +176,21 @@ def request_fingerprint(state: str, questions: dict, kind: str) -> tuple[str, di
            "questions": {k: _canonical(q) for k, q in sorted(questions.items())}}
     blob = json.dumps(req, sort_keys=True, ensure_ascii=False)
     return hashlib.sha256(blob.encode()).hexdigest(), req
+
+
+def question_fingerprint(questions: dict, kind: str) -> str:
+    """Identity of a question SET, independent of any particular state.
+
+    An artifact produced by these questions carries this string. A loader can
+    then refuse a parquet that a different edition of the prompt wrote, which
+    is what let a stale assessment file pass as current: the rows looked fine
+    and nothing recorded which criteria had judged them.
+    """
+    blob = json.dumps({"schema": CACHE_SCHEMA, "model": MODEL, "kind": kind,
+                       "questions": {k: _canonical(q)
+                                     for k, q in sorted(questions.items())}},
+                      sort_keys=True, ensure_ascii=False)
+    return hashlib.sha256(blob.encode()).hexdigest()[:16]
 
 
 def ask(state: str, questions: dict, kind: str) -> dict:

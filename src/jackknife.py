@@ -1,59 +1,80 @@
-"""How much does a 7.7% hole in the universe move the result?
+"""Sensitivity of the ARMS' DIFFERENCE to universe composition.
 
-The real gap cannot be filled: yfinance does not serve delisted tickers and
-no other provider is configured here. What can be measured is the SIZE of a
-hole that shape. Punch another one of the same size in the panel and re-run.
+An earlier version of this measured the dispersion of rules-only equity under
+deletion and multiplied its standard deviation by 1.96. That was wrong twice
+over: deleting observed survivors does not sample the unknown missing-data
+mechanism, so the number is not a confidence interval for that bias; and
+comparing a single arm's dispersion against Jev's incremental effect compares
+two different quantities. Common shocks hit both arms and largely cancel.
 
-Scheme A drops 49 tickers uniformly. Scheme B drops 49 that actually left the
-index during the window -- the same selection process that produced the real
-gap, so it is the closer analogue.
+The relevant statistic is the PAIRED difference -- Jev equity minus rules
+equity on the SAME deleted panel -- and its dispersion across draws. That is
+what this measures. It remains a sensitivity analysis of a deletion procedure,
+not an estimate of the survivorship bias itself.
 """
-import sys, random, pandas as pd, numpy as np
-sys.path.insert(0,'/Users/michaelguo/projects/jev-trade-cc/src')
-import strategy as S, universe as U, backtest as B, data as D, compare as C
+from __future__ import annotations
 
-pan = pd.read_parquet('../data/raw/panel.parquet')
-memb = U.membership()
-idx = D.index_prices()
-have = set(pan['ticker'].unique())
+import random
+import sys
 
-snaps = sorted(memb)
-inwin = [s for s in snaps if pd.Timestamp('2022-01-03') <= s <= pd.Timestamp('2026-09-18')]
-first, last = memb[inwin[0]], memb[inwin[-1]]
-left = sorted((first - last) & have)          # were members, then were not
-print(f"tickers that left the index in-window and we DO have: {len(left)}")
+import numpy as np
+import pandas as pd
 
-def run_with(drop):
-    p = pan[~pan['ticker'].isin(drop)]
-    sig = S.build_signals(p, membership=memb)
+import backtest as B
+import compare as C
+import data as D
+import jev as J
+import strategy as S
+import universe as U
+
+N_DRAWS = int(sys.argv[1]) if len(sys.argv) > 1 else 12
+DROP_N = 49
+
+
+def arm(sig, idx, memb, pan, *, jev: bool) -> float:
     C.apply_shipped()
-    S.JEV_ENTRY = S.JEV_EXIT = False; S.JEV_SELECT = False; S.NEARMISS_MODE = 3
-    B.load_panel(p)
-    r = B.run(sig, idx, memb)
-    buy = int(sig[(sig['date']>='2022-01-03')&(sig['date']<='2026-09-18')]
-              ['buyable'].fillna(False).sum())
-    return r['equity'][-1], buy
+    S.JEV_ENTRY = S.JEV_EXIT = jev
+    S.JEV_SELECT = False
+    S.NEARMISS_MODE = 3
+    B.load_panel(pan)
+    return B.run(sig, idx, memb)["equity"][-1]
 
-base, base_buy = run_with(set())
-print(f"\nfull panel (still missing the real 49): ${base:,.0f}, "
-      f"{base_buy} buyable rows\n")
 
-rng = random.Random(0)
-for name, pool in (("A uniform", sorted(have)), ("B left the index", left)):
-    res = []
-    for k in range(20):
-        drop = set(rng.sample(pool, min(49, len(pool))))
-        eq, bu = run_with(drop)
-        res.append((eq, bu))
-    eqs = np.array([x[0] for x in res]); bus = np.array([x[1] for x in res])
-    print(f"{name}: 20 draws, 49 more tickers removed")
-    print(f"   final equity  min ${eqs.min():>9,.0f}   median ${np.median(eqs):>9,.0f}"
-          f"   max ${eqs.max():>9,.0f}")
-    print(f"   vs full panel {100*(eqs.min()/base-1):>+7.1f}%"
-          f"        {100*(np.median(eqs)/base-1):>+7.1f}%"
-          f"         {100*(eqs.max()/base-1):>+7.1f}%")
-    print(f"   mean ${eqs.mean():,.0f}  sd ${eqs.std(ddof=1):,.0f}"
-          f"  spread ${eqs.max()-eqs.min():,.0f}")
-    print(f"   buyable rows {bus.min()}-{bus.max()} (full {base_buy})")
-    print(f"   a single run's 95% interval on universe choice alone: "
-          f"+/-${1.96*eqs.std(ddof=1):,.0f}\n")
+def main() -> None:
+    pan = pd.read_parquet(C.ROOT / "data" / "raw" / "panel.parquet")
+    memb, idx = U.membership(), D.index_prices()
+    have = sorted(pan["ticker"].unique())
+
+    def pair(drop):
+        p = pan[~pan["ticker"].isin(drop)]
+        sig = S.build_signals(p, membership=memb)
+        return arm(sig, idx, memb, p, jev=False), arm(sig, idx, memb, p, jev=True)
+
+    r0, j0 = pair(set())
+    print(f"undeleted panel: rules ${r0:,.0f}  jev ${j0:,.0f}  "
+          f"diff ${j0-r0:+,.0f}\n")
+
+    rng = random.Random(0)
+    rows = []
+    for k in range(N_DRAWS):
+        r, j = pair(set(rng.sample(have, DROP_N)))
+        rows.append((r, j, j - r))
+        print(f"  draw {k+1:>2}: rules ${r:>9,.0f}  jev ${j:>9,.0f}  "
+              f"diff ${j-r:>+9,.0f}", flush=True)
+        J.save_cache()
+
+    a = np.array(rows)
+    rules, jev, diff = a[:, 0], a[:, 1], a[:, 2]
+    print(f"\n{'':<22}{'mean':>12}{'sd':>11}{'min':>12}{'max':>12}")
+    for lab, v in (("rules-only equity", rules), ("jev equity", jev),
+                   ("PAIRED diff", diff)):
+        print(f"{lab:<22}${v.mean():>11,.0f}${v.std(ddof=1):>10,.0f}"
+              f"${v.min():>11,.0f}${v.max():>11,.0f}")
+    print(f"\nsd of each arm separately  ~${rules.std(ddof=1):,.0f}")
+    print(f"sd of the paired difference ${diff.std(ddof=1):,.0f}")
+    print(f"draws where Jev beat rules: {(diff > 0).sum()}/{len(diff)}")
+    print(f"\nspend ${J.stats()['input_tokens']/1e6*0.042:.3f}")
+
+
+if __name__ == "__main__":
+    main()

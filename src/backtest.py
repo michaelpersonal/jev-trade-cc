@@ -20,8 +20,10 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+import anchor as A
 import jev as J
 import macro as MAC
+import policy as P
 import strategy as S
 import universe as U
 
@@ -40,9 +42,13 @@ def _why_buy(rows, tkr) -> str:
 class Position:
     __slots__ = ("ticker", "shares", "entry", "entry_date", "entry_idx",
                  "stop", "target", "hold_until", "peak", "peak_high",
-                 "below_ma_days", "defer_start")
+                 "below_ma_days", "defer_start", "anchor")
 
-    def __init__(self, ticker, shares, entry, entry_date, entry_idx):
+    def __init__(self, ticker, shares, entry, entry_date, entry_idx,
+                 anchor=None):
+        # The base this position broke out of, frozen at the decision and
+        # never recomputed. See anchor.py.
+        self.anchor = anchor
         self.ticker, self.shares = ticker, shares
         self.entry, self.entry_date, self.entry_idx = entry, entry_date, entry_idx
         self.stop = entry * (1 - S.STOP_LOSS)
@@ -60,11 +66,42 @@ class Position:
 _PANEL: dict = {}
 _WEEKLY: dict = {}
 _ASSESS: dict = {}          # (date, ticker) -> Jev's assessment of that setup
+_ASSESS_FP: str | None = None   # provenance of the artifact they came from
 
 
-def load_assessments(df) -> None:
-    """Phase-A assessments, keyed for the day loop."""
-    global _ASSESS
+def load_assessments(df, manifest: dict | None = None,
+                     require_current: bool = True) -> None:
+    """Phase-A assessments, keyed for the day loop.
+
+    An assessment artifact is only meaningful alongside the criteria that
+    produced it. Without this check a parquet written by an older edition of
+    ASSESS loaded silently and the run reported Jev's current judgment while
+    replaying its previous one. `require_current=False` is for deliberately
+    inspecting an old artifact, never for producing a result.
+    """
+    global _ASSESS, _ASSESS_FP
+    want = J.question_fingerprint(J.ASSESS, "assess")
+    got = (manifest or {}).get("question_fingerprint")
+    if require_current:
+        if got is None:
+            raise RuntimeError(
+                "assessment artifact has no manifest: cannot tell which "
+                "criteria judged these rows. Re-run jev_select.py.")
+        if got != want:
+            raise RuntimeError(
+                f"assessment artifact was written by different criteria "
+                f"({got}), current ASSESS is {want}. Re-run jev_select.py.")
+        if manifest.get("partial"):
+            raise RuntimeError(
+                f"assessment artifact is a PARTIAL run "
+                f"({manifest.get('returned')} of {manifest.get('requested')} "
+                f"rows); it is not a universe.")
+    _ASSESS_FP = got
+    # An error or a missing history is not an assessed negative. Only rows the
+    # model actually answered become assessments; the rest stay absent, so a
+    # zero-candidate day can be told apart from a day nothing was asked about.
+    if "status" in df.columns:
+        df = df[df["status"] == "ok"]
     _ASSESS = {(pd.Timestamp(r.date), r.ticker): dict(
         setup=r.setup, supply=r.supply, prior_advance=r.prior_advance)
         for r in df.itertuples(index=False)}
@@ -144,6 +181,9 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
         start: str | None = None, end: str | None = None,
         capital: float | None = None, by_date: dict | None = None,
         feat: pd.DataFrame | None = None) -> dict:
+    pol = P.resolve()          # the executed policy, resolved once
+    for n in pol.notes:
+        print(f"  policy: {n}")
     regime = S.market_regime(idx)
     if S.MACRO_MODE and feat is not None:
         regime = MAC.apply_regime(regime, feat, S.MACRO_MODE, S.MAX_POSITIONS)
@@ -163,7 +203,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
     ledger: list[dict] = []             # every decision Jev was asked for
     prev_max_pos: int | None = None     # last night's position limit
     positions: dict[str, Position] = {}
-    pending_buys: list[str] = []
+    pending_buys: list[A.Anchor] = []
     pending_sells: list[tuple[str, str]] = []
     equity_curve, trades, daily = [], [], []
 
@@ -206,7 +246,8 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
         # --- 2. fill yesterday's BUYS at today's open ----------------------
         equity_now = cash + sum(p.shares * px(t, "open") for t, p in positions.items()
                                 if t in rows.index)
-        for tkr in pending_buys:
+        for anc in pending_buys:
+            tkr = anc.ticker
             if (tkr in positions or len(positions) >= max_pos_at_open
                     or tkr not in rows.index):
                 continue
@@ -220,7 +261,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                 continue
             cost = shares * fill + COMMISSION
             cash -= cost
-            positions[tkr] = Position(tkr, shares, fill, today, i)
+            positions[tkr] = Position(tkr, shares, fill, today, i, anc)
             trades.append(dict(date=str(today.date()), ticker=tkr, side="BUY",
                                shares=shares, price=round(fill, 2),
                                reason=_why_buy(rows, tkr),
@@ -298,12 +339,15 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
             # --- mode 2: Jev reviews the holding on its own schedule -------
             # No rule has to trigger. Jev can sell a position the 50-day rule
             # is content with, which the override framing could never do.
-            if S.JEV_EXIT_MODE == 2 and tkr in rows.index:
-                due = (held > 0 and held % S.REVIEW_EVERY == 0)
+            if pol.exit_path == "review" and tkr in rows.index:
+                due = (held > 0 and held % pol.review_every == 0)
                 if due or p.below_ma_days >= need:
                     row = rows.loc[tkr].to_dict()
                     row["regime"] = regime_name
-                    piv = px(tkr, "pivot")
+                    # The base THIS position broke out of. Today's rolling
+                    # high climbs with the stock and inverted this number's
+                    # sign; see anchor.py.
+                    piv = p.anchor.base_top if p.anchor else float("nan")
                     stop_gap = (1 - max(p.stop, p.peak * (1 - S.TRAIL_PCT)
                                         if S.TRAIL_PCT else p.stop) / c) * 100
                     try:
@@ -337,14 +381,14 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                 continue
 
             if p.below_ma_days >= need:
-                if S.JEV_EXIT:
+                if pol.exit_path == "override":
                     # Bounded deferral, per src/deferral_contract.md. Jev may
                     # keep a position for at most DEFER_MAX sessions from the
                     # day the mechanical exit first qualified; after that it is
                     # sold regardless. Protective stops are unaffected.
                     if p.defer_start is None:
                         p.defer_start = i
-                    left = S.DEFER_MAX - (i - p.defer_start)
+                    left = pol.defer_max - (i - p.defer_start)
                     if left <= 0:
                         pending_sells.append((tkr, "Jev: deferral expired"))
                         _log(ledger, today, tkr, "exit", "expired",
@@ -355,7 +399,8 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                         stop_gap = (1 - max(p.stop, p.peak * (1 - S.TRAIL_PCT)
                                             if S.TRAIL_PCT else p.stop) / c) * 100
                         try:
-                            piv = px(tkr, "pivot")
+                            piv = (p.anchor.base_top if p.anchor
+                                   else float("nan"))
                             d = J.decide_exit(
                                 row, gain_pct=(c / p.entry - 1) * 100,
                                 days_held=held,
@@ -400,7 +445,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                                  baseline="sell", action="hold", value=left)
                 else:
                     pending_sells.append((tkr, f"broke 50dma ({regime_name})"))
-            elif S.JEV_EXIT and p.defer_start is not None:
+            elif pol.exit_path == "override" and p.defer_start is not None:
                 p.defer_start = None      # recovered above the 50-day: reset
 
         sell_set = {t for t, _ in pending_sells}
@@ -415,7 +460,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
         n_cands = n_cands_pre = 0
         if open_slots > 0 and regime_name != "RED":
             live = set(memb_on(today, memb))
-            if S.JEV_SELECT:
+            if pol.jev_select:
                 # Candidates are every eligible name Jev judged a valid setup.
                 # No quality threshold of mine stands between them and the
                 # decision; code enforces only membership and holdings.
@@ -434,7 +479,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                 gp = cands["group_pct"]
                 cands = cands[gp.isna() | (gp >= S.GROUP_MIN_PCT)]
             n_cands_pre = len(cands)      # opportunities before any model filter
-            if S.JEV_ENTRY and len(cands):
+            if pol.jev_entry and len(cands):
                 if not _PANEL:
                     raise RuntimeError(
                         "JEV_ENTRY is on but no price history is loaded. Call "
@@ -474,9 +519,9 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
             # rs_rating is rounded to whole numbers so ties are common; break
             # them on ticker, otherwise the result depends on row order.
             rank_key = ("jev_conviction"
-                        if S.JEV_ENTRY and "jev_conviction" in cands.columns
+                        if pol.jev_entry and "jev_conviction" in cands.columns
                         else "rs_rating")
-            if S.JEV_SELECT and len(cands):
+            if pol.jev_select and len(cands):
                 # Jev sees the competitors in one question and picks one, or
                 # none. This is the step the reranking design never had.
                 opts, key = {}, {}
@@ -516,42 +561,38 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                          baseline=cands["rs_rating"].idxmax(), action=pick,
                          value=len(opts),
                          detail=f"truncated={truncated}" if truncated else None)
-                pending_buys = [key[pick]] if pick in key else []
+                pending_buys = ([A.from_row(
+                    rows.loc[key[pick]], key[pick], today, "jev_select",
+                    _ASSESS.get((today, key[pick])), _ASSESS_FP)]
+                    if pick in key else [])
                 jev_declined = pick not in key
             else:
                 jev_declined = False
-                pending_buys = (cands.sort_values(rank_key, ascending=False,
-                                                  kind="mergesort")
-                                .sort_index(kind="mergesort")
-                                .sort_values(rank_key, ascending=False,
-                                             kind="mergesort")
-                                .index[:open_slots].tolist())
+                picked = (cands.sort_values(rank_key, ascending=False,
+                                            kind="mergesort")
+                          .sort_index(kind="mergesort")
+                          .sort_values(rank_key, ascending=False,
+                                       kind="mergesort")
+                          .index[:open_slots].tolist())
+                pending_buys = [A.from_row(rows.loc[t], t, today, "screen")
+                                for t in picked]
 
             # --- near-miss adjudication (prereg_nearmiss.md) ---------------
             # Strict candidates take slots first; near-misses fill what is
             # left. This is the only path by which a model can INCREASE the
             # supply of candidates rather than filter one the rules built.
             spare = open_slots - len(pending_buys)
-            # When Jev is the selector, the mechanical near-miss path is off.
-            # It shares the same slots, so with both live a "none" answer --
-            # Jev looking at the day's candidates and declining all of them --
-            # left every slot open for the near-miss quota to fill, and the
-            # portfolio bought anyway. A refusal that the next twenty lines
-            # overrule is not a delegation. The two are separate arms: Jev
-            # chooses from the strict pool, or the rules widen the pool.
-            if S.JEV_SELECT and S.NEARMISS_MODE:
-                if jev_declined:
-                    _log(ledger, today, "-", "nearmiss", "skipped",
-                         baseline="-", action="none",
-                         detail="JEV_SELECT declined; near-miss path not run")
-                spare = 0
-            if S.NEARMISS_MODE and spare > 0:
+            # Selection/near-miss interlock is resolved in policy.py.
+            if pol.jev_select and jev_declined:
+                _log(ledger, today, "-", "select", "declined",
+                     baseline="-", action="none", detail="no buy this session")
+            if pol.nearmiss_mode and spare > 0:
                 nm = rows[rows["nearmiss"].fillna(False)]
                 nm = nm[nm.index.isin(live) & ~nm.index.isin(positions)
-                        & ~nm.index.isin(pending_buys)]
+                        & ~nm.index.isin([a.ticker for a in pending_buys])]
                 taken: list[str] = []
                 if len(nm):
-                    if S.NEARMISS_MODE == 1:            # Jev adjudicates
+                    if pol.nearmiss_mode == 1:            # Jev adjudicates
                         if not _PANEL:
                             raise RuntimeError(
                                 "NEARMISS_MODE=1 needs price history; call "
@@ -579,7 +620,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                         taken = sorted(keep, key=lambda t: (-sc[t], t))[:spare]
                     else:                                # mechanical control
                         quota = (S.NEARMISS_QUOTA.get(str(pd.Timestamp(today).date()), 0)
-                                 if S.NEARMISS_MODE == 2 else spare)
+                                 if pol.nearmiss_mode == 2 else spare)
                         n = min(spare, quota)
                         taken = (nm.sort_values("rs_rating", ascending=False,
                                                 kind="mergesort")
@@ -587,7 +628,8 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
                                  .sort_values("rs_rating", ascending=False,
                                               kind="mergesort")
                                  .index[:n].tolist())
-                pending_buys += taken
+                pending_buys += [A.from_row(rows.loc[t], t, today, "nearmiss")
+                                 for t in taken]
                 nm_taken[str(pd.Timestamp(today).date())] = len(taken)
 
         prev_max_pos = max_pos     # tonight's limit governs tomorrow's opens
@@ -607,15 +649,7 @@ def run(sig: pd.DataFrame, idx: pd.DataFrame, memb: dict, *,
     return dict(daily=daily, trades=trades, equity=equity_curve, dates=dates,
                 jev_holds=jev_holds[0], jev_errors=errors[0], ledger=ledger,
                 nm_taken=nm_taken, nm_total=sum(nm_taken.values()),
-                config=dict(max_positions=S.MAX_POSITIONS,
-                            profit_target=S.PROFIT_TARGET, trail_pct=S.TRAIL_PCT,
-                            trail_atr=S.TRAIL_ATR, macro_mode=S.MACRO_MODE,
-                            group_min_pct=S.GROUP_MIN_PCT,
-                            regime_mode=S.REGIME_MODE,
-                            yellow_slots=S.YELLOW_SLOTS,
-                            jev_entry=S.JEV_ENTRY, jev_exit=S.JEV_EXIT,
-                            nearmiss_mode=S.NEARMISS_MODE,
-                            defer_max=S.DEFER_MAX, jev_model=J.MODEL),
+                config=pol.as_record(),
                 final=equity_curve[-1] if equity_curve else capital)
 
 
