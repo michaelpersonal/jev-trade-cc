@@ -27,7 +27,7 @@ model, same positions, only wording differing:
 This is the `is_monday = 0.96` failure: assert a premise in the state and Jev
 agrees with it, confidently.
 
-- [ ] **1.1** Make `JEV_EXIT_MODE=2` (neutral `HOLDING_REVIEW`) the exit path.
+- [x] **1.1** Make `JEV_EXIT_MODE=2` (neutral `HOLDING_REVIEW`) the exit path.
       The standing stops stay in code and fire regardless: a calibrated
       probability is not a risk limit.
 - [x] **1.2** Wire `pol.review_abstain`. It is declared in `policy.py` and

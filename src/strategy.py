@@ -60,7 +60,15 @@ JEV_EXIT = True
 JEV_SELECT = False
 # 0 off · 1 Jev may override a 50-day sale · 2 Jev reviews every holding on a
 # cadence and decides hold or sell on its own evidence
-JEV_EXIT_MODE = 1
+# SHIPPED: 2. Mode 1 asks "a rule has already decided to SELL -- override it?"
+# That puts the conclusion in the state, and Jev ratifies it: measured on the
+# cache over the same positions, mode 1 keeps 2.4% of them at 0.90 confidence
+# while the neutral question keeps 46.0%. It is the "today is Monday" failure,
+# where Jev answered 0.96 that it was Monday because the state said so while
+# answering 0.11 that it could verify it. Mode 2 asks what the position is
+# doing and lets the answer decide. The standing stops remain in code either
+# way: a calibrated probability is not a risk limit.
+JEV_EXIT_MODE = 2
 REVIEW_EVERY = 5          # sessions between routine reviews in mode 2
 
 NEARMISS_MODE = 3

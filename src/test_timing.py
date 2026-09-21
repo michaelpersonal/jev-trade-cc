@@ -185,7 +185,11 @@ def test_deferral_is_bounded() -> bool:
     dates = pd.DatetimeIndex(sorted(sig["date"].unique()))
     real = jev.decide_exit
     jev.decide_exit = lambda *a, **k: {"action": {"choice": "override"}}
-    S.JEV_EXIT = True
+    # This guard tests the MODE 1 deferral contract specifically, so it pins
+    # the mode rather than inheriting whichever one ships. It relied on the
+    # default being 1 and went vacuous the moment the shipped default moved
+    # to 2 -- the anti-vacuity check caught it, which is what it is for.
+    S.JEV_EXIT, S.JEV_EXIT_MODE = True, 1
     try:
         r = B.run(sig, _index(dates, 4200.0), memb,
                   start=str(dates[300].date()), end=str(dates[-1].date()),
@@ -195,7 +199,7 @@ def test_deferral_is_bounded() -> bool:
                    if t.get("reason") == "Jev: deferral expired"]
     finally:
         jev.decide_exit = real
-        S.JEV_EXIT = False
+        S.JEV_EXIT, S.JEV_EXIT_MODE = False, S.JEV_EXIT_MODE
     if holds == 0:
         print("  VACUOUS: no deferral episode opened, the test proves nothing"
               "  ->  FAIL")
