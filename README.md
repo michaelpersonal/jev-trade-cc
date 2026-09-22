@@ -13,6 +13,13 @@ stops and the fills, and never delegates risk.
 `src/make_gif.py`, so the frames cannot drift from the numbers the arms report.
 Run the page yourself with `python3 -m http.server 8000 --directory web`.*
 
+> **The write-up:** [关于 Jev，大家普遍用错的一件事](POST.md) — what this project
+> got wrong about using a System One model, and the eight rules that came out of
+> it. Starts from a question with nothing to do with stocks: *what day is it
+> today?* The experiment behind it is
+> [`examples/what_day_is_it.py`](examples/what_day_is_it.py) — runs in five
+> minutes for well under a cent.
+
 ![Architecture](docs/architecture/architecture.png)
 
 ## Result
@@ -94,6 +101,9 @@ with a 2026 cutoff knows what happened in this window; showing it a symbol would
 defeat every other point-in-time safeguard in the project.
 
 ### The thing that mattered most: Jev knows only what it is told
+
+Run this yourself: [`examples/what_day_is_it.py`](examples/what_day_is_it.py),
+five minutes, well under a cent. The longer write-up is [POST.md](POST.md).
 
 Ask Jev what day it is with nothing in the state and it answers "Monday" at
 **0.12 confidence** — below the 0.14 you get from guessing. Give it a
@@ -260,6 +270,9 @@ src/fundamentals.py point-in-time SEC XBRL earnings, keyed on filing date
 src/exam_oneil.py   strategy-comprehension exam, 48 paired cases
 src/run_exam.py     runs the exam against the questions that actually ship
 src/prove_fix.py    pre-registered sample proof of the state/framing fixes
+src/make_gif.py     renders the README replay from web/data.js
+examples/           standalone, runnable demonstrations
+POST.md             the write-up: how to use Jev correctly
 src/compare.py      the fixed five-arm comparison
 src/jackknife.py    paired deletion experiment — the verdict
 src/backtest.py     day-by-day simulation
