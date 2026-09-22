@@ -17,3 +17,4 @@ data/edgar/
 
 # Codex review artifacts (local)
 .lavish/
+docs/replay_frames/

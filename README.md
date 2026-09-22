@@ -7,6 +7,12 @@ to 2026-09-18, $100,000, long only, benchmarked against the S&P 500.
 and decides the exits.** Deterministic code owns the data, the signals, the
 stops and the fills, and never delegates risk.
 
+![Replay](docs/replay.gif)
+
+*Four and a half years in twelve seconds. Rendered from `web/data.js` by
+`src/make_gif.py`, so the frames cannot drift from the numbers the arms report.
+Run the page yourself with `python3 -m http.server 8000 --directory web`.*
+
 ![Architecture](docs/architecture/architecture.png)
 
 ## Result
