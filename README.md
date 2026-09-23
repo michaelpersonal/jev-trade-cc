@@ -13,7 +13,7 @@ stops and the fills, and never delegates risk.
 `src/make_gif.py`, so the frames cannot drift from the numbers the arms report.
 Run the page yourself with `python3 -m http.server 8000 --directory web`.*
 
-> **The write-up:** [关于 Jev，大家普遍用错的一件事](POST.md) — what this project
+> **The write-up:** [Jev 只知道你告诉她的事](POST.md) — what this project
 > got wrong about using a System One model, and the eight rules that came out of
 > it. Starts from a question with nothing to do with stocks: *what day is it
 > today?* The experiment behind it is
